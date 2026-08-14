@@ -4,6 +4,8 @@
 any test needing one would fail loudly rather than quietly acquiring a
 connection this application is not supposed to have.
 """
+import re
+
 from django.conf import settings
 from django.test import SimpleTestCase, override_settings
 
@@ -72,6 +74,51 @@ class HomePageTests(SimpleTestCase):
 
         for token in ('{#', '#}', '{%', '%}', '{{', '}}'):
             self.assertNotIn(token, body)
+
+    def test_page_landmarks_appear_exactly_once(self):
+        """Guards against duplicated sections.
+
+        A block of markup was once inserted before *every* `{% endblock %}`
+        rather than the one closing `content`, so the CTA band rendered six
+        times — including inside `page_css`, which put it in <head>, from where
+        the browser hoisted it above the header. Django renders all of that
+        without complaint, so only counting catches it.
+        """
+        body = self.client.get('/').content.decode()
+
+        for marker, label in (
+            ('<header', 'header'),
+            ('<footer', 'footer'),
+            ('<main', 'main'),
+            ('hs-cta-band"', 'CTA band'),
+            ('hs-hero"', 'hero'),
+            ('hs-credibility"', 'credibility strip'),
+            ('id="platforms"', 'platforms section'),
+        ):
+            self.assertEqual(body.count(marker), 1, f'{label} should appear once')
+
+    def test_nothing_renders_before_the_header(self):
+        """<head> blocks must not leak markup into the body. Anything emitted
+        there is hoisted above the header by the browser, which is how the
+        duplicate CTA band became visible."""
+        body = self.client.get('/').content.decode()
+
+        self.assertLess(body.index('<header'), body.index('<main'))
+        # The only thing before the header is the skip link.
+        before = body[body.index('<body'):body.index('<header')]
+        self.assertNotIn('<section', before)
+        self.assertNotIn('<h2', before)
+
+    def test_head_blocks_contain_no_markup(self):
+        """title/description/og_* are attribute and text content — a stray tag in
+        them corrupts the metadata rather than erroring."""
+        body = self.client.get('/').content.decode()
+        head = body[:body.index('</head>')]
+
+        title = re.search(r'<title>(.*?)</title>', head, re.S).group(1)
+        self.assertNotIn('<', title)
+        for match in re.finditer(r'<meta[^>]*content="([^"]*)"', head):
+            self.assertNotIn('<section', match.group(1))
 
     def test_logo_ink_matches_the_ground_it_sits_on(self):
         """The filename suffix names the *background*, not the ink: -dark is the
