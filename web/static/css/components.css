@@ -27,6 +27,9 @@
   font-weight: var(--hs-weight-semibold);
   line-height: 1.4;
   text-align: center;
+  /* A button sizes to its label. Without this the flex item shrinks and the
+     label wraps mid-phrase — "Explore our / platforms" over three lines. */
+  white-space: nowrap;
   cursor: pointer;
   transition: transform var(--hs-transition), background-color var(--hs-transition),
               border-color var(--hs-transition), color var(--hs-transition);
@@ -85,12 +88,12 @@
   display: inline-flex;
   align-items: center;
   gap: var(--hs-space-2);
-  padding: var(--hs-space-1) var(--hs-space-3);
+  padding: 0.125rem var(--hs-space-2);
   border-radius: var(--hs-radius-pill);
-  font-size: var(--hs-text-xs);
-  font-weight: var(--hs-weight-bold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.6875rem;              /* 11px — a note, not a heading */
+  font-weight: var(--hs-weight-semibold);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
   background-color: var(--hs-surface-sunken);
   color: var(--hs-text-muted);
 }
@@ -216,6 +219,7 @@
   font-size: var(--hs-text-sm);
   font-weight: var(--hs-weight-bold);
 }
+.hs-platform-card__cta--soon { color: var(--hs-text-muted); font-weight: var(--hs-weight-semibold); }
 .hs-platform-card__cta svg { width: 0.875rem; height: 0.875rem; transition: transform var(--hs-transition); }
 .hs-platform-card:hover .hs-platform-card__cta svg { transform: translateX(4px); }
 .hs-platform-card__domain {

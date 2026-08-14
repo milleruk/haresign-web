@@ -7,13 +7,13 @@
   <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
   <meta name="description" content="{% block description %}Haresign brings together consultancy, primary care intelligence, practical tools, client services and a professional community.{% endblock %}">
 
-  {# Indexing is opt-in (settings.SITE_INDEXABLE). Beta must never be indexed, so
+  {% comment %} Indexing is opt-in (settings.SITE_INDEXABLE). Beta must never be indexed, so
      the unsafe state requires someone to set a flag rather than to forget one.
-     robots.txt says the same thing, since crawlers honour one or the other. #}
+     robots.txt says the same thing, since crawlers honour one or the other. {% endcomment %}
   {% if not SITE_INDEXABLE %}<meta name="robots" content="noindex, nofollow">{% endif %}
 
-  {# Canonical is built from SITE_BASE_URL rather than the request host, so a
-     page reached through a proxy alias still names one canonical address. #}
+  {% comment %} Canonical is built from SITE_BASE_URL rather than the request host, so a
+     page reached through a proxy alias still names one canonical address. {% endcomment %}
   <link rel="canonical" href="{% block canonical %}{{ SITE_BASE_URL }}{{ request.path }}{% endblock %}">
 
   <meta property="og:site_name" content="{{ SITE_NAME }}">
@@ -32,13 +32,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
   <meta name="theme-color" content="#111827">
 
-  {# Load order matters and is the design system's contract:
+  {% comment %} Load order matters and is the design system's contract:
        vendor  — Bootstrap Reboot + grid + utilities (layout foundation only)
        tokens  — brand values; everything below reads from these
        base    — element defaults and accessibility affordances
        layout  — page scaffolding
        components — reusable UI
-       page    — the one page's own rules, last so it can win #}
+       page    — the one page's own rules, last so it can win {% endcomment %}
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">

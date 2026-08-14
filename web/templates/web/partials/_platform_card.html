@@ -28,7 +28,7 @@ unreadable accessible name. The CTA is the link.
   {% comment %}Named, so a screen reader user hears what these belong to rather
   than "list, eleven items".{% endcomment %}
   <ul class="hs-platform-card__areas" aria-label="{{ card.name }} — areas covered">
-    {% for area in card.platform.areas %}<li>{{ area }}</li>{% endfor %}
+    {% for area in card.areas %}<li>{{ area }}</li>{% endfor %}
   </ul>
 
   <div class="hs-platform-card__footer">
@@ -40,9 +40,12 @@ unreadable accessible name. The CTA is the link.
         {% include 'web/partials/_icon.html' with name='arrow-right' %}
       </a>
     {% else %}
-      <button class="hs-btn hs-btn--sm" type="button" disabled
-              aria-describedby="hs-soon-{{ card.platform.service }}">{{ card.platform.cta }}</button>
-      <span class="hs-badge hs-badge--accent" id="hs-soon-{{ card.platform.service }}">Coming soon</span>
+      {% comment %}Muted text in the same slot the live card's link occupies, not
+      a bordered button beside a pill — that read as a different component from
+      the card next to it and made the row look inconsistent. There is nothing to
+      click, so there is no control: just the label and a quiet note.{% endcomment %}
+      <span class="hs-platform-card__cta hs-platform-card__cta--soon">{{ card.platform.cta }}</span>
+      <span class="hs-badge hs-badge--accent">Coming soon</span>
     {% endif %}
 
     {% comment %}Shown as text even when it is not a link — it tells the reader

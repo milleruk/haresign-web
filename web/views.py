@@ -6,6 +6,14 @@ from django.views.decorators.cache import never_cache
 from .content import PLATFORMS, PRINCIPLES, get_insights
 
 
+# How many areas a card lists. The cards stretch to the tallest in the row, so
+# Intelligence's eleven were setting the height of all four and leaving the other
+# three with a block of dead space beneath their list. Six keeps the row compact
+# and the cards balanced; the copy says "areas include", so the list was never
+# meant to be exhaustive. The full sets stay in content.py for later use.
+CARD_AREA_LIMIT = 6
+
+
 def build_platform_cards():
     """Join platform copy to the service registry into ready-to-render cards.
 
@@ -28,6 +36,7 @@ def build_platform_cards():
             'available': service['available'],
             'accent': service['accent'],
             'icon': platform.icon,
+            'areas': platform.areas[:CARD_AREA_LIMIT],
             'domain': service['url'].split('://', 1)[-1].rstrip('/'),
         })
     return cards

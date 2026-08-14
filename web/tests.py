@@ -63,6 +63,16 @@ class HomePageTests(SimpleTestCase):
         self.assertNotIn('<style', body)
         self.assertNotIn('style="', body)
 
+    def test_no_template_syntax_leaks_into_the_page(self):
+        """`{# … #}` comments only ever cover a SINGLE line — a multi-line one
+        renders straight into the page as text, which is exactly what happened
+        in <head> and showed above the hero. Nothing errors, so only a test
+        catches it."""
+        body = self.client.get('/').content.decode()
+
+        for token in ('{#', '#}', '{%', '%}', '{{', '}}'):
+            self.assertNotIn(token, body)
+
     def test_logo_ink_matches_the_ground_it_sits_on(self):
         """The filename suffix names the *background*, not the ink: -dark is the
         white-ink file. The header is white and the footer deep navy, so they
