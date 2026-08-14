@@ -22,12 +22,12 @@ unreadable accessible name. The CTA is the link.
     {% include 'web/partials/_icon.html' with name=card.icon %}
   </span>
 
-  <h3 class="hs-platform-card__title">{{ card.platform.heading }}</h3>
+  <h3 class="hs-platform-card__title">{{ card.name }}</h3>
   <p class="hs-platform-card__blurb">{{ card.platform.blurb }}</p>
 
   {% comment %}Named, so a screen reader user hears what these belong to rather
   than "list, eleven items".{% endcomment %}
-  <ul class="hs-platform-card__areas" aria-label="{{ card.platform.heading }} — areas covered">
+  <ul class="hs-platform-card__areas" aria-label="{{ card.name }} — areas covered">
     {% for area in card.platform.areas %}<li>{{ area }}</li>{% endfor %}
   </ul>
 

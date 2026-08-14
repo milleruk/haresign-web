@@ -21,6 +21,9 @@ def build_platform_cards():
         service = settings.HARESIGN_SERVICES[platform.service]
         cards.append({
             'platform': platform,
+            # The card heading. Read from the registry rather than stored a
+            # second time in content.py, so a product rename is one edit.
+            'name': service['name'],
             'url': service['url'],
             'available': service['available'],
             'accent': service['accent'],

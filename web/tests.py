@@ -8,7 +8,7 @@ from django.conf import settings
 from django.test import SimpleTestCase, override_settings
 
 from config.services import build_registry
-from web.content import PLATFORMS, PRINCIPLES, get_insights
+from web.content import PRINCIPLES, get_insights
 from web.views import build_platform_cards
 
 
@@ -30,10 +30,10 @@ class HomePageTests(SimpleTestCase):
     def test_shows_every_platform_with_its_copy(self):
         response = self.client.get('/')
 
-        for platform in PLATFORMS:
-            self.assertContains(response, platform.heading)
-            self.assertContains(response, platform.blurb)
-            self.assertContains(response, platform.cta)
+        for card in build_platform_cards():
+            self.assertContains(response, card['name'])
+            self.assertContains(response, card['platform'].blurb)
+            self.assertContains(response, card['platform'].cta)
 
     def test_shows_the_four_principles(self):
         response = self.client.get('/')
@@ -98,10 +98,10 @@ class PlatformAvailabilityTests(SimpleTestCase):
 
     def test_availability_is_configuration_not_code(self):
         registry = build_registry()
-        self.assertTrue(registry['app']['available'])
+        self.assertTrue(registry['intelligence']['available'])
         self.assertFalse(registry['consulting']['available'])
 
-        with self.settings(HARESIGN_SERVICES=_registry_with_live('app,consulting')):
+        with self.settings(HARESIGN_SERVICES=_registry_with_live('intelligence,consulting')):
             cards = {c['platform'].service: c for c in build_platform_cards()}
             self.assertTrue(cards['consulting']['available'])
 
@@ -110,7 +110,7 @@ class PlatformAvailabilityTests(SimpleTestCase):
         response = self.client.get('/')
 
         self.assertNotContains(response, 'href="https://auth.haresign.net"')
-        self.assertContains(response, 'aria-describedby="hs-signin-note"')
+        self.assertContains(response, 'aria-describedby="hs-account-note"')
 
     def test_card_domain_label_matches_where_it_points(self):
         """The label under a card is derived from the URL, so the two cannot
@@ -130,6 +130,76 @@ def _registry_with_live(live_csv):
             os.environ.pop('HARESIGN_LIVE_SERVICES', None)
         else:
             os.environ['HARESIGN_LIVE_SERVICES'] = previous
+
+
+class NamingTests(SimpleTestCase):
+    """The agreed product naming: **Haresign + a clear functional name**.
+
+    Written down as assertions because naming drifts silently — nothing breaks
+    when a superseded label reappears, so nothing catches it either.
+    """
+
+    AGREED = [
+        'Haresign Consulting',
+        'Haresign Intelligence',
+        'Haresign Community',
+        'Haresign Workspace',
+    ]
+
+    # Retired customer-facing labels. "Haresign Core" is the internal
+    # architectural term for the identity service; users see "Haresign Account".
+    SUPERSEDED = [
+        'Haresign App',
+        'Haresign Clients',
+        'Client Portal',
+        'Client Login',
+        'Haresign Core',
+    ]
+
+    def test_agreed_product_names_are_used(self):
+        response = self.client.get('/')
+
+        for name in self.AGREED:
+            self.assertContains(response, name)
+
+    def test_no_superseded_label_survives(self):
+        body = self.client.get('/').content.decode()
+
+        for label in self.SUPERSEDED:
+            self.assertNotIn(label, body)
+
+    def test_nav_uses_the_short_label_not_the_full_name(self):
+        """The nav has no room for the full name four times, and the logo beside
+        it already states the master brand."""
+        body = self.client.get('/').content.decode()
+        nav = body[body.index('<nav'):body.index('</nav>')]
+
+        self.assertIn('>Intelligence<', nav)
+        self.assertIn('>Workspace<', nav)
+        self.assertNotIn('Haresign Intelligence', nav)
+
+    def test_account_is_the_public_name_for_identity(self):
+        registry = build_registry()
+
+        self.assertEqual(registry['account']['name'], 'Haresign Account')
+        self.assertEqual(registry['account']['url'], 'https://auth.haresign.net')
+
+    def test_product_renames_did_not_move_the_hosts(self):
+        """Renaming a product is not renaming a live subdomain — the slugs are
+        the product names, the hosts stay where they are deployed."""
+        registry = build_registry()
+
+        self.assertEqual(registry['intelligence']['url'], 'https://app.haresign.net')
+        self.assertEqual(registry['workspace']['url'], 'https://clients.haresign.net')
+
+    def test_names_are_defined_once(self):
+        """Every name on the page comes from the registry, so a rename is one
+        edit. content.py must not carry a second copy."""
+        from web import content
+
+        source = (content.__file__ and open(content.__file__).read()) or ''
+        for name in self.AGREED:
+            self.assertNotIn(name, source)
 
 
 class InsightsTests(SimpleTestCase):
@@ -242,5 +312,6 @@ class DecouplingTests(SimpleTestCase):
         """Subdomains will move during the migration; nothing may hard-code one."""
         registry = build_registry()
 
-        for slug in ('consulting', 'app', 'community', 'clients', 'auth'):
+        for slug in ('consulting', 'intelligence', 'community', 'workspace',
+                     'account', 'api'):
             self.assertTrue(registry[slug]['url'].startswith('https://'))

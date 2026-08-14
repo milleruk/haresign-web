@@ -37,12 +37,13 @@ class Article:
 class Platform:
     """One of the four platform cards.
 
-    `service` is the registry slug (config/services.py), which is where the URL
-    and the live/coming-soon state come from — this object carries the copy only,
-    so a subdomain move never touches this file.
+    `service` is the registry slug (config/services.py), which is where the
+    product *name*, the URL and the live/coming-soon state come from. This object
+    carries only the copy unique to the card, so a rename or a subdomain move
+    never touches this file — the card heading is `service.name`, not a second
+    copy of it.
     """
     service: str
-    heading: str
     blurb: str
     cta: str
     icon: str
@@ -52,7 +53,6 @@ class Platform:
 PLATFORMS = [
     Platform(
         service='consulting',
-        heading='Consulting',
         blurb='Practical support for practices, PCNs and primary care organisations.',
         cta='Explore Consulting',
         icon='compass',
@@ -60,11 +60,10 @@ PLATFORMS = [
                'Transformation', 'Management support'],
     ),
     Platform(
-        service='app',
-        heading='App',
-        blurb='Primary care intelligence, practical tools and data that turn '
+        service='intelligence',
+        blurb='Primary care data, insight and practical tools that turn '
               'information into action.',
-        cta='Open Haresign App',
+        cta='Open Intelligence',
         icon='chart',
         areas=['Benchmarking', 'GP appointments', 'Patient experience', 'Workforce',
                'List size', 'Funding', 'Forecasting', 'Contracts', 'Compliance',
@@ -72,7 +71,6 @@ PLATFORMS = [
     ),
     Platform(
         service='community',
-        heading='Community',
         blurb='A place for primary care people to learn, share and support each other.',
         cta='Join the Community',
         icon='community',
@@ -80,10 +78,9 @@ PLATFORMS = [
                'Knowledge sharing', 'Peer support'],
     ),
     Platform(
-        service='clients',
-        heading='Clients',
-        blurb='A private workspace for organisations working directly with Haresign.',
-        cta='Client Login',
+        service='workspace',
+        blurb='Your private workspace for projects, reports, analysis and resources.',
+        cta='Open Workspace',
         icon='folder',
         areas=['Reports', 'Dashboards', 'Projects', 'Analysis',
                'Resources', 'Deliverables'],
@@ -110,8 +107,8 @@ PRINCIPLES = [
     {
         'icon': 'connected',
         'heading': 'Connected',
-        'body': 'Consulting, data, tools, clients and community working as one '
-                'Haresign ecosystem.',
+        'body': 'Consulting, intelligence, workspace and community working as '
+                'one Haresign ecosystem.',
     },
 ]
 

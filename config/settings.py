@@ -115,6 +115,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', True)
+    # The container health check calls http://127.0.0.1:8000/health/ directly,
+    # with no proxy and so no X-Forwarded-Proto. Without this exemption the
+    # redirect turns every check into a 301 and the container reports unhealthy
+    # while serving traffic perfectly well.
+    SECURE_REDIRECT_EXEMPT = [r'^health/$']
     SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', 31536000))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True

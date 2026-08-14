@@ -29,24 +29,31 @@ crosses one of these boundaries fails the build.
 ### Where this sits
 
 ```
-                    haresign.net            (this repo, once promoted)
-                          │
-      ┌───────────┬───────┴───────┬───────────────┐
-      ▼           ▼               ▼               ▼
- consulting.   app.          community.      clients.
- haresign.net  haresign.net  haresign.net    haresign.net
+                       haresign.net              (this repo, once promoted)
+                             │
+      ┌────────────┬─────────┴────────┬────────────────┐
+      ▼            ▼                  ▼                ▼
+   Haresign     Haresign           Haresign         Haresign
+  Consulting   Intelligence        Community        Workspace
+ consulting.       app.            community.        clients.
+ haresign.net  haresign.net       haresign.net    haresign.net
 
-                    identity
-                        │
-                        ▼
-                 auth.haresign.net
-                   Haresign Core
+                        identity
+                            │
+                            ▼
+                     Haresign Account
+                    auth.haresign.net
+              (internally: "Haresign Core")
 ```
 
-Each application will own its own repository and its own application data. Core
-will later own identity, organisations, roles and entitlements, and applications
-will integrate through authentication/API contracts — **never** by sharing its
-database. None of that is implemented here.
+**"Haresign Core" is an internal architectural term** for the identity service
+and appears only in documentation like this. Users see **Haresign Account**;
+`NamingTests` asserts the internal term never reaches a page.
+
+Each application will own its own repository and its own application data. The
+identity service will later own identity, organisations, roles and entitlements,
+and applications will integrate through authentication/API contracts — **never**
+by sharing its database. None of that is implemented here.
 
 ---
 
@@ -264,11 +271,12 @@ python manage.py check --deploy
 | `SITE_INDEXABLE` | `false` | **Opt-in.** Controls `noindex` and `robots.txt`. |
 | `SITE_ENVIRONMENT_LABEL` | `Beta` | Header badge; empty string removes it. |
 | `HARESIGN_URL_CONSULTING` | `https://consulting.haresign.net` | |
-| `HARESIGN_URL_APP` | `https://app.haresign.net` | |
+| `HARESIGN_URL_INTELLIGENCE` | `https://app.haresign.net` | Haresign Intelligence. |
 | `HARESIGN_URL_COMMUNITY` | `https://community.haresign.net` | |
-| `HARESIGN_URL_CLIENTS` | `https://clients.haresign.net` | |
-| `HARESIGN_URL_AUTH` | `https://auth.haresign.net` | |
-| `HARESIGN_LIVE_SERVICES` | `app` | Comma-separated slugs that actually resolve. |
+| `HARESIGN_URL_WORKSPACE` | `https://clients.haresign.net` | Haresign Workspace. |
+| `HARESIGN_URL_ACCOUNT` | `https://auth.haresign.net` | Haresign Account. |
+| `HARESIGN_URL_API` | `https://api.haresign.net` | Haresign API. |
+| `HARESIGN_LIVE_SERVICES` | `intelligence` | Comma-separated slugs that actually resolve. |
 | `LEGAL_COMPANY_NAME` | `Haresign Consulting Services` | |
 | `LEGAL_COMPANY_NUMBER` | *(unset)* | Omitted from the footer when blank. |
 | `LEGAL_REGISTERED_ADDRESS` | *(unset)* | Omitted when blank. |

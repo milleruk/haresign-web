@@ -1,22 +1,36 @@
-{% comment %}The Sign in action.
+{% comment %}The account / sign-in action.
 
-Authentication is not part of this repository's current scope, so this must not
-imply it works. When `auth` is not live the control is a <button disabled> —
-never an <a> to a host that will bounce or 404 — with the reason exposed through
-aria-describedby so it reaches screen readers and not only sighted users.
+The service is **Haresign Account** (`auth.haresign.net`). "Haresign Core" is the
+internal architectural term for it and must never appear on the page.
 
-Flip it on by adding `auth` to HARESIGN_LIVE_SERVICES once identity ships.
+Naming follows the space available: the full product name in the nav panel, where
+there is room, and the short `nav_label` ("Sign in") in the header bar, where
+there is not. Both come from the registry.
+
+Authentication is not part of this repository's scope, so this must not imply it
+works. When `account` is not live the control is a <button disabled> — never an
+<a> to a host that will bounce or 404 — with the reason exposed through
+aria-describedby so it reaches screen readers, not only sighted users.
+
+Flip it on by adding `account` to HARESIGN_LIVE_SERVICES once identity ships.
 
 Usage:
-    {% include 'web/partials/_signin.html' %}            {# header button #}
+    {% include 'web/partials/_signin.html' %}                   {# header bar #}
     {% include 'web/partials/_signin.html' with in_nav=True %}  {# mobile nav row #}
-{% endcomment %}{% if services.auth.available %}
-  <a class="hs-btn hs-btn--secondary hs-btn--sm{% if in_nav %} w-100{% endif %}"
-     href="{{ services.auth.url }}">Sign in</a>
+{% endcomment %}{% if in_nav %}{% with account_label=services.account.name %}{% if services.account.available %}
+  <a class="hs-btn hs-btn--secondary hs-btn--sm w-100" href="{{ services.account.url }}">{{ account_label }}</a>
 {% else %}
-  <span class="d-inline-flex align-items-center gap-2{% if in_nav %} py-3{% endif %}">
+  <span class="d-inline-flex align-items-center gap-2 py-3">
     <button class="hs-btn hs-btn--secondary hs-btn--sm" type="button" disabled
-            aria-describedby="hs-signin-note">Sign in</button>
-    <span class="hs-badge" id="hs-signin-note">Coming soon</span>
+            aria-describedby="hs-account-note-nav">{{ account_label }}</button>
+    <span class="hs-badge" id="hs-account-note-nav">Coming soon</span>
   </span>
-{% endif %}
+{% endif %}{% endwith %}{% else %}{% with account_label=services.account.nav_label %}{% if services.account.available %}
+  <a class="hs-btn hs-btn--secondary hs-btn--sm" href="{{ services.account.url }}">{{ account_label }}</a>
+{% else %}
+  <span class="d-inline-flex align-items-center gap-2">
+    <button class="hs-btn hs-btn--secondary hs-btn--sm" type="button" disabled
+            aria-describedby="hs-account-note">{{ account_label }}</button>
+    <span class="hs-badge" id="hs-account-note">Coming soon</span>
+  </span>
+{% endif %}{% endwith %}{% endif %}

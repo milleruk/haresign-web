@@ -25,15 +25,17 @@ navigates somewhere implies authentication exists, and it does not yet.
 
       <nav class="hs-nav" id="hs-nav" aria-label="Primary">
         <ul class="hs-nav__list">
-          {% comment %}Through _service_link so an unlaunched platform is a label,
-          not a link to a host that does not resolve.{% endcomment %}
-          <li>{% include 'web/partials/_service_link.html' with service=services.consulting link_class='hs-nav__link' badge_class='' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.app link_class='hs-nav__link' badge_class='' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.community link_class='hs-nav__link' badge_class='' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.clients link_class='hs-nav__link' badge_class='' %}</li>
+          {% comment %}Short `nav_label` from the registry, not the full product
+          name — the nav has no room for "Haresign Intelligence" four times, and
+          the master brand is already stated by the logo beside it. Routed through
+          _service_link so an unlaunched platform is a label, not a link to a host
+          that does not resolve.{% endcomment %}
+          <li>{% include 'web/partials/_service_link.html' with service=services.consulting label=services.consulting.nav_label link_class='hs-nav__link' badge_class='' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.intelligence label=services.intelligence.nav_label link_class='hs-nav__link' badge_class='' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.community label=services.community.nav_label link_class='hs-nav__link' badge_class='' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.workspace label=services.workspace.nav_label link_class='hs-nav__link' badge_class='' %}</li>
           <li><a class="hs-nav__link" href="#insights">Insights</a></li>
           <li><a class="hs-nav__link" href="#about">About</a></li>
-          <li><a class="hs-nav__link" href="#contact">Contact</a></li>
           {% comment %}The header Sign in button is hidden below 992px, so the
           panel carries its own copy — the action is never lost on mobile.{% endcomment %}
           <li class="d-lg-none">

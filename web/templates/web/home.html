@@ -92,7 +92,9 @@
 {# ============================ Platforms ============================ #}
 <section class="hs-section hs-section--muted" id="platforms" aria-labelledby="platforms-title">
   <div class="hs-container">
-    {% include 'web/partials/_section_header.html' with eyebrow='The ecosystem' heading='Four platforms. One purpose.' lead='Different services. One purpose — better decisions for primary care.' heading_id='platforms-title' %}
+    {% comment %}The lead states the umbrella explicitly: these are parts of one
+    Haresign, not unrelated businesses that happen to share a word.{% endcomment %}
+    {% include 'web/partials/_section_header.html' with eyebrow='The ecosystem' heading='Four platforms. One purpose.' lead='One Haresign. Different ways to support primary care.' heading_id='platforms-title' %}
 
     <div class="hs-platform-grid">
       {% for card in platform_cards %}
