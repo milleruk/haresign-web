@@ -1,0 +1,257 @@
+/* ==========================================================================
+   layout.css — page scaffolding: container, sections, header and footer shells.
+
+   Structure and spacing only. Anything reusable and self-contained (buttons,
+   cards, badges) belongs in components.css; anything specific to one page
+   belongs in pages/.
+   ========================================================================== */
+
+/* --- Container -----------------------------------------------------------
+   Our own rather than Bootstrap's .container: one fluid max-width with fluid
+   padding, instead of Bootstrap's five breakpoint steps, which visibly jump. */
+.hs-container {
+  width: 100%;
+  max-width: var(--hs-container-max);
+  margin-inline: auto;
+  padding-inline: var(--hs-container-pad);
+}
+
+/* --- Sections ------------------------------------------------------------ */
+.hs-section { padding-block: var(--hs-section-y); }
+.hs-section--tight { padding-block: var(--hs-section-y-tight); }
+.hs-section--muted { background-color: var(--hs-surface-muted); }
+
+/* Dark section. Sets the on-dark text tokens once so children need no
+   per-element colour overrides. */
+.hs-section--inverse {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--hs-surface-inverse);
+  color: var(--hs-text-on-dark);
+  overflow: hidden;
+}
+.hs-section--inverse h1,
+.hs-section--inverse h2,
+.hs-section--inverse h3 { color: var(--hs-text-on-dark-strong); }
+
+/* --- Section header ------------------------------------------------------ */
+.hs-section-header { max-width: 45rem; margin-bottom: var(--hs-space-14, 3.5rem); }
+.hs-section-header__title { margin-bottom: var(--hs-space-4); }
+.hs-section-header__lead {
+  font-size: var(--hs-text-lg);
+  margin-bottom: 0;
+}
+.hs-section--inverse .hs-section-header__lead { color: var(--hs-text-on-dark); }
+
+/* Header with an action on the right (e.g. "All insights"). */
+.hs-section-header--split {
+  max-width: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--hs-space-4);
+}
+
+/* --- Site header --------------------------------------------------------- */
+.hs-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--hs-border);
+}
+.hs-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hs-space-5);
+  min-height: var(--hs-header-height);
+}
+.hs-header__brand { display: flex; align-items: center; gap: var(--hs-space-3); }
+/* The header is white, so this takes the navy-ink logo. The asset suffix names
+   the *background* it belongs on, not the ink: logo-primary-dark is the
+   white-ink file for dark grounds. Getting these the wrong way round renders
+   the logo invisible rather than broken, so check against the ground. */
+.hs-header__logo { height: 2.625rem; width: auto; display: block; }
+.hs-header__actions { display: flex; align-items: center; gap: var(--hs-space-3); }
+
+/* --- Primary navigation -------------------------------------------------- */
+.hs-nav__list {
+  display: flex;
+  align-items: center;
+  gap: var(--hs-space-6);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hs-nav__link {
+  display: inline-block;
+  position: relative;
+  padding-block: var(--hs-space-2);
+  color: var(--hs-text-strong);
+  font-size: var(--hs-text-base);
+  font-weight: var(--hs-weight-medium);
+}
+.hs-nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--hs-aqua);
+  border-radius: 2px;
+  transition: width var(--hs-transition);
+}
+.hs-nav__link:hover { color: var(--hs-aqua); }
+.hs-nav__link:hover::after,
+.hs-nav__link[aria-current="page"]::after { width: 100%; }
+
+/* A platform that is not live yet: a label, not a link. Muted and without the
+   hover underline, so it does not invite a click it cannot honour. */
+.hs-nav__link--unavailable,
+.hs-footer__link--unavailable {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  color: var(--hs-text-muted);
+  cursor: default;
+}
+.hs-nav__link--unavailable::after { display: none; }
+.hs-footer__link--unavailable { color: var(--hs-text-on-dark-muted); }
+
+.hs-nav__toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  /* 44px — the minimum comfortable touch target. */
+  width: 2.75rem;
+  height: 2.75rem;
+  background: transparent;
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-sm);
+  color: var(--hs-text-strong);
+  cursor: pointer;
+}
+.hs-nav__toggle-bar,
+.hs-nav__toggle-bar::before,
+.hs-nav__toggle-bar::after {
+  display: block;
+  width: 1.125rem;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transition: transform var(--hs-transition), opacity var(--hs-duration-fast) var(--hs-ease);
+}
+.hs-nav__toggle-bar { position: relative; }
+.hs-nav__toggle-bar::before { content: ""; position: absolute; top: -6px; }
+.hs-nav__toggle-bar::after  { content: ""; position: absolute; top: 6px; }
+
+/* Open state: the bars become a cross, so the control shows what it will do. */
+.hs-nav__toggle[aria-expanded="true"] .hs-nav__toggle-bar { background-color: transparent; }
+.hs-nav__toggle[aria-expanded="true"] .hs-nav__toggle-bar::before { top: 0; transform: rotate(45deg); }
+.hs-nav__toggle[aria-expanded="true"] .hs-nav__toggle-bar::after  { top: 0; transform: rotate(-45deg); }
+
+/* --- Site footer --------------------------------------------------------- */
+.hs-footer {
+  background-color: var(--hs-navy-deep);
+  color: var(--hs-text-on-dark);
+  padding-top: var(--hs-space-20);
+}
+.hs-footer a { color: var(--hs-text-on-dark); }
+.hs-footer a:hover { color: var(--hs-text-on-dark-strong); }
+/* Deep-navy ground, so the white-ink logo — the opposite of the header. */
+.hs-footer__logo { height: 2.75rem; width: auto; margin-bottom: var(--hs-space-5); }
+.hs-footer__tagline { max-width: 22rem; margin-bottom: var(--hs-space-6); }
+
+.hs-footer__grid {
+  display: grid;
+  grid-template-columns: 1.6fr repeat(3, 1fr);
+  gap: var(--hs-space-10);
+}
+.hs-footer__heading {
+  color: var(--hs-text-on-dark-strong);
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+  margin-bottom: var(--hs-space-5);
+}
+.hs-footer__list { list-style: none; margin: 0; padding: 0; }
+.hs-footer__list li { margin-bottom: var(--hs-space-3); }
+
+.hs-footer__legal-details {
+  margin-top: var(--hs-space-6);
+  font-size: var(--hs-text-xs);
+  color: var(--hs-text-on-dark-muted);
+}
+.hs-footer__legal-details p { margin-bottom: var(--hs-space-1); }
+
+.hs-footer__bottom {
+  margin-top: var(--hs-space-16);
+  padding-block: var(--hs-space-6);
+  border-top: 1px solid var(--hs-border-on-dark);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hs-space-4);
+  font-size: var(--hs-text-sm);
+}
+.hs-footer__bottom p { margin-bottom: 0; }
+.hs-footer__bottom-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hs-space-6);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 991.98px) {
+  .hs-nav__toggle { display: inline-flex; }
+
+  /* The nav becomes a stacked disclosure panel below the bar. A panel rather
+     than a full-screen overlay: seven links do not need a focus trap, and a
+     panel keeps the header visible so the close control never moves. */
+  .hs-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--hs-surface);
+    border-bottom: 1px solid var(--hs-border);
+    box-shadow: var(--hs-shadow-md);
+    padding-block: var(--hs-space-3) var(--hs-space-5);
+  }
+  .hs-nav.is-open { display: block; }
+  .hs-nav__list {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding-inline: var(--hs-container-pad);
+  }
+  .hs-nav__list > li { border-bottom: 1px solid var(--hs-border); }
+  .hs-nav__list > li:last-child { border-bottom: 0; }
+  .hs-nav__link { display: block; padding-block: var(--hs-space-4); }
+  .hs-nav__link::after { display: none; }
+
+  /* The header Sign in button is hidden on small screens; the nav panel
+     carries its own copy, so the action is never actually lost. */
+  .hs-header__actions .hs-btn { display: none; }
+
+  .hs-footer__grid { grid-template-columns: repeat(2, 1fr); gap: var(--hs-space-8); }
+  .hs-footer__brand-col { grid-column: 1 / -1; }
+}
+
+@media (max-width: 575.98px) {
+  .hs-footer__grid { grid-template-columns: 1fr; }
+  .hs-footer__bottom { flex-direction: column; align-items: flex-start; }
+  .hs-section-header--split { align-items: flex-start; }
+}

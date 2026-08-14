@@ -1,0 +1,39 @@
+# haresign-web — beta.haresign.net
+#
+# Joins the existing external t3_proxy network so Traefik can route to it,
+# exactly as the other Haresign services do. No database, no cache, no queue:
+# this application has no state.
+#
+# Deploy:  docker compose up -d --build
+
+services:
+  haresign_web:
+    container_name: HaresignWeb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - t3_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=t3_proxy"
+
+      - "traefik.http.routers.haresign-web-rtr.rule=Host(`beta.haresign.net`)"
+      - "traefik.http.routers.haresign-web-rtr.entrypoints=websecure"
+      - "traefik.http.routers.haresign-web-rtr.tls=true"
+      - "traefik.http.routers.haresign-web-rtr.middlewares=chain-no-auth@file"
+      - "traefik.http.routers.haresign-web-rtr.service=haresign-web-svc"
+
+      # Higher than the monolith's router. beta.haresign.net was previously
+      # served by HaresignDotNet; until that host is removed from its rule, the
+      # more specific router here must win or the old page keeps answering.
+      - "traefik.http.routers.haresign-web-rtr.priority=200"
+
+      - "traefik.http.services.haresign-web-svc.loadbalancer.server.port=8000"
+
+networks:
+  t3_proxy:
+    external: true

@@ -1,0 +1,81 @@
+{% load static %}{% comment %}Site footer.
+
+Platform links resolve through the service registry. Legal links are prepared but
+point at routes that do not exist yet, so they render as plain text with a
+"Coming soon" note rather than as links to 404s — see `legal_links` below.
+
+Company/registration details come from settings.LEGAL and are *omitted when
+unset*. Nothing here is invented: the real registration and ICO details belong to
+the business and are supplied by configuration (see README).
+{% endcomment %}
+<footer class="hs-footer" id="contact">
+  <div class="hs-container">
+
+    <div class="hs-footer__grid">
+
+      <div class="hs-footer__brand-col">
+        {% comment %}Deep-navy ground, so the white-ink logo — the opposite of
+        the header. The filename suffix names the background, not the ink.{% endcomment %}
+        <img class="hs-footer__logo" src="{% static 'images/logo-primary-dark.png' %}"
+             alt="{{ SITE_NAME }}">
+        <p class="hs-footer__tagline">
+          Consultancy, intelligence, practical tools, client services and a
+          professional community — helping primary care understand, manage and improve.
+        </p>
+        <p><a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a></p>
+
+        {% comment %}Rendered only when configured. An absent line is better than
+        a placeholder that looks like a real company number.{% endcomment %}
+        {% if legal.company_number or legal.registered_address or legal.ico_registration %}
+          <div class="hs-footer__legal-details">
+            {% if legal.company_number %}<p>Company number {{ legal.company_number }}</p>{% endif %}
+            {% if legal.registered_address %}<p>{{ legal.registered_address }}</p>{% endif %}
+            {% if legal.ico_registration %}<p>ICO registration {{ legal.ico_registration }}</p>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div>
+        <h2 class="hs-footer__heading" id="footer-platforms">Platforms</h2>
+        <ul class="hs-footer__list" aria-labelledby="footer-platforms">
+          {% comment %}Same rule as the nav and the cards: not live, not a link.{% endcomment %}
+          <li>{% include 'web/partials/_service_link.html' with service=services.consulting link_class='hs-footer__link' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.app link_class='hs-footer__link' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.community link_class='hs-footer__link' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.clients link_class='hs-footer__link' %}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="hs-footer__heading" id="footer-haresign">Haresign</h2>
+        <ul class="hs-footer__list" aria-labelledby="footer-haresign">
+          <li><a href="#about">About</a></li>
+          <li><a href="#insights">Insights</a></li>
+          <li><a href="mailto:{{ legal.contact_email }}">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="hs-footer__heading" id="footer-legal">Legal</h2>
+        {% comment %}Structure is in place; the pages are not written yet. They
+        are text, not links — a Privacy link that 404s on a healthcare site is
+        worse than one that is visibly still to come.{% endcomment %}
+        <ul class="hs-footer__list" aria-labelledby="footer-legal">
+          <li>Privacy <span class="hs-badge hs-badge--on-dark">Soon</span></li>
+          <li>Cookies <span class="hs-badge hs-badge--on-dark">Soon</span></li>
+          <li>Terms <span class="hs-badge hs-badge--on-dark">Soon</span></li>
+          <li>Accessibility <span class="hs-badge hs-badge--on-dark">Soon</span></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="hs-footer__bottom">
+      <p>&copy; <span data-hs-year>{% now "Y" %}</span> {{ legal.company_name }}. All rights reserved.</p>
+      <ul class="hs-footer__bottom-links">
+        <li>{{ SITE_NAME }} — primary care intelligence</li>
+      </ul>
+    </div>
+
+  </div>
+</footer>

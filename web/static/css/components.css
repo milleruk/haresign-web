@@ -1,0 +1,284 @@
+/* ==========================================================================
+   components.css — reusable, self-contained UI pieces.
+
+   Each block here pairs with a template partial in web/templates/web/partials/
+   and must work anywhere on any page. A rule that only makes sense on one page
+   belongs in pages/ instead.
+
+   Accent-aware components read --hs-accent / --hs-accent-ink / --hs-accent-tint,
+   set by an .hs-accent-* class from tokens.css. That is what lets one card
+   component render in four colourways without four sets of rules.
+   ========================================================================== */
+
+/* --- Button --------------------------------------------------------------
+   .hs-btn plus one variant. Renders as <a> or <button>; both get the same box
+   because a control should not change shape based on its element. */
+.hs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hs-space-2);
+  /* Comfortably above the 44px touch-target minimum at default font size. */
+  padding: var(--hs-space-3) var(--hs-space-6);
+  border: 2px solid transparent;
+  border-radius: var(--hs-radius-pill);
+  font-family: inherit;
+  font-size: var(--hs-text-base);
+  font-weight: var(--hs-weight-semibold);
+  line-height: 1.4;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--hs-transition), background-color var(--hs-transition),
+              border-color var(--hs-transition), color var(--hs-transition);
+}
+.hs-btn:hover { transform: translateY(-2px); }
+
+.hs-btn--primary {
+  background-color: var(--hs-aqua);
+  border-color: var(--hs-aqua);
+  color: var(--hs-text-on-dark-strong);
+  box-shadow: var(--hs-shadow-cta);
+}
+.hs-btn--primary:hover {
+  background-color: var(--hs-aqua-deep);
+  border-color: var(--hs-aqua-deep);
+  color: var(--hs-text-on-dark-strong);
+}
+
+.hs-btn--secondary {
+  background-color: transparent;
+  border-color: var(--hs-border-strong);
+  color: var(--hs-text-strong);
+}
+.hs-btn--secondary:hover { border-color: var(--hs-navy); color: var(--hs-navy); }
+
+.hs-btn--on-dark {
+  background-color: transparent;
+  border-color: var(--hs-border-on-dark);
+  color: var(--hs-text-on-dark-strong);
+}
+.hs-btn--on-dark:hover {
+  background-color: var(--hs-surface);
+  border-color: var(--hs-surface);
+  color: var(--hs-navy);
+}
+
+.hs-btn--sm { padding: var(--hs-space-2) var(--hs-space-5); font-size: var(--hs-text-sm); }
+
+/* Unavailable action. Rendered as a <button disabled>, never as a dead <a>:
+   a link that goes nowhere is a broken promise, a disabled control is a
+   statement. aria-describedby points at the "Coming soon" badge so screen
+   reader users get the reason, not just the disabled state. */
+.hs-btn[disabled],
+.hs-btn--unavailable {
+  background-color: transparent;
+  border-color: var(--hs-border);
+  color: var(--hs-text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.hs-btn[disabled]:hover,
+.hs-btn--unavailable:hover { transform: none; }
+
+/* --- Badge --------------------------------------------------------------- */
+.hs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  padding: var(--hs-space-1) var(--hs-space-3);
+  border-radius: var(--hs-radius-pill);
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background-color: var(--hs-surface-sunken);
+  color: var(--hs-text-muted);
+}
+.hs-badge--accent { background-color: var(--hs-accent-tint); color: var(--hs-accent-ink); }
+.hs-badge--environment { background-color: var(--hs-tint-teal); color: var(--hs-teal-deep); }
+.hs-badge--on-dark {
+  background-color: rgba(255, 255, 255, 0.10);
+  color: var(--hs-text-on-dark-strong);
+}
+
+/* --- Eyebrow ------------------------------------------------------------- */
+.hs-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  margin-bottom: var(--hs-space-4);
+  color: var(--hs-aqua);
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+}
+.hs-eyebrow::before {
+  content: "";
+  width: 1.625rem;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+}
+.hs-section--inverse .hs-eyebrow { color: var(--hs-teal); }
+
+/* --- Card (shared shell) -------------------------------------------------
+   .hs-card is the surface; .hs-platform-card and .hs-article-card add their
+   own content rules on top rather than redefining the box. */
+.hs-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--hs-surface);
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-md);
+  box-shadow: var(--hs-shadow-md);
+  overflow: hidden;
+  transition: transform var(--hs-transition), box-shadow var(--hs-transition),
+              border-color var(--hs-transition);
+}
+.hs-card--interactive:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--hs-shadow-lg);
+}
+
+/* --- Platform card ------------------------------------------------------- */
+.hs-platform-card {
+  padding: var(--hs-space-8) var(--hs-space-6) var(--hs-space-6);
+  height: 100%;
+}
+.hs-platform-card:hover { border-color: var(--hs-accent); }
+/* Accent rule along the top edge — the card's colour identity. */
+.hs-platform-card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 5px;
+  background-color: var(--hs-accent);
+}
+.hs-platform-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.375rem;
+  height: 3.375rem;
+  margin-bottom: var(--hs-space-5);
+  border-radius: var(--hs-radius-sm);
+  background-color: var(--hs-accent-tint);
+  color: var(--hs-accent-ink);
+}
+.hs-platform-card__icon svg { width: 1.5rem; height: 1.5rem; }
+.hs-platform-card__title { margin-bottom: var(--hs-space-3); }
+.hs-platform-card__blurb {
+  color: var(--hs-navy-soft);
+  font-size: var(--hs-text-base);
+  font-weight: var(--hs-weight-medium);
+  margin-bottom: var(--hs-space-5);
+}
+.hs-platform-card__areas {
+  list-style: none;
+  margin: 0 0 var(--hs-space-6);
+  padding: 0;
+  /* Pushes the CTA to the bottom so all four cards align regardless of how
+     many areas each lists — App has eleven, Consulting five. */
+  flex: 1 1 auto;
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+}
+.hs-platform-card__areas li {
+  position: relative;
+  padding-inline-start: var(--hs-space-5);
+  margin-bottom: var(--hs-space-2);
+}
+.hs-platform-card__areas li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.62em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--hs-accent);
+  opacity: 0.55;
+}
+.hs-platform-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hs-space-3);
+}
+.hs-platform-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  color: var(--hs-accent-ink);
+  font-size: var(--hs-text-sm);
+  font-weight: var(--hs-weight-bold);
+}
+.hs-platform-card__cta svg { width: 0.875rem; height: 0.875rem; transition: transform var(--hs-transition); }
+.hs-platform-card:hover .hs-platform-card__cta svg { transform: translateX(4px); }
+.hs-platform-card__domain {
+  width: 100%;
+  margin: var(--hs-space-4) 0 0;
+  padding-top: var(--hs-space-4);
+  border-top: 1px solid var(--hs-border);
+  font-family: var(--hs-font-mono);
+  font-size: var(--hs-text-xs);
+  color: var(--hs-text-muted);
+}
+
+/* --- Article card -------------------------------------------------------- */
+.hs-article-card { padding: var(--hs-space-5) var(--hs-space-6); }
+.hs-article-card--link:hover {
+  border-color: var(--hs-aqua);
+  transform: translateX(4px);
+}
+.hs-article-card__title { font-size: var(--hs-text-lg); margin: var(--hs-space-2) 0 0; }
+.hs-article-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hs-space-3);
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--hs-text-muted);
+}
+
+/* Featured variant — the lead article. */
+.hs-article-card--featured { padding: 0; }
+.hs-article-card--featured .hs-article-card__media {
+  aspect-ratio: 16 / 8;
+  background: linear-gradient(135deg, var(--hs-navy) 0%, var(--hs-aqua) 100%);
+}
+.hs-article-card--featured .hs-article-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hs-article-card--featured .hs-article-card__body {
+  padding: var(--hs-space-6) var(--hs-space-8) var(--hs-space-8);
+}
+.hs-article-card--featured .hs-article-card__title {
+  font-size: clamp(1.5rem, 2.5vw, 1.6875rem);
+  margin-block: var(--hs-space-3);
+}
+.hs-article-card__summary { margin-bottom: 0; color: var(--hs-text); }
+
+/* --- Principle ----------------------------------------------------------- */
+.hs-principle__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.875rem;
+  height: 2.875rem;
+  margin-bottom: var(--hs-space-5);
+  border-radius: var(--hs-radius-sm);
+  background-color: rgba(255, 255, 255, 0.10);
+  color: var(--hs-text-on-dark-strong);
+}
+.hs-principle__icon svg { width: 1.25rem; height: 1.25rem; }
+.hs-principle__title { font-size: var(--hs-text-xl); margin-bottom: var(--hs-space-2); }
+.hs-principle__body { margin-bottom: 0; color: var(--hs-text-on-dark); }

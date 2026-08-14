@@ -1,0 +1,58 @@
+{% load static %}{% comment %}Site header — brand, primary navigation, Sign in.
+
+Platform destinations come from the service registry (config/services.py), never
+from a literal URL here, so a subdomain move is a configuration change.
+
+Sign in is deliberately *not* a working link while `auth` is not live: it renders
+as a disabled control with a "Coming soon" badge, because a Sign in button that
+navigates somewhere implies authentication exists, and it does not yet.
+{% endcomment %}
+<header class="hs-header">
+  <div class="hs-container position-relative">
+    <div class="hs-header__inner">
+
+      <a class="hs-header__brand" href="/">
+        {% comment %}The asset suffix names the background, not the ink:
+        logo-primary-dark is the white-ink file. This header is white, so it
+        takes logo-primary (navy ink). Reversed, the logo is invisible rather
+        than obviously broken.{% endcomment %}
+        <img class="hs-header__logo" src="{% static 'images/logo-primary.png' %}"
+             alt="{{ SITE_NAME }} — home">
+        {% if SITE_ENVIRONMENT_LABEL %}
+          <span class="hs-badge hs-badge--environment">{{ SITE_ENVIRONMENT_LABEL }}</span>
+        {% endif %}
+      </a>
+
+      <nav class="hs-nav" id="hs-nav" aria-label="Primary">
+        <ul class="hs-nav__list">
+          {% comment %}Through _service_link so an unlaunched platform is a label,
+          not a link to a host that does not resolve.{% endcomment %}
+          <li>{% include 'web/partials/_service_link.html' with service=services.consulting link_class='hs-nav__link' badge_class='' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.app link_class='hs-nav__link' badge_class='' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.community link_class='hs-nav__link' badge_class='' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.clients link_class='hs-nav__link' badge_class='' %}</li>
+          <li><a class="hs-nav__link" href="#insights">Insights</a></li>
+          <li><a class="hs-nav__link" href="#about">About</a></li>
+          <li><a class="hs-nav__link" href="#contact">Contact</a></li>
+          {% comment %}The header Sign in button is hidden below 992px, so the
+          panel carries its own copy — the action is never lost on mobile.{% endcomment %}
+          <li class="d-lg-none">
+            {% include 'web/partials/_signin.html' with in_nav=True %}
+          </li>
+        </ul>
+      </nav>
+
+      <div class="hs-header__actions">
+        <div class="d-none d-lg-block">
+          {% include 'web/partials/_signin.html' %}
+        </div>
+        <button class="hs-nav__toggle" type="button" id="hs-nav-toggle"
+                aria-controls="hs-nav" aria-expanded="false">
+          <span class="hs-nav__toggle-bar"></span>
+          <span class="hs-visually-hidden">Menu</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</header>

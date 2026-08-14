@@ -1,0 +1,162 @@
+/* ==========================================================================
+   pages/home.css — rules that exist only on the homepage.
+
+   Mostly the hero, which is bespoke by design. Anything here that gets reused
+   on a second page should move to components.css.
+   ========================================================================== */
+
+.hs-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-block: clamp(3rem, 7vw, 6.25rem) clamp(3.75rem, 8vw, 6.875rem);
+  background-color: var(--hs-surface);
+}
+
+/* Organic colour fields rather than a linear gradient — the brief is explicitly
+   "not a generic blue SaaS template". Large, heavily blurred and low-opacity,
+   so they read as warmth behind the type and never threaten its contrast.
+   Clipped by the section's own overflow:hidden. */
+.hs-hero__field {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+.hs-hero__field--teal {
+  width: 38.75rem;
+  height: 38.75rem;
+  top: -13.75rem;
+  right: -10rem;
+  background-color: rgba(15, 163, 163, 0.20);
+}
+.hs-hero__field--coral {
+  width: 30rem;
+  height: 30rem;
+  bottom: -13.75rem;
+  left: -11.25rem;
+  background-color: rgba(255, 91, 97, 0.16);
+}
+.hs-hero__field--aqua {
+  width: 32.5rem;
+  height: 32.5rem;
+  top: 7.5rem;
+  right: 22%;
+  background-color: rgba(13, 91, 184, 0.12);
+}
+
+/* Faint grid, masked to fade out at the edges so it never becomes a visible
+   rectangle. Decorative — hidden from assistive tech in the markup. */
+.hs-hero__grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(17, 24, 39, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 24, 39, 0.045) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 20%, transparent 75%);
+}
+
+.hs-hero__title { margin-bottom: var(--hs-space-6); }
+
+/* "grown" — the emphasis the whole page hangs on. Coral carries it, and the
+   underline rule means the emphasis survives greyscale printing and colour
+   vision differences, where hue alone would not. */
+.hs-hero__emphasis {
+  position: relative;
+  color: var(--hs-coral-ink);
+  white-space: nowrap;
+}
+.hs-hero__emphasis::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -0.08em;
+  height: 0.09em;
+  background-color: var(--hs-coral);
+  border-radius: var(--hs-radius-pill);
+}
+
+.hs-hero__lead {
+  max-width: 38.75rem;
+  margin-bottom: var(--hs-space-5);
+  color: var(--hs-navy-soft);
+  font-size: var(--hs-text-xl);
+  line-height: 1.6;
+}
+.hs-hero__body {
+  max-width: 40rem;
+  margin-bottom: var(--hs-space-8);
+  font-size: var(--hs-text-lg);
+}
+.hs-hero__actions { display: flex; flex-wrap: wrap; gap: var(--hs-space-4); }
+
+.hs-hero__visual { position: relative; }
+.hs-hero__visual svg { display: block; width: 100%; height: auto; }
+
+/* --- Platform grid ------------------------------------------------------- */
+.hs-platform-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--hs-space-6);
+}
+
+/* --- Principles grid ----------------------------------------------------- */
+.hs-principles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--hs-space-8);
+}
+/* Decorative colour fields for the dark band. */
+.hs-band__field {
+  position: absolute;
+  z-index: 0;
+  width: 35rem;
+  height: 35rem;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+.hs-band__field--teal  { top: -15rem; left: -7.5rem; background-color: rgba(15, 163, 163, 0.22); }
+.hs-band__field--coral { bottom: -17.5rem; right: -8.75rem; background-color: rgba(255, 91, 97, 0.14); }
+.hs-band__content { position: relative; z-index: 1; }
+
+/* --- Insights ------------------------------------------------------------ */
+.hs-insights-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--hs-space-8);
+  align-items: start;
+}
+.hs-insights-list { display: flex; flex-direction: column; gap: var(--hs-space-4); }
+
+/* --- Responsive ----------------------------------------------------------
+   Deliberately not "shrink the desktop page": the platform grid steps 4 -> 2 -> 1,
+   the hero visual moves below the copy rather than being squeezed beside it, and
+   the blurred fields shrink so they do not swamp a small screen. */
+
+@media (max-width: 1199.98px) {
+  .hs-platform-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 991.98px) {
+  .hs-hero__visual { max-width: 32.5rem; margin-top: var(--hs-space-10); }
+  .hs-principles-grid { grid-template-columns: repeat(2, 1fr); }
+  .hs-insights-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 767.98px) {
+  .hs-platform-grid { grid-template-columns: 1fr; gap: var(--hs-space-5); }
+  .hs-principles-grid { grid-template-columns: 1fr; gap: var(--hs-space-6); }
+
+  /* Full-width CTAs — side-by-side pills get uncomfortably narrow below ~380px. */
+  .hs-hero__actions .hs-btn { width: 100%; }
+
+  .hs-hero__field { filter: blur(50px); }
+  .hs-hero__field--teal  { width: 21.25rem; height: 21.25rem; top: -8.75rem; right: -7.5rem; }
+  .hs-hero__field--coral { width: 18.75rem; height: 18.75rem; bottom: -8.75rem; left: -7.5rem; }
+  .hs-hero__field--aqua  { display: none; }
+}

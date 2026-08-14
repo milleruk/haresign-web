@@ -1,0 +1,53 @@
+{% comment %}Platform card.
+
+    {% include 'web/partials/_platform_card.html' with card=card %}
+
+`card` comes from `views.build_platform_cards()` and carries the copy, the
+resolved URL, the accent and whether the service is live.
+
+One component, four colourways: the accent class sets --hs-accent and children
+read it, so there are no per-platform rules in CSS.
+
+When the service is not live the CTA is a disabled <button> plus a "Coming soon"
+badge, never a link. Three of the four platforms do not exist yet, and a card
+linking to a host that does not resolve is worse than one that says so.
+
+The card is deliberately not a single wrapping <a>: it holds a list plus an
+action, and wrapping that in an anchor nests interactive content and produces an
+unreadable accessible name. The CTA is the link.
+{% endcomment %}
+<article class="hs-card hs-card--interactive hs-platform-card hs-accent-{{ card.accent }}">
+
+  <span class="hs-platform-card__icon">
+    {% include 'web/partials/_icon.html' with name=card.icon %}
+  </span>
+
+  <h3 class="hs-platform-card__title">{{ card.platform.heading }}</h3>
+  <p class="hs-platform-card__blurb">{{ card.platform.blurb }}</p>
+
+  {% comment %}Named, so a screen reader user hears what these belong to rather
+  than "list, eleven items".{% endcomment %}
+  <ul class="hs-platform-card__areas" aria-label="{{ card.platform.heading }} — areas covered">
+    {% for area in card.platform.areas %}<li>{{ area }}</li>{% endfor %}
+  </ul>
+
+  <div class="hs-platform-card__footer">
+    {% if card.available %}
+      {% comment %}The label names the platform, so the link stands on its own
+      out of context ("Explore Consulting", never "Read more").{% endcomment %}
+      <a class="hs-platform-card__cta" href="{{ card.url }}">
+        {{ card.platform.cta }}
+        {% include 'web/partials/_icon.html' with name='arrow-right' %}
+      </a>
+    {% else %}
+      <button class="hs-btn hs-btn--sm" type="button" disabled
+              aria-describedby="hs-soon-{{ card.platform.service }}">{{ card.platform.cta }}</button>
+      <span class="hs-badge hs-badge--accent" id="hs-soon-{{ card.platform.service }}">Coming soon</span>
+    {% endif %}
+
+    {% comment %}Shown as text even when it is not a link — it tells the reader
+    where the platform will live.{% endcomment %}
+    <p class="hs-platform-card__domain">{{ card.domain }}</p>
+  </div>
+
+</article>

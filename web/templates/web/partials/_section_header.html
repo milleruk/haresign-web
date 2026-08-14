@@ -1,0 +1,23 @@
+{% comment %}Section header — eyebrow, heading, supporting line.
+
+    {% include 'web/partials/_section_header.html' with eyebrow='The ecosystem' heading='Four platforms. One purpose.' lead='…' %}
+
+`heading_id` is worth passing whenever the section is a landmark: it lets the
+<section> point at it with aria-labelledby, which is what gives the region an
+accessible name.
+
+All three text parts are optional so one component covers every section on the
+page rather than three near-identical ones.
+{% endcomment %}
+<div class="hs-section-header{% if split %} hs-section-header--split{% endif %}">
+  <div>
+    {% if eyebrow %}<p class="hs-eyebrow">{{ eyebrow }}</p>{% endif %}
+    {% if heading %}
+      <h2 class="hs-section-header__title"{% if heading_id %} id="{{ heading_id }}"{% endif %}>{{ heading }}</h2>
+    {% endif %}
+    {% if lead %}<p class="hs-section-header__lead">{{ lead }}</p>{% endif %}
+  </div>
+  {% comment %}`action` is rendered by the caller via the block below — see
+  home.html's insights section, which puts a button here.{% endcomment %}
+  {% if action %}<div>{{ action }}</div>{% endif %}
+</div>

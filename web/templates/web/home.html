@@ -1,0 +1,146 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block title %}Haresign — consultancy, intelligence, tools and community for primary care{% endblock %}
+{% block description %}Haresign brings together consultancy, intelligence, practical tools, client services and a growing professional community — all focused on helping primary care understand, manage and improve.{% endblock %}
+{% block og_title %}Haresign has grown.{% endblock %}
+{% block og_description %}Consultancy, intelligence, practical tools, client services and a growing professional community for primary care.{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">{% endblock %}
+
+{% block content %}
+
+{# ============================== Hero ============================== #}
+<section class="hs-hero" aria-labelledby="hero-title">
+  {# Decorative only: no information here, so all of it is hidden from AT. #}
+  <span class="hs-hero__grid" aria-hidden="true"></span>
+  <span class="hs-hero__field hs-hero__field--teal" aria-hidden="true"></span>
+  <span class="hs-hero__field hs-hero__field--coral" aria-hidden="true"></span>
+  <span class="hs-hero__field hs-hero__field--aqua" aria-hidden="true"></span>
+
+  <div class="hs-container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <h1 class="hs-hero__title" id="hero-title">
+          Haresign has <span class="hs-hero__emphasis">grown</span>.
+        </h1>
+        <p class="hs-hero__lead">
+          What started as a simple aim — helping primary care make better use of
+          its data — has become something much bigger.
+        </p>
+        <p class="hs-hero__body">
+          Today, Haresign brings together consultancy, intelligence, practical
+          tools, client services and a growing professional community — all
+          focused on helping primary care understand, manage and improve.
+        </p>
+        <div class="hs-hero__actions">
+          <a class="hs-btn hs-btn--primary" href="#platforms">
+            Explore our platforms
+            {% include 'web/partials/_icon.html' with name='arrow-down' %}
+          </a>
+          <a class="hs-btn hs-btn--secondary" href="#about">About Haresign</a>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        {% comment %}Abstract rather than stock photography: four bands in the
+        platform colours rising left to right over a sparse data grid. It reads
+        as growth and as data without asserting any figure — the copy makes no
+        numerical claims and the picture must not either.{% endcomment %}
+        <div class="hs-hero__visual" aria-hidden="true">
+          <svg viewBox="0 0 460 400" role="presentation" focusable="false">
+            <defs>
+              <clipPath id="hs-hero-blob">
+                <path d="M232 8c78-14 158 34 191 106 33 72 18 165-33 219-51 54-138 70-206 51-68-19-117-73-135-142C31 173 44 96 96 51 148 6 154 22 232 8Z"/>
+              </clipPath>
+            </defs>
+
+            <path d="M232 8c78-14 158 34 191 106 33 72 18 165-33 219-51 54-138 70-206 51-68-19-117-73-135-142C31 173 44 96 96 51 148 6 154 22 232 8Z"
+                  fill="#f4f6f8"/>
+
+            <g clip-path="url(#hs-hero-blob)">
+              <g stroke="#111827" stroke-opacity=".07" stroke-width="1">
+                <path d="M0 320h460M0 250h460M0 180h460M0 110h460"/>
+              </g>
+
+              {# One band per platform, in the order the cards appear below. #}
+              <rect x="78"  y="238" width="52" height="120" rx="12" fill="#ff5b61"/>
+              <rect x="150" y="192" width="52" height="166" rx="12" fill="#0fa3a3"/>
+              <rect x="222" y="140" width="52" height="218" rx="12" fill="#0d5bb8"/>
+              <rect x="294" y="84"  width="52" height="274" rx="12" fill="#111827"/>
+
+              <polyline points="104,238 176,192 248,140 320,84" fill="none"
+                        stroke="#111827" stroke-opacity=".35" stroke-width="2.5"
+                        stroke-linecap="round" stroke-dasharray="6 8"/>
+              <g fill="#ffffff" stroke="#111827" stroke-opacity=".35" stroke-width="2.5">
+                <circle cx="104" cy="238" r="6"/>
+                <circle cx="176" cy="192" r="6"/>
+                <circle cx="248" cy="140" r="6"/>
+                <circle cx="320" cy="84"  r="6"/>
+              </g>
+            </g>
+
+            <path d="M232 8c78-14 158 34 191 106 33 72 18 165-33 219-51 54-138 70-206 51-68-19-117-73-135-142C31 173 44 96 96 51 148 6 154 22 232 8Z"
+                  fill="none" stroke="#111827" stroke-opacity=".10" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ============================ Platforms ============================ #}
+<section class="hs-section hs-section--muted" id="platforms" aria-labelledby="platforms-title">
+  <div class="hs-container">
+    {% include 'web/partials/_section_header.html' with eyebrow='The ecosystem' heading='Four platforms. One purpose.' lead='Different services. One purpose — better decisions for primary care.' heading_id='platforms-title' %}
+
+    <div class="hs-platform-grid">
+      {% for card in platform_cards %}
+        {% include 'web/partials/_platform_card.html' with card=card %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ============================ Principles =========================== #}
+<section class="hs-section hs-section--inverse" id="about" aria-labelledby="principles-title">
+  <span class="hs-band__field hs-band__field--teal" aria-hidden="true"></span>
+  <span class="hs-band__field hs-band__field--coral" aria-hidden="true"></span>
+
+  <div class="hs-container hs-band__content">
+    {% include 'web/partials/_section_header.html' with eyebrow='What connects it' heading='Built around what matters in primary care.' lead='Four platforms, one set of principles — the reason they belong together.' heading_id='principles-title' %}
+
+    <div class="hs-principles-grid">
+      {% for principle in principles %}
+        <div class="hs-principle">
+          <span class="hs-principle__icon">
+            {% include 'web/partials/_icon.html' with name=principle.icon %}
+          </span>
+          <h3 class="hs-principle__title">{{ principle.heading }}</h3>
+          <p class="hs-principle__body">{{ principle.body }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# ============================= Insights ============================ #}
+{% if featured_article %}
+<section class="hs-section" id="insights" aria-labelledby="insights-title">
+  <div class="hs-container">
+    {% include 'web/partials/_section_header.html' with eyebrow='Research & analysis' heading='Latest insight' heading_id='insights-title' split=True %}
+
+    <div class="hs-insights-grid">
+      {% include 'web/partials/_article_card.html' with article=featured_article featured=True %}
+
+      <div class="hs-insights-list">
+        {% for article in recent_articles %}
+          {% include 'web/partials/_article_card.html' with article=article %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

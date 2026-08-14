@@ -1,0 +1,22 @@
+{% comment %}The Sign in action.
+
+Authentication is not part of this repository's current scope, so this must not
+imply it works. When `auth` is not live the control is a <button disabled> —
+never an <a> to a host that will bounce or 404 — with the reason exposed through
+aria-describedby so it reaches screen readers and not only sighted users.
+
+Flip it on by adding `auth` to HARESIGN_LIVE_SERVICES once identity ships.
+
+Usage:
+    {% include 'web/partials/_signin.html' %}            {# header button #}
+    {% include 'web/partials/_signin.html' with in_nav=True %}  {# mobile nav row #}
+{% endcomment %}{% if services.auth.available %}
+  <a class="hs-btn hs-btn--secondary hs-btn--sm{% if in_nav %} w-100{% endif %}"
+     href="{{ services.auth.url }}">Sign in</a>
+{% else %}
+  <span class="d-inline-flex align-items-center gap-2{% if in_nav %} py-3{% endif %}">
+    <button class="hs-btn hs-btn--secondary hs-btn--sm" type="button" disabled
+            aria-describedby="hs-signin-note">Sign in</button>
+    <span class="hs-badge" id="hs-signin-note">Coming soon</span>
+  </span>
+{% endif %}
