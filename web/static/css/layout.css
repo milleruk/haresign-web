@@ -165,6 +165,10 @@
 }
 .hs-footer a { color: var(--hs-text-on-dark); }
 .hs-footer a:hover { color: var(--hs-text-on-dark-strong); }
+/* Section headings inside the footer stack; the second in a column needs air. */
+.hs-footer__heading + .hs-footer__list { margin-bottom: var(--hs-space-8); }
+.hs-footer__list + .hs-footer__heading { margin-top: 0; }
+
 /* Deep-navy ground, so the white-ink logo — the opposite of the header. */
 .hs-footer__logo { height: 2.75rem; width: auto; margin-bottom: var(--hs-space-5); }
 .hs-footer__tagline { max-width: 22rem; margin-bottom: var(--hs-space-6); }

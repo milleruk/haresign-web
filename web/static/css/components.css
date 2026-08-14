@@ -37,16 +37,39 @@
 .hs-btn:hover { transform: translateY(-2px); }
 
 .hs-btn--primary {
-  background-color: var(--hs-aqua);
-  border-color: var(--hs-aqua);
+  background-color: var(--hs-primary);
+  border-color: var(--hs-primary);
   color: var(--hs-text-on-dark-strong);
   box-shadow: var(--hs-shadow-cta);
 }
 .hs-btn--primary:hover {
-  background-color: var(--hs-aqua-deep);
-  border-color: var(--hs-aqua-deep);
+  background-color: var(--hs-primary-hover);
+  border-color: var(--hs-primary-hover);
   color: var(--hs-text-on-dark-strong);
 }
+
+/* Navy — the anchor colour. For CTAs that sit on a light or warm ground where
+   teal would compete with the section's own accent. */
+.hs-btn--navy {
+  background-color: var(--hs-navy);
+  border-color: var(--hs-navy);
+  color: var(--hs-text-on-dark-strong);
+}
+.hs-btn--navy:hover {
+  background-color: var(--hs-navy-soft);
+  border-color: var(--hs-navy-soft);
+  color: var(--hs-text-on-dark-strong);
+}
+
+/* Solid light button for use on navy. Coral is deliberately NOT a button fill
+   anywhere: it is the warmth and emphasis colour, and making it the default
+   action would spend it. */
+.hs-btn--light {
+  background-color: var(--hs-surface);
+  border-color: var(--hs-surface);
+  color: var(--hs-navy);
+}
+.hs-btn--light:hover { background-color: var(--hs-surface-muted); border-color: var(--hs-surface-muted); }
 
 .hs-btn--secondary {
   background-color: transparent;
@@ -141,7 +164,8 @@
               border-color var(--hs-transition);
 }
 .hs-card--interactive:hover {
-  transform: translateY(-6px);
+  /* Restrained: a 6px jump on four large cards read as fidgety. */
+  transform: translateY(-3px);
   box-shadow: var(--hs-shadow-lg);
 }
 
@@ -151,21 +175,25 @@
   height: 100%;
 }
 .hs-platform-card:hover { border-color: var(--hs-accent); }
-/* Accent rule along the top edge — the card's colour identity. */
+/* The accent is a short rule, not the full card width. Four full-width colour
+   bars made the row read as four separate products; the eye should meet the
+   Haresign ecosystem first and the four destinations second. */
 .hs-platform-card::before {
   content: "";
   position: absolute;
   inset-block-start: 0;
-  inset-inline: 0;
-  height: 5px;
+  inset-inline-start: var(--hs-space-6);
+  width: 3.25rem;
+  height: 4px;
+  border-radius: 0 0 var(--hs-radius-pill) var(--hs-radius-pill);
   background-color: var(--hs-accent);
 }
 .hs-platform-card__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.375rem;
-  height: 3.375rem;
+  width: 3.5rem;
+  height: 3.5rem;
   margin-bottom: var(--hs-space-5);
   border-radius: var(--hs-radius-sm);
   background-color: var(--hs-accent-tint);
@@ -286,3 +314,89 @@
 .hs-principle__icon svg { width: 1.375rem; height: 1.375rem; }
 .hs-principle__title { font-size: var(--hs-text-xl); margin-bottom: var(--hs-space-2); }
 .hs-principle__body { margin-bottom: 0; color: var(--hs-text-on-dark); }
+
+
+/* --- Credibility strip ---------------------------------------------------
+   Haresign is not an anonymous software company, and an umbrella page with no
+   trace of where it came from reads like one. Four short factual statements,
+   each already substantiated on haresign.net — no invented numbers, no claims
+   about customers, and no turning the umbrella page into a personal profile.
+   ------------------------------------------------------------------------- */
+.hs-credibility {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--hs-space-6);
+}
+.hs-credibility__item {
+  padding-inline-start: var(--hs-space-5);
+  border-inline-start: 3px solid var(--hs-accent, var(--hs-teal));
+}
+.hs-credibility__item:nth-child(1) { --hs-accent: var(--hs-coral); }
+.hs-credibility__item:nth-child(2) { --hs-accent: var(--hs-teal); }
+.hs-credibility__item:nth-child(3) { --hs-accent: var(--hs-aqua); }
+.hs-credibility__item:nth-child(4) { --hs-accent: var(--hs-navy); }
+.hs-credibility__lead {
+  display: block;
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-lg);
+  font-weight: var(--hs-weight-bold);
+  color: var(--hs-text-strong);
+  margin-bottom: var(--hs-space-1);
+}
+.hs-credibility__note { margin: 0; font-size: var(--hs-text-sm); color: var(--hs-text-muted); }
+
+/* --- CTA band -------------------------------------------------------------
+   The transition into the footer. Without it the Insights section ended and the
+   navy footer simply began, which read as the page running out rather than
+   closing. */
+.hs-cta-band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--hs-radius-lg);
+  background-color: var(--hs-navy);
+  color: var(--hs-text-on-dark);
+  padding: clamp(2.5rem, 5vw, 4rem);
+  text-align: center;
+}
+.hs-cta-band h2 { color: var(--hs-text-on-dark-strong); margin-bottom: var(--hs-space-4); }
+.hs-cta-band__lead {
+  max-width: 42rem;
+  margin: 0 auto var(--hs-space-8);
+  color: var(--hs-text-on-dark);
+  font-size: var(--hs-text-lg);
+}
+.hs-cta-band__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hs-space-4);
+  justify-content: center;
+}
+.hs-cta-band__field {
+  position: absolute;
+  z-index: -1;
+  width: 30rem;
+  height: 30rem;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+.hs-cta-band__field--teal  { top: -14rem; left: -8rem;  background-color: rgba(15, 163, 163, 0.30); }
+.hs-cta-band__field--coral { bottom: -16rem; right: -8rem; background-color: rgba(255, 91, 97, 0.18); }
+
+/* --- Editorial article treatment -----------------------------------------
+   Insights is research and commentary, not product release notes, so the
+   featured item reads as a lead article: a rule above the meta, a display-face
+   headline and room to breathe. */
+.hs-article-card__meta { font-family: var(--hs-font-body); }
+.hs-article-card--featured .hs-article-card__body { border-top: 3px solid var(--hs-coral); }
+.hs-article-card__title { font-family: var(--hs-font-display); }
+.hs-article-card--link { border-inline-start: 3px solid transparent; }
+.hs-article-card--link:hover { border-inline-start-color: var(--hs-teal); }
+
+@media (max-width: 991.98px) {
+  .hs-credibility { grid-template-columns: repeat(2, 1fr); gap: var(--hs-space-5); }
+}
+@media (max-width: 575.98px) {
+  .hs-credibility { grid-template-columns: 1fr; }
+}

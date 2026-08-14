@@ -10,7 +10,11 @@
   isolation: isolate;
   overflow: hidden;
   padding-block: clamp(3rem, 7vw, 6.25rem) clamp(3.75rem, 8vw, 6.875rem);
-  background-color: var(--hs-surface);
+  /* Warm wash rather than flat white. The four brand colours are no longer
+     spread evenly across the hero: teal and navy lead, coral appears once (on
+     "grown"), and aqua sits behind the composition. */
+  background-color: var(--hs-surface-warm);
+  border-bottom: 1px solid var(--hs-border-subtle);
 }
 
 /* Organic colour fields rather than a linear gradient — the brief is explicitly
@@ -25,25 +29,25 @@
   pointer-events: none;
 }
 .hs-hero__field--teal {
-  width: 38.75rem;
-  height: 38.75rem;
-  top: -13.75rem;
-  right: -10rem;
-  background-color: rgba(15, 163, 163, 0.20);
+  width: 40rem;
+  height: 40rem;
+  top: -14rem;
+  right: -9rem;
+  background-color: rgba(15, 163, 163, 0.26);
 }
 .hs-hero__field--coral {
-  width: 30rem;
-  height: 30rem;
-  bottom: -13.75rem;
-  left: -11.25rem;
-  background-color: rgba(255, 91, 97, 0.16);
+  width: 26rem;
+  height: 26rem;
+  bottom: -12rem;
+  left: -10rem;
+  background-color: rgba(255, 91, 97, 0.14);
 }
 .hs-hero__field--aqua {
-  width: 32.5rem;
-  height: 32.5rem;
-  top: 7.5rem;
-  right: 22%;
-  background-color: rgba(13, 91, 184, 0.12);
+  width: 34rem;
+  height: 34rem;
+  top: 9rem;
+  right: 26%;
+  background-color: rgba(13, 91, 184, 0.14);
 }
 
 /* Faint grid, masked to fade out at the edges so it never becomes a visible
@@ -55,7 +59,7 @@
   background-image:
     linear-gradient(rgba(17, 24, 39, 0.045) 1px, transparent 1px),
     linear-gradient(90deg, rgba(17, 24, 39, 0.045) 1px, transparent 1px);
-  background-size: 4rem 4rem;
+  background-size: 4.5rem 4.5rem;
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 20%, transparent 75%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 20%, transparent 75%);
 }
@@ -67,15 +71,15 @@
    vision differences, where hue alone would not. */
 .hs-hero__emphasis {
   position: relative;
-  color: var(--hs-coral-ink);
+  color: var(--hs-coral-ink-large);
   white-space: nowrap;
 }
 .hs-hero__emphasis::after {
   content: "";
   position: absolute;
   inset-inline: 0;
-  bottom: -0.08em;
-  height: 0.09em;
+  bottom: -0.06em;
+  height: 0.075em;
   background-color: var(--hs-coral);
   border-radius: var(--hs-radius-pill);
 }
@@ -84,8 +88,10 @@
   max-width: 38.75rem;
   margin-bottom: var(--hs-space-5);
   color: var(--hs-navy-soft);
+  font-family: var(--hs-font-display);
   font-size: var(--hs-text-xl);
-  line-height: 1.6;
+  font-weight: var(--hs-weight-medium);
+  line-height: 1.55;
 }
 .hs-hero__body {
   max-width: 40rem;
@@ -95,7 +101,13 @@
 .hs-hero__actions { display: flex; flex-wrap: wrap; gap: var(--hs-space-4); }
 
 .hs-hero__visual { position: relative; }
-.hs-hero__visual svg { display: block; width: 100%; height: auto; }
+.hs-hero__visual svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Depth through a soft cast shadow rather than more colour. */
+  filter: drop-shadow(0 18px 40px rgba(17, 24, 39, 0.10));
+}
 
 /* --- Platform grid ------------------------------------------------------- */
 .hs-platform-grid {
@@ -160,3 +172,20 @@
   .hs-hero__field--coral { width: 18.75rem; height: 18.75rem; bottom: -8.75rem; left: -7.5rem; }
   .hs-hero__field--aqua  { display: none; }
 }
+
+
+/* --- Section rhythm ------------------------------------------------------
+   warm hero -> light platforms -> navy principles -> white insights ->
+   navy CTA band -> navy footer. Each band is intentional, and no two adjacent
+   sections share a ground, so the page reads as a sequence rather than as one
+   long scroll of white cards on pale grey.
+   ------------------------------------------------------------------------- */
+.hs-section--credibility {
+  background-color: var(--hs-surface);
+  border-bottom: 1px solid var(--hs-border-subtle);
+}
+
+/* The navy principle band bleeds into the footer's navy, so it needs no bottom
+   transition of its own; the CTA band sits inside the white section above it. */
+.hs-section--cta { padding-bottom: 0; }
+.hs-section--cta .hs-container { padding-bottom: var(--hs-section-y); }

@@ -56,6 +56,11 @@ the business and are supplied by configuration (see README).
       </div>
 
       <div>
+        <h2 class="hs-footer__heading" id="footer-account">Account</h2>
+        <ul class="hs-footer__list" aria-labelledby="footer-account">
+          <li>{% include 'web/partials/_service_link.html' with service=services.account link_class='hs-footer__link' %}</li>
+        </ul>
+
         <h2 class="hs-footer__heading" id="footer-legal">Legal</h2>
         {% comment %}Structure is in place; the pages are not written yet. They
         are text, not links — a Privacy link that 404s on a healthcare site is

@@ -6,9 +6,39 @@
    and the accessibility affordances. No component styles belong here.
    ========================================================================== */
 
+/* --- Web fonts -----------------------------------------------------------
+   Self-hosted, latin subset, variable — two files totalling ~77KB. The
+   production stylesheet names these faces but its @import paths are broken and
+   no files ship, so haresign.net has always rendered in the browser default.
+   Serving them here delivers the intended Haresign typography *and* removes a
+   third-party request rather than introducing one (no Google Fonts call, so
+   nothing to disclose in a cookie banner).
+
+   font-display: swap — text is readable immediately in the fallback and
+   reflows once, rather than being invisible while a font downloads. */
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/dm-sans-latin.woff2") format("woff2-variations"),
+       url("../fonts/dm-sans-latin.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Mona Sans";
+  src: url("../fonts/mona-sans-latin.woff2") format("woff2-variations"),
+       url("../fonts/mona-sans-latin.woff2") format("woff2");
+  font-weight: 500 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   font-family: var(--hs-font-body);
   font-size: var(--hs-text-base);
+  /* Production sets body copy at weight 500, which is a large part of why it
+     reads as warm and solid rather than thin. */
+  font-weight: var(--hs-weight-medium);
   line-height: var(--hs-leading-normal);
   color: var(--hs-text);
   background-color: var(--hs-surface);
@@ -18,13 +48,17 @@ body {
   overflow-x: hidden;
 }
 
+/* Headings take the display face. This is the single biggest reason the page
+   reads as editorial and brand-led rather than as a component library. */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--hs-font-display);
   color: var(--hs-text-strong);
   font-weight: var(--hs-weight-bold);
   line-height: var(--hs-leading-tight);
   letter-spacing: var(--hs-tracking-tight);
   margin-top: 0;
 }
+h1 { font-weight: var(--hs-weight-extrabold); }
 
 h1 { font-size: var(--hs-heading-hero); letter-spacing: var(--hs-tracking-hero); }
 h2 { font-size: var(--hs-heading-section); }
@@ -33,11 +67,11 @@ h3 { font-size: var(--hs-heading-card); line-height: var(--hs-leading-snug); }
 p { margin-top: 0; }
 
 a {
-  color: var(--hs-aqua);
+  color: var(--hs-primary);
   text-decoration: none;
   transition: color var(--hs-transition);
 }
-a:hover { color: var(--hs-aqua-deep); }
+a:hover { color: var(--hs-primary-hover); }
 
 /* Prose links keep their underline — in running text, colour alone is not a
    sufficient affordance and fails WCAG 1.4.1 for colour-blind readers.

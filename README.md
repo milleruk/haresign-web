@@ -152,6 +152,37 @@ vendor/bootstrap  →  tokens  →  base  →  layout  →  components  →  pag
 If something in `pages/` gets used on a second page, move it to
 `components.css`.
 
+### Typography
+
+Headings use **Mona Sans**, body copy **DM Sans**, both self-hosted as latin
+variable subsets (~77KB total, `web/static/fonts/`).
+
+The production stylesheet names these two faces but its `@import` paths are
+broken and no font files ship, so `haresign.net` has always rendered in the
+browser's default sans. Serving them here delivers the typography the brand
+already intended, and *removes* a third-party request rather than adding one —
+there is no Google Fonts call, so nothing to disclose in a cookie banner. Body
+copy is weight 500 at 1.75 line-height, matching production's 16px/28px setting.
+
+### Colour hierarchy
+
+Navy anchors, teal is the primary interactive colour, coral is warmth used
+sparingly, aqua is the secondary data accent. Components reference
+`--hs-primary`, so the hierarchy can move without touching them.
+
+**`--hs-primary` is the deep teal `#0b7d7d`, not brand teal `#0fa3a3`.** Brand
+teal gives white text only 3.09:1 and cannot legally carry a button label; the
+deep teal is 4.95:1. Bright teal stays for marks and for text on navy (5.73:1).
+
+Coral has **two** inks because the thresholds genuinely differ:
+
+| Token | Use | Ratio |
+|---|---|---|
+| `--hs-coral-ink` `#cf353c` | small text (card CTA) | 4.97:1 — clears AA 4.5 |
+| `--hs-coral-ink-large` `#e8484f` | large text only (hero emphasis) | 3.62:1 — clears the 3.0 large-text threshold |
+
+Reaching for `--hs-coral` as a text colour is the mistake this prevents.
+
 ### Accent theming
 
 A component sets `--hs-accent` once via an `.hs-accent-*` class and its children
@@ -187,7 +218,19 @@ cue. Re-run this before changing any brand colour.
 | `_section_header.html` | Eyebrow + heading + lead; `split=True` adds a right-hand action |
 | `_service_link.html` | A link to another platform — **or a plain label when it is not live** |
 | `_signin.html` | Sign in, disabled until identity exists |
-| `_icon.html` | Inline SVG by name; decorative and `aria-hidden` |
+| `_icon.html` | Inline SVG by name; solid shapes, decorative and `aria-hidden` |
+
+Plus CSS-only components: `.hs-credibility` (the factual strip), `.hs-cta-band`
+(the closing band), and button variants `--primary` (teal), `--navy`, `--light`,
+`--secondary`, `--on-dark`. **Coral is never a button fill** — it is the warmth
+and emphasis colour, and making it the default action would spend it.
+
+### Section rhythm
+
+warm hero → white credibility → light platforms → navy principles → white
+insights → navy CTA band → navy footer. No two adjacent sections share a ground,
+so the page reads as a sequence rather than one long scroll of white cards on
+pale grey.
 
 ---
 

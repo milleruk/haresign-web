@@ -1,12 +1,152 @@
 {% extends 'web/base.html' %}
 {% load static %}
 
-{% block title %}Haresign — consultancy, intelligence, tools and community for primary care{% endblock %}
-{% block description %}Haresign brings together consultancy, intelligence, practical tools, client services and a growing professional community — all focused on helping primary care understand, manage and improve.{% endblock %}
-{% block og_title %}Haresign has grown.{% endblock %}
-{% block og_description %}Consultancy, intelligence, practical tools, client services and a growing professional community for primary care.{% endblock %}
+{% block title %}Haresign — consultancy, intelligence, tools and community for primary care{# ============================ CTA band ============================= #}
+<section class="hs-section hs-section--cta" aria-labelledby="cta-title">
+  <div class="hs-container">
+    {% comment %}The transition into the footer. Without it Insights simply
+    stopped and the navy footer began, which read as the page running out rather
+    than closing. Both actions are real: Intelligence is live, and the second is
+    an email address, not a link to a host that does not resolve yet.{% endcomment %}
+    <div class="hs-cta-band">
+      <span class="hs-cta-band__field hs-cta-band__field--teal" aria-hidden="true"></span>
+      <span class="hs-cta-band__field hs-cta-band__field--coral" aria-hidden="true"></span>
+      <h2 id="cta-title">One Haresign. Wherever you start.</h2>
+      <p class="hs-cta-band__lead">
+        Explore the data and tools yourself, or talk to us about what your
+        practice or PCN is trying to work out.
+      </p>
+      <div class="hs-cta-band__actions">
+        {% if services.intelligence.available %}
+          <a class="hs-btn hs-btn--light" href="{{ services.intelligence.url }}">
+            Open {{ services.intelligence.nav_label }}
+            {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          </a>
+        {% endif %}
+        <a class="hs-btn hs-btn--on-dark" href="mailto:{{ legal.contact_email }}">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
 
-{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">{% endblock %}
+{% endblock %}
+{% block description %}Haresign brings together consultancy, intelligence, practical tools, client services and a growing professional community — all focused on helping primary care understand, manage and improve.{# ============================ CTA band ============================= #}
+<section class="hs-section hs-section--cta" aria-labelledby="cta-title">
+  <div class="hs-container">
+    {% comment %}The transition into the footer. Without it Insights simply
+    stopped and the navy footer began, which read as the page running out rather
+    than closing. Both actions are real: Intelligence is live, and the second is
+    an email address, not a link to a host that does not resolve yet.{% endcomment %}
+    <div class="hs-cta-band">
+      <span class="hs-cta-band__field hs-cta-band__field--teal" aria-hidden="true"></span>
+      <span class="hs-cta-band__field hs-cta-band__field--coral" aria-hidden="true"></span>
+      <h2 id="cta-title">One Haresign. Wherever you start.</h2>
+      <p class="hs-cta-band__lead">
+        Explore the data and tools yourself, or talk to us about what your
+        practice or PCN is trying to work out.
+      </p>
+      <div class="hs-cta-band__actions">
+        {% if services.intelligence.available %}
+          <a class="hs-btn hs-btn--light" href="{{ services.intelligence.url }}">
+            Open {{ services.intelligence.nav_label }}
+            {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          </a>
+        {% endif %}
+        <a class="hs-btn hs-btn--on-dark" href="mailto:{{ legal.contact_email }}">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block og_title %}Haresign has grown.{# ============================ CTA band ============================= #}
+<section class="hs-section hs-section--cta" aria-labelledby="cta-title">
+  <div class="hs-container">
+    {% comment %}The transition into the footer. Without it Insights simply
+    stopped and the navy footer began, which read as the page running out rather
+    than closing. Both actions are real: Intelligence is live, and the second is
+    an email address, not a link to a host that does not resolve yet.{% endcomment %}
+    <div class="hs-cta-band">
+      <span class="hs-cta-band__field hs-cta-band__field--teal" aria-hidden="true"></span>
+      <span class="hs-cta-band__field hs-cta-band__field--coral" aria-hidden="true"></span>
+      <h2 id="cta-title">One Haresign. Wherever you start.</h2>
+      <p class="hs-cta-band__lead">
+        Explore the data and tools yourself, or talk to us about what your
+        practice or PCN is trying to work out.
+      </p>
+      <div class="hs-cta-band__actions">
+        {% if services.intelligence.available %}
+          <a class="hs-btn hs-btn--light" href="{{ services.intelligence.url }}">
+            Open {{ services.intelligence.nav_label }}
+            {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          </a>
+        {% endif %}
+        <a class="hs-btn hs-btn--on-dark" href="mailto:{{ legal.contact_email }}">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block og_description %}Consultancy, intelligence, practical tools, client services and a growing professional community for primary care.{# ============================ CTA band ============================= #}
+<section class="hs-section hs-section--cta" aria-labelledby="cta-title">
+  <div class="hs-container">
+    {% comment %}The transition into the footer. Without it Insights simply
+    stopped and the navy footer began, which read as the page running out rather
+    than closing. Both actions are real: Intelligence is live, and the second is
+    an email address, not a link to a host that does not resolve yet.{% endcomment %}
+    <div class="hs-cta-band">
+      <span class="hs-cta-band__field hs-cta-band__field--teal" aria-hidden="true"></span>
+      <span class="hs-cta-band__field hs-cta-band__field--coral" aria-hidden="true"></span>
+      <h2 id="cta-title">One Haresign. Wherever you start.</h2>
+      <p class="hs-cta-band__lead">
+        Explore the data and tools yourself, or talk to us about what your
+        practice or PCN is trying to work out.
+      </p>
+      <div class="hs-cta-band__actions">
+        {% if services.intelligence.available %}
+          <a class="hs-btn hs-btn--light" href="{{ services.intelligence.url }}">
+            Open {{ services.intelligence.nav_label }}
+            {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          </a>
+        {% endif %}
+        <a class="hs-btn hs-btn--on-dark" href="mailto:{{ legal.contact_email }}">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">{# ============================ CTA band ============================= #}
+<section class="hs-section hs-section--cta" aria-labelledby="cta-title">
+  <div class="hs-container">
+    {% comment %}The transition into the footer. Without it Insights simply
+    stopped and the navy footer began, which read as the page running out rather
+    than closing. Both actions are real: Intelligence is live, and the second is
+    an email address, not a link to a host that does not resolve yet.{% endcomment %}
+    <div class="hs-cta-band">
+      <span class="hs-cta-band__field hs-cta-band__field--teal" aria-hidden="true"></span>
+      <span class="hs-cta-band__field hs-cta-band__field--coral" aria-hidden="true"></span>
+      <h2 id="cta-title">One Haresign. Wherever you start.</h2>
+      <p class="hs-cta-band__lead">
+        Explore the data and tools yourself, or talk to us about what your
+        practice or PCN is trying to work out.
+      </p>
+      <div class="hs-cta-band__actions">
+        {% if services.intelligence.available %}
+          <a class="hs-btn hs-btn--light" href="{{ services.intelligence.url }}">
+            Open {{ services.intelligence.nav_label }}
+            {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          </a>
+        {% endif %}
+        <a class="hs-btn hs-btn--on-dark" href="mailto:{{ legal.contact_email }}">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
 
 {% block content %}
 
@@ -43,47 +183,71 @@
       </div>
 
       <div class="col-lg-5">
-        {% comment %}Abstract rather than stock photography: four bands in the
-        platform colours rising left to right over a sparse data grid. It reads
-        as growth and as data without asserting any figure — the copy makes no
-        numerical claims and the picture must not either.{% endcomment %}
         <div class="hs-hero__visual" aria-hidden="true">
-          <svg viewBox="0 0 460 400" role="presentation" focusable="false">
-            <defs>
-              <clipPath id="hs-hero-blob">
-                <path d="M232 8c78-14 158 34 191 106 33 72 18 165-33 219-51 54-138 70-206 51-68-19-117-73-135-142C31 173 44 96 96 51 148 6 154 22 232 8Z"/>
-              </clipPath>
-            </defs>
+          <svg viewBox="0 0 460 420" role="presentation" focusable="false">
+            {% comment %}An ecosystem, not a growth chart. The previous four-bar
+            graphic read as a software product; this echoes the Haresign logo
+            mark's rounded-square geometry — one Haresign at the centre, four
+            destinations around it, connected. Navy and teal lead; coral appears
+            once, as it does in the headline.{% endcomment %}
+            <path d="M243 22c74-12 150 32 181 100 31 68 17 156-31 207-48 51-131 66-195 48-64-18-111-69-128-134C53 178 65 105 114 63c49-42 55-29 129-41Z"
+                  fill="#ffffff" opacity=".72"/>
 
-            <path d="M232 8c78-14 158 34 191 106 33 72 18 165-33 219-51 54-138 70-206 51-68-19-117-73-135-142C31 173 44 96 96 51 148 6 154 22 232 8Z"
-                  fill="#f4f6f8"/>
+            <g stroke="#111827" stroke-opacity=".16" stroke-width="1.5" stroke-linecap="round">
+              <path d="M120 116 168 160M340 116 292 160M120 304 168 260M340 304 292 260"/>
+            </g>
 
-            <g clip-path="url(#hs-hero-blob)">
-              <g stroke="#111827" stroke-opacity=".07" stroke-width="1">
-                <path d="M0 320h460M0 250h460M0 180h460M0 110h460"/>
-              </g>
-
-              {# One band per platform, in the order the cards appear below. #}
-              <rect x="78"  y="238" width="52" height="120" rx="12" fill="#ff5b61"/>
-              <rect x="150" y="192" width="52" height="166" rx="12" fill="#0fa3a3"/>
-              <rect x="222" y="140" width="52" height="218" rx="12" fill="#0d5bb8"/>
-              <rect x="294" y="84"  width="52" height="274" rx="12" fill="#111827"/>
-
-              <polyline points="104,238 176,192 248,140 320,84" fill="none"
-                        stroke="#111827" stroke-opacity=".35" stroke-width="2.5"
-                        stroke-linecap="round" stroke-dasharray="6 8"/>
-              <g fill="#ffffff" stroke="#111827" stroke-opacity=".35" stroke-width="2.5">
-                <circle cx="104" cy="238" r="6"/>
-                <circle cx="176" cy="192" r="6"/>
-                <circle cx="248" cy="140" r="6"/>
-                <circle cx="320" cy="84"  r="6"/>
+            <g>
+              <rect x="88"  y="84"  width="64" height="64" rx="19" fill="#ff5b61"/>
+              <rect x="308" y="84"  width="64" height="64" rx="19" fill="#0fa3a3"/>
+              <rect x="88"  y="272" width="64" height="64" rx="19" fill="#0d5bb8"/>
+              <rect x="308" y="272" width="64" height="64" rx="19" fill="#1e293b"/>
+              <g fill="#ffffff" opacity=".92">
+                <rect x="106" y="112" width="28" height="8" rx="4"/>
+                <rect x="326" y="112" width="28" height="8" rx="4"/>
+                <rect x="106" y="300" width="28" height="8" rx="4"/>
+                <rect x="326" y="300" width="28" height="8" rx="4"/>
               </g>
             </g>
 
-            <path d="M232 8c78-14 158 34 191 106 33 72 18 165-33 219-51 54-138 70-206 51-68-19-117-73-135-142C31 173 44 96 96 51 148 6 154 22 232 8Z"
-                  fill="none" stroke="#111827" stroke-opacity=".10" stroke-width="1.5"/>
+            <rect x="160" y="140" width="140" height="140" rx="34" fill="#111827"/>
+            <g fill="#ffffff">
+              <rect x="186" y="170" width="18" height="80" rx="5"/>
+              <rect x="256" y="170" width="18" height="80" rx="5"/>
+              <rect x="186" y="201" width="88" height="18" rx="5"/>
+            </g>
+            <rect x="212" y="170" width="26" height="26" rx="7" fill="#ff5b61"/>
           </svg>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# =========================== Credibility =========================== #}
+<section class="hs-section hs-section--tight hs-section--credibility" aria-label="About Haresign">
+  <div class="hs-container">
+    {% comment %}Four factual statements, each already substantiated on
+    haresign.net. No customer counts, no performance claims, and nothing that
+    turns the umbrella page into a personal profile — that belongs to Haresign
+    Consulting. Without something like this the page reads as an anonymous
+    software company, which is the one thing Haresign is not.{% endcomment %}
+    <div class="hs-credibility">
+      <div class="hs-credibility__item">
+        <span class="hs-credibility__lead">Built inside primary care</span>
+        <p class="hs-credibility__note">Created from 25+ years of practice and business management.</p>
+      </div>
+      <div class="hs-credibility__item">
+        <span class="hs-credibility__lead">IGPM accredited</span>
+        <p class="hs-credibility__note">Accredited member of the Institute of General Practice Management.</p>
+      </div>
+      <div class="hs-credibility__item">
+        <span class="hs-credibility__lead">Published NHS data</span>
+        <p class="hs-credibility__note">Analysis built on official NHS datasets, not estimates.</p>
+      </div>
+      <div class="hs-credibility__item">
+        <span class="hs-credibility__lead">Practices and PCNs</span>
+        <p class="hs-credibility__note">Working with general practice across England.</p>
       </div>
     </div>
   </div>
@@ -144,5 +308,33 @@
   </div>
 </section>
 {% endif %}
+
+{# ============================ CTA band ============================= #}
+<section class="hs-section hs-section--cta" aria-labelledby="cta-title">
+  <div class="hs-container">
+    {% comment %}The transition into the footer. Without it Insights simply
+    stopped and the navy footer began, which read as the page running out rather
+    than closing. Both actions are real: Intelligence is live, and the second is
+    an email address, not a link to a host that does not resolve yet.{% endcomment %}
+    <div class="hs-cta-band">
+      <span class="hs-cta-band__field hs-cta-band__field--teal" aria-hidden="true"></span>
+      <span class="hs-cta-band__field hs-cta-band__field--coral" aria-hidden="true"></span>
+      <h2 id="cta-title">One Haresign. Wherever you start.</h2>
+      <p class="hs-cta-band__lead">
+        Explore the data and tools yourself, or talk to us about what your
+        practice or PCN is trying to work out.
+      </p>
+      <div class="hs-cta-band__actions">
+        {% if services.intelligence.available %}
+          <a class="hs-btn hs-btn--light" href="{{ services.intelligence.url }}">
+            Open {{ services.intelligence.nav_label }}
+            {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          </a>
+        {% endif %}
+        <a class="hs-btn hs-btn--on-dark" href="mailto:{{ legal.contact_email }}">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 {% endblock %}
