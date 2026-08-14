@@ -168,7 +168,7 @@
   background-color: var(--hs-accent-tint);
   color: var(--hs-accent-ink);
 }
-.hs-platform-card__icon svg { width: 1.5rem; height: 1.5rem; }
+.hs-platform-card__icon svg { width: 1.625rem; height: 1.625rem; }
 .hs-platform-card__title { margin-bottom: var(--hs-space-3); }
 .hs-platform-card__blurb {
   color: var(--hs-navy-soft);
@@ -279,6 +279,6 @@
   background-color: rgba(255, 255, 255, 0.10);
   color: var(--hs-text-on-dark-strong);
 }
-.hs-principle__icon svg { width: 1.25rem; height: 1.25rem; }
+.hs-principle__icon svg { width: 1.375rem; height: 1.375rem; }
 .hs-principle__title { font-size: var(--hs-text-xl); margin-bottom: var(--hs-space-2); }
 .hs-principle__body { margin-bottom: 0; color: var(--hs-text-on-dark); }

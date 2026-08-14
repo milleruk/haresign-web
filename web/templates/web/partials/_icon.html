@@ -2,23 +2,28 @@
 
     {% include 'web/partials/_icon.html' with name='arrow-right' %}
 
-Inline rather than an icon font: a font is a second network request that blocks
-render, and every icon here is decorative next to a text label, so it must be
-aria-hidden and contribute nothing to the accessible name. `currentColor` means
-an icon always matches the text it sits beside without a per-context rule.
+**Solid, not outline.** An earlier version used 2px-stroke outline geometry and
+read as thin and weak inside the 54px tinted chips — noticeably lighter than the
+icon font the previous design used. These are filled shapes, which carry the
+same visual weight without the font dependency: the whole set is one HTTP
+request that is already part of the HTML.
 
-Paths are from Feather-style 24x24 stroke geometry, drawn here rather than
-pulled from a package — nine icons do not justify a dependency.
-{% endcomment %}<svg class="hs-icon{% if extra_class %} {{ extra_class }}{% endif %}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-{% if name == 'arrow-right' %}<path d="M5 12h14M13 6l6 6-6 6"/>
-{% elif name == 'arrow-down' %}<path d="M12 5v14M6 13l6 6 6-6"/>
-{% elif name == 'compass' %}<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>
-{% elif name == 'chart' %}<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m7 15 4-5 3 3 5-6"/>
-{% elif name == 'community' %}<path d="M17 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="6" r="3.5"/><path d="M22 20v-2a4 4 0 0 0-3-3.85"/><path d="M16.5 3.15a4 4 0 0 1 0 7.7"/>
-{% elif name == 'folder' %}<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-{% elif name == 'evidence' %}<circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.6-4.6"/><path d="M8 11.5l2 2 3.5-4"/>
-{% elif name == 'experience' %}<path d="M12 2 4 6v6c0 5 3.4 9.1 8 10 4.6-.9 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/>
-{% elif name == 'practical' %}<path d="M14.7 6.3a4 4 0 0 0 5.3 5.3l-8 8a2.8 2.8 0 0 1-4-4z"/><path d="M17.5 3.5 21 7"/>
-{% elif name == 'connected' %}<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.5 6h7M7.2 8.2l3.6 7.6M16.8 8.2l-3.6 7.6"/>
-{% elif name == 'lock' %}<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+Inline rather than an icon font: a font is a render-blocking request, and every
+icon here is decorative beside a text label, so it must be aria-hidden and
+contribute nothing to the accessible name. `currentColor` means an icon always
+matches the text beside it with no per-context rule.
+
+The svg fills by default; the few elements that want a line set their own stroke.
+{% endcomment %}<svg class="hs-icon{% if extra_class %} {{ extra_class }}{% endif %}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+{% if name == 'arrow-right' %}<path d="M4 12a1 1 0 0 1 1-1h10.6l-3.3-3.3a1 1 0 1 1 1.4-1.4l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 0 1-1.4-1.4l3.3-3.3H5a1 1 0 0 1-1-1Z"/>
+{% elif name == 'arrow-down' %}<path d="M12 4a1 1 0 0 1 1 1v10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4l3.3 3.3V5a1 1 0 0 1 1-1Z"/>
+{% elif name == 'compass' %}<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2.6a7.4 7.4 0 1 1 0 14.8 7.4 7.4 0 0 1 0-14.8Z"/><path d="m16.4 7.6-5.7 2.3a1 1 0 0 0-.56.56L7.6 16.4a.6.6 0 0 0 .78.78l5.94-2.37a1 1 0 0 0 .56-.56Z"/>
+{% elif name == 'chart' %}<path d="M4 3a1 1 0 0 1 1 1v14.2h15a1 1 0 1 1 0 2H4.6A1.6 1.6 0 0 1 3 18.6V4a1 1 0 0 1 1-1Z"/><rect x="7" y="11" width="3.4" height="6" rx="1"/><rect x="12" y="7.5" width="3.4" height="9.5" rx="1"/><rect x="17" y="4" width="3.4" height="13" rx="1"/>
+{% elif name == 'community' %}<circle cx="9" cy="7" r="3.6"/><path d="M9 12.4a7 7 0 0 0-7 6.8c0 .8.6 1.4 1.4 1.4h11.2c.8 0 1.4-.6 1.4-1.4a7 7 0 0 0-7-6.8Z"/><circle cx="17.6" cy="8.2" r="2.7"/><path d="M17.6 13a5.7 5.7 0 0 0-2.5.6 9 9 0 0 1 2.5 6h3.3c.7 0 1.2-.5 1.2-1.2A5.4 5.4 0 0 0 17.6 13Z"/>
+{% elif name == 'folder' %}<path d="M3 7a2.2 2.2 0 0 1 2.2-2.2h3.5a2 2 0 0 1 1.6.8l1.2 1.6H18.8A2.2 2.2 0 0 1 21 9.4v7.4a2.2 2.2 0 0 1-2.2 2.2H5.2A2.2 2.2 0 0 1 3 16.8Z"/>
+{% elif name == 'evidence' %}<path fill-rule="evenodd" d="M10.6 3a7.6 7.6 0 1 0 4.42 13.79l3.63 3.63a1.2 1.2 0 0 0 1.7-1.7l-3.63-3.63A7.6 7.6 0 0 0 10.6 3Zm0 2.6a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"/>
+{% elif name == 'experience' %}<path d="M12.4 2.1a1 1 0 0 0-.8 0L4.8 5.2a1.2 1.2 0 0 0-.7 1.1v5.4c0 5.2 3.4 9.7 7.7 10.9a.9.9 0 0 0 .5 0c4.3-1.2 7.7-5.7 7.7-10.9V6.3a1.2 1.2 0 0 0-.7-1.1Zm3.3 7.2-4.2 4.6a1 1 0 0 1-1.45.05l-2.2-2.1a1 1 0 1 1 1.4-1.45l1.45 1.4 3.5-3.85a1 1 0 0 1 1.5 1.35Z"/>
+{% elif name == 'practical' %}<path d="M21.3 4.6a1 1 0 0 0-1.66-.42l-2.6 2.6-1.82-1.82 2.6-2.6a1 1 0 0 0-.42-1.66 6.4 6.4 0 0 0-8 8.06l-6.4 6.4a3 3 0 0 0 4.24 4.24l6.4-6.4a6.4 6.4 0 0 0 7.66-8.4Z"/>
+{% elif name == 'connected' %}<path d="M8.9 5.2h6.2a1.15 1.15 0 0 1 0 2.3H8.9a1.15 1.15 0 0 1 0-2.3Z"/><path d="M6.6 8.1a1.15 1.15 0 0 1 1.52.56l3.4 7.1a1.15 1.15 0 1 1-2.08.98l-3.4-7.1A1.15 1.15 0 0 1 6.6 8.1Z"/><path d="M17.4 8.1a1.15 1.15 0 0 1 .56 1.54l-3.4 7.1a1.15 1.15 0 1 1-2.08-.98l3.4-7.1a1.15 1.15 0 0 1 1.52-.56Z"/><circle cx="6" cy="6" r="3.1"/><circle cx="18" cy="6" r="3.1"/><circle cx="12" cy="18" r="3.1"/>
+{% elif name == 'lock' %}<path d="M12 2a4.8 4.8 0 0 0-4.8 4.8V9.4H6.6A2.1 2.1 0 0 0 4.5 11.5v8A2.1 2.1 0 0 0 6.6 21.6h10.8a2.1 2.1 0 0 0 2.1-2.1v-8a2.1 2.1 0 0 0-2.1-2.1h-.6V6.8A4.8 4.8 0 0 0 12 2Zm0 2.4a2.4 2.4 0 0 1 2.4 2.4V9.4H9.6V6.8A2.4 2.4 0 0 1 12 4.4Z"/>
 {% endif %}</svg>

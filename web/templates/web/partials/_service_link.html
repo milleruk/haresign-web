@@ -1,13 +1,20 @@
 {% comment %}A link to a Haresign service — or a plain label when it is not live.
 
     {% include 'web/partials/_service_link.html' with service=services.consulting link_class='hs-nav__link' %}
+    {% include 'web/partials/_service_link.html' with service=services.consulting link_class='hs-nav__link' show_badge=False %}
 
 Every reference to another platform goes through this, not just the cards. The
-nav and the footer named the same four hosts, and guarding only the cards left
+nav and the footer name the same four services, and guarding only the cards left
 two sets of links pointing at subdomains that do not resolve — the availability
 rule has to hold everywhere or it does not hold at all.
 
 An unavailable service renders as a <span>, never a disabled-looking anchor:
 there is no href to give it, and a link that goes nowhere is the thing being
 avoided.
-{% endcomment %}{% if service.available %}<a class="{{ link_class }}" href="{{ service.url }}">{{ label|default:service.name }}</a>{% else %}<span class="{{ link_class }} {{ link_class }}--unavailable">{{ label|default:service.name }}<span class="hs-badge {{ badge_class|default:'hs-badge--on-dark' }}">Soon</span></span>{% endif %}
+
+`show_badge=False` drops the visible "Soon" pill. The nav uses it: three badges
+across four items turned the header into noise, and the platform cards already
+carry the coming-soon message in full. The reason is kept as visually-hidden
+text, so a screen reader user is still told why the item is not a link — the
+badge is decoration for sighted users, not the information itself.
+{% endcomment %}{% if service.available %}<a class="{{ link_class }}" href="{{ service.url }}">{{ label|default:service.name }}</a>{% else %}<span class="{{ link_class }} {{ link_class }}--unavailable">{{ label|default:service.name }}{% if show_badge|default_if_none:True %}<span class="hs-badge {{ badge_class|default:'hs-badge--on-dark' }}">Soon</span>{% else %}<span class="hs-visually-hidden"> — coming soon</span>{% endif %}</span>{% endif %}

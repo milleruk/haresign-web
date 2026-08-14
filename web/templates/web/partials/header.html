@@ -29,11 +29,15 @@ navigates somewhere implies authentication exists, and it does not yet.
           name — the nav has no room for "Haresign Intelligence" four times, and
           the master brand is already stated by the logo beside it. Routed through
           _service_link so an unlaunched platform is a label, not a link to a host
-          that does not resolve.{% endcomment %}
-          <li>{% include 'web/partials/_service_link.html' with service=services.consulting label=services.consulting.nav_label link_class='hs-nav__link' badge_class='' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.intelligence label=services.intelligence.nav_label link_class='hs-nav__link' badge_class='' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.community label=services.community.nav_label link_class='hs-nav__link' badge_class='' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.workspace label=services.workspace.nav_label link_class='hs-nav__link' badge_class='' %}</li>
+          that does not resolve.
+
+          show_badge=False: three "Soon" pills across four items made the header
+          noisy, and the platform cards say it properly. Screen readers still get
+          the reason as visually-hidden text.{% endcomment %}
+          <li>{% include 'web/partials/_service_link.html' with service=services.consulting label=services.consulting.nav_label link_class='hs-nav__link' show_badge=False %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.intelligence label=services.intelligence.nav_label link_class='hs-nav__link' show_badge=False %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.community label=services.community.nav_label link_class='hs-nav__link' show_badge=False %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.workspace label=services.workspace.nav_label link_class='hs-nav__link' show_badge=False %}</li>
           <li><a class="hs-nav__link" href="#insights">Insights</a></li>
           <li><a class="hs-nav__link" href="#about">About</a></li>
           {% comment %}The header Sign in button is hidden below 992px, so the
