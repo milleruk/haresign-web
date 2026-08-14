@@ -9,28 +9,11 @@ Two reasons this is a module rather than markup:
    copy and the four principles actually reach the page, which markup buried in
    a template makes awkward.
 
-The article entries here are placeholders for layout only, and say so. They are
-*not* invented Haresign research: no fabricated findings, statistics or claims,
-and `is_placeholder` lets the template mark them rather than passing them off as
-published work.
+`get_insights()` is the seam between this page and editorial content. It used to
+return placeholders; it now reads the `insights` app, and the homepage template
+was not touched to make that happen.
 """
 from dataclasses import dataclass, field
-from datetime import date
-
-
-@dataclass(frozen=True)
-class Article:
-    title: str
-    summary: str
-    published: date
-    url: str = ''
-    category: str = 'Insight'
-    is_placeholder: bool = False
-
-    @property
-    def has_link(self):
-        """A card with no destination renders as static, not as a dead link."""
-        return bool(self.url)
 
 
 @dataclass(frozen=True)
@@ -113,46 +96,20 @@ PRINCIPLES = [
 ]
 
 
-# Placeholder article set. Titles describe the *kind* of thing Haresign
-# publishes; none of them asserts a finding, a figure or an outcome, because a
-# placeholder that reads as real research is a claim nobody made.
-_PLACEHOLDER_ARTICLES = [
-    Article(
-        title='Making sense of your practice data',
-        summary='How primary care teams can move from reporting numbers to '
-                'acting on what those numbers actually show.',
-        published=date(2026, 7, 22),
-        category='Featured',
-        is_placeholder=True,
-    ),
-    Article(
-        title='Understanding your appointment data',
-        summary='What GP appointment data does and does not tell you about access.',
-        published=date(2026, 7, 8),
-        is_placeholder=True,
-    ),
-    Article(
-        title='Workforce planning in general practice',
-        summary='Approaching workforce decisions with the data already available to you.',
-        published=date(2026, 6, 24),
-        is_placeholder=True,
-    ),
-    Article(
-        title='Benchmarking without the noise',
-        summary='Choosing comparisons that support a decision rather than start an argument.',
-        published=date(2026, 6, 10),
-        is_placeholder=True,
-    ),
-]
-
-
 def get_insights(limit=4):
-    """Return articles for the "Latest insight" section, newest first.
+    """Articles for the homepage "Latest insight" section, newest first.
 
-    The seam. Today it returns the placeholder set above; tomorrow it queries a
-    CMS or an internal content API. Callers get `Article` objects either way, so
-    replacing the body is the entire migration — the template never learns where
-    an article came from.
+    This was the documented seam for "today a placeholder list, tomorrow a real
+    source". That swap has now happened: it reads the `insights` app, which this
+    repository owns. The homepage template did not change — it never learned
+    where an article came from, which was the point.
+
+    Imported here rather than at module scope so `content` stays importable
+    without the app registry being ready.
     """
-    articles = sorted(_PLACEHOLDER_ARTICLES, key=lambda a: a.published, reverse=True)
-    return articles[:limit]
+    from insights.selectors import featured_article, recent_articles
+
+    featured = featured_article()
+    if featured is None:
+        return []
+    return [featured] + recent_articles(limit=limit - 1, exclude=featured)

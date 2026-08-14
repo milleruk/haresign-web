@@ -15,3 +15,6 @@ staticfiles/
 .DS_Store
 *.md
 !README.md
+
+# Uploaded media is a runtime bind mount, never baked into the image.
+media/

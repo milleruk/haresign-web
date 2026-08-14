@@ -1,0 +1,26 @@
+{% comment %}The lead article on the Insights index — a wide editorial card.
+
+Distinct from the homepage's featured card so the index has its own shape; both
+read from the same `Article`, so neither can show a different summary.
+{% endcomment %}
+<a class="hs-lead-article" href="{{ article.get_absolute_url }}">
+  {% if article.featured_image %}
+    <div class="hs-lead-article__media">
+      <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}" loading="lazy">
+    </div>
+  {% endif %}
+  <div class="hs-lead-article__body">
+    <p class="hs-article-card__meta">
+      <span>Featured</span>
+      {% for category in article.categories.all %}<span>{{ category.name }}</span>{% endfor %}
+      <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:'j F Y' }}</time>
+    </p>
+    {% if article.kicker %}<p class="hs-article-kicker">{{ article.kicker }}</p>{% endif %}
+    <h2 class="hs-lead-article__title">{{ article.title }}</h2>
+    <p class="hs-lead-article__summary">{{ article.summary }}</p>
+    <span class="hs-lead-article__more">
+      Read the article
+      {% include 'web/partials/_icon.html' with name='arrow-right' %}
+    </span>
+  </div>
+</a>

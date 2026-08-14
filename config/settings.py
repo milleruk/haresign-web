@@ -1,16 +1,24 @@
 """Settings for haresign-web — the public Haresign web layer.
 
-Deliberately small. This application renders public pages and nothing else, so
-it runs with **no database**: `DATABASES = {}` is a supported Django
-configuration, and it is the clearest possible statement that this repository
-does not share the monolith's data. Sessions, auth, admin and messages are all
-absent for the same reason — nothing here has a user, so nothing here needs a
-session cookie.
+Deliberately small. It renders public pages and owns one thing: Haresign's
+public editorial content (the `insights` app).
+
+The ownership boundary, which has not loosened now that there is a database:
+this application has its **own** PostgreSQL database holding Web-owned content
+only. It never connects to the monolith's database, never writes back to it, and
+shares no models with it. Identity, primary-care application data and client
+data belong to their own services.
+
+Django Admin is the publishing backend, so auth/sessions/admin are installed.
+Those accounts are **editorial staff logins for this admin**, not Haresign
+identity — ecosystem identity is Haresign Account (auth.haresign.net) and is not
+implemented here. No public view on this site reads `request.user`.
 
 Anything that varies by environment is read from the environment. Nothing in
 this file is a secret, and no secret has a default.
 """
 import os
+import sys
 from pathlib import Path
 
 from .services import HARESIGN_SERVICES  # noqa: F401  (re-exported for settings access)
@@ -50,18 +58,36 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 INSTALLED_APPS = [
+    # Admin is the publishing backend for Insights, which is why auth, sessions,
+    # contenttypes and messages are here. Read the boundary carefully: these
+    # accounts are *editorial staff logins for this site's admin*, not Haresign
+    # identity. Ecosystem identity remains Haresign Account (auth.haresign.net)
+    # and is not implemented here. Nothing public on this site has a user, and
+    # no public view reads request.user.
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'tinymce',
+
+    'insights',
     'web',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     # No form on the site posts anything today, and this sets no cookie until a
     # template asks for a token — so it is free now and already correct on the
     # day somebody adds the first form, rather than a thing to remember then.
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -76,15 +102,38 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
                 'web.context_processors.site',
             ],
         },
     },
 ]
 
-# No database. Not "an empty default" — genuinely none, so an accidental ORM
-# import fails loudly here rather than quietly reaching for a connection.
-DATABASES = {}
+# --- Database ---------------------------------------------------------------
+# A PostgreSQL database owned by *this* application and nothing else.
+#
+# The architectural rule has not loosened. haresign-web must never become the
+# shared backend for the ecosystem, and this database is not a step toward that:
+# it holds Web-owned editorial content only. It is a separate database on a
+# separate container from the monolith's, this application never connects to the
+# monolith's database, and nothing writes back to it. Identity, primary-care
+# application data and client data stay with their own services.
+#
+# Discrete variables rather than a DATABASE_URL, so a password containing "@" or
+# "/" needs no URL-encoding and cannot silently truncate a connection string.
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB', 'haresign_web'),
+        'USER': os.environ.get('POSTGRES_USER', 'haresign_web'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        # Persistent connections; gunicorn workers are long-lived.
+        'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', 60)),
+    }
+}
 
 # --- Internationalisation --------------------------------------------------
 
@@ -107,13 +156,66 @@ STORAGES = {
 }
 WHITENOISE_MAX_AGE = 31536000  # a year; filenames are content-hashed
 
+# --- Media (uploaded files) -------------------------------------------------
+# Featured images and any images placed in article bodies. Binary data never
+# goes in PostgreSQL: the database holds the *path*, the bytes live on a volume.
+#
+# Storage is declared through STORAGES['default'], so moving to object storage
+# (Cloudflare R2 via django-storages' S3 backend) later is a settings change plus
+# a file copy — the Article model, the templates and the admin are unaffected
+# because they only ever touch `article.featured_image.url`. See README, "Media".
+MEDIA_URL = '/media/'
+MEDIA_ROOT = Path(os.environ.get('MEDIA_ROOT', BASE_DIR / 'media'))
+
+# --- TinyMCE ----------------------------------------------------------------
+# The monolith's blog authors in TinyMCE and stores HTML. Insights does the same
+# deliberately: it keeps the authoring model familiar and, more importantly, means
+# legacy article HTML can be imported later without rewriting a single article.
+#
+# The toolbar is the set of things Haresign articles actually use — headings,
+# emphasis, links, lists, quotes, tables, images, and a source view for fixing
+# imported markup. Everything else was left out; a 40-button toolbar makes an
+# editor harder to use, not more capable.
+TINYMCE_DEFAULT_CONFIG = {
+    'height': 620,
+    'menubar': 'edit view insert format table',
+    'plugins': (
+        'advlist autolink lists link image charmap preview anchor '
+        'searchreplace visualblocks code fullscreen '
+        'insertdatetime media table wordcount'
+    ),
+    'toolbar': (
+        'undo redo | blocks | bold italic | '
+        'alignleft aligncenter alignright | '
+        'bullist numlist outdent indent | '
+        'link image blockquote table | removeformat | code fullscreen'
+    ),
+    # Only the block types the article stylesheet actually styles, so an author
+    # cannot pick a heading level the design does not render.
+    'block_formats': 'Paragraph=p; Heading 2=h2; Heading 3=h3; Heading 4=h4; Quote=blockquote; Code=pre',
+    'branding': False,
+    'promotion': False,
+    'convert_urls': False,      # keep hrefs exactly as typed/imported
+    'relative_urls': False,
+    'browser_spellcheck': True,
+    'contextmenu': False,
+}
+# Served from the installed package, never a CDN — the site keeps no external
+# runtime dependency and the admin works on a locked-down network.
+TINYMCE_JS_URL = None
+
 # --- Security --------------------------------------------------------------
 
 # Behind Traefik, which terminates TLS. Without this Django never sees a secure
 # request and will not emit HSTS or mark cookies secure.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-if not DEBUG:
+# The test runner must not depend on the deployment environment. With
+# SECURE_SSL_REDIRECT on, every test-client request 301s and the response body is
+# empty, so assertions fail for a reason that has nothing to do with the code.
+TESTING = 'test' in sys.argv
+
+if not DEBUG and not TESTING:
     SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', True)
     # The container health check calls http://127.0.0.1:8000/health/ directly,
     # with no proxy and so no X-Forwarded-Proto. Without this exemption the

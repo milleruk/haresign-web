@@ -1,0 +1,71 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block title %}{{ article.seo_title }} — {{ SITE_NAME }}{% endblock %}
+{% block description %}{{ article.seo_description|striptags|truncatewords:32 }}{% endblock %}
+{% block canonical %}{{ SITE_BASE_URL }}{{ article.get_absolute_url }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ article.seo_title }}{% endblock %}
+{% block og_description %}{{ article.seo_description|striptags|truncatewords:32 }}{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/insights.css' %}">{% endblock %}
+
+{% block content %}
+
+<article class="hs-article">
+
+  <header class="hs-article__header">
+    <div class="hs-container hs-container--reading">
+      <a class="hs-article__back" href="{% url 'insights:index' %}">
+        {% include 'web/partials/_icon.html' with name='arrow-right' extra_class='hs-icon--back' %}
+        Insights
+      </a>
+
+      {% if article.kicker %}<p class="hs-article-kicker">{{ article.kicker }}</p>{% endif %}
+      <h1 class="hs-article__title">{{ article.title }}</h1>
+      <p class="hs-article__summary">{{ article.summary }}</p>
+
+      <p class="hs-article__byline">
+        <span>{{ article.author_name }}</span>
+        <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:'j F Y' }}</time>
+        {% for category in article.categories.all %}<span>{{ category.name }}</span>{% endfor %}
+      </p>
+    </div>
+  </header>
+
+  {% if article.featured_image %}
+    <div class="hs-container hs-container--reading">
+      <figure class="hs-article__figure">
+        <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}">
+      </figure>
+    </div>
+  {% endif %}
+
+  <div class="hs-container hs-container--reading">
+    {% comment %}`|safe` is scoped to exactly this element and nothing else.
+    Article bodies are HTML written by editorial staff in TinyMCE — trusted
+    input by definition, since only admin users can create them. Escaping is
+    never disabled globally, and no other field on the page is marked safe.
+
+    .hs-prose is where the long-form styling lives, so an imported legacy
+    article inherits the new design without carrying any inline styling of its
+    own.{% endcomment %}
+    <div class="hs-prose">{{ article.body|safe }}</div>
+
+    {% if article.tags.all %}
+      <div class="hs-article__tags">
+        <h2 class="hs-article__tags-heading">Tagged</h2>
+        <ul class="hs-tag-list">
+          {% for tag in article.tags.all %}<li class="hs-tag">{{ tag.name }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="hs-article__foot">
+      <a class="hs-btn hs-btn--secondary" href="{% url 'insights:index' %}">All insights</a>
+    </div>
+  </div>
+
+</article>
+
+{% endblock %}

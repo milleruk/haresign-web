@@ -1,20 +1,56 @@
 # haresign-web — beta.haresign.net
 #
-# Joins the existing external t3_proxy network so Traefik can route to it,
-# exactly as the other Haresign services do. No database, no cache, no queue:
-# this application has no state.
+# Joins the existing external t3_proxy network so Traefik can route to it.
+#
+# The database is this application's own, on its own container and its own
+# volume. It is NOT the monolith's database and must never be pointed at it:
+# haresign-web owns the public editorial content and nothing else, and a shared
+# database would be exactly the coupling this repository exists to avoid.
 #
 # Deploy:  docker compose up -d --build
+#          docker compose exec haresign_web python manage.py migrate
 
 services:
+
+  web_db:
+    image: postgres:16-alpine
+    container_name: HaresignWebDB
+    restart: unless-stopped
+    volumes:
+      - haresign_web_pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-haresign_web}
+      - POSTGRES_USER=${POSTGRES_USER:-haresign_web}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - t3_proxy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-haresign_web} -d ${POSTGRES_DB:-haresign_web}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   haresign_web:
     container_name: HaresignWeb
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    depends_on:
+      web_db:
+        condition: service_healthy
     env_file:
       - .env
+    environment:
+      # Inside the compose network the database is reachable by service name,
+      # so .env need not carry a host that only makes sense in one place.
+      - POSTGRES_HOST=web_db
+      - POSTGRES_PORT=5432
+    volumes:
+      # Uploaded media — featured images and anything placed in an article body.
+      # A bind mount so the files can be backed up, browsed and copied without
+      # going through Docker. Binary data never goes in PostgreSQL.
+      - ./media:/app/media
     networks:
       - t3_proxy
     labels:
@@ -26,13 +62,12 @@ services:
       - "traefik.http.routers.haresign-web-rtr.tls=true"
       - "traefik.http.routers.haresign-web-rtr.middlewares=chain-no-auth@file"
       - "traefik.http.routers.haresign-web-rtr.service=haresign-web-svc"
-
-      # Higher than the monolith's router. beta.haresign.net was previously
-      # served by HaresignDotNet; until that host is removed from its rule, the
-      # more specific router here must win or the old page keeps answering.
       - "traefik.http.routers.haresign-web-rtr.priority=200"
 
       - "traefik.http.services.haresign-web-svc.loadbalancer.server.port=8000"
+
+volumes:
+  haresign_web_pgdata:
 
 networks:
   t3_proxy:

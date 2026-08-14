@@ -1,20 +1,25 @@
 """Tests for the public web layer.
 
-`SimpleTestCase` throughout — there is no database, and using it asserts that:
-any test needing one would fail loudly rather than quietly acquiring a
-connection this application is not supposed to have.
+Page-rendering tests use `TestCase`: the homepage reads published articles from
+the `insights` app, so rendering it touches the database. `DecouplingTests` stays
+on `SimpleTestCase` because it only inspects settings — and keeping it there
+means a future change that makes an architectural assertion hit the database
+fails loudly instead of quietly acquiring a connection.
+
+Insights behaviour itself is covered in `insights/tests.py`; what is tested here
+is that the homepage renders whatever the seam returns.
 """
 import re
 
 from django.conf import settings
-from django.test import SimpleTestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from config.services import build_registry
-from web.content import PRINCIPLES, get_insights
+from web.content import PRINCIPLES
 from web.views import build_platform_cards
 
 
-class HomePageTests(SimpleTestCase):
+class HomePageTests(TestCase):
     def test_renders(self):
         response = self.client.get('/')
 
@@ -137,7 +142,7 @@ class HomePageTests(SimpleTestCase):
         self.assertIn('logo-primary-dark.', footer)
 
 
-class PlatformAvailabilityTests(SimpleTestCase):
+class PlatformAvailabilityTests(TestCase):
     """Three of the four platforms do not exist yet. A card must never link to
     a host that does not resolve."""
 
@@ -189,7 +194,7 @@ def _registry_with_live(live_csv):
             os.environ['HARESIGN_LIVE_SERVICES'] = previous
 
 
-class NamingTests(SimpleTestCase):
+class NamingTests(TestCase):
     """The agreed product naming: **Haresign + a clear functional name**.
 
     Written down as assertions because naming drifts silently — nothing breaks
@@ -259,37 +264,7 @@ class NamingTests(SimpleTestCase):
             self.assertNotIn(name, source)
 
 
-class InsightsTests(SimpleTestCase):
-    def test_featured_article_plus_three_cards(self):
-        response = self.client.get('/')
-
-        self.assertContains(response, 'Latest insight')
-        self.assertEqual(len(response.context['recent_articles']), 3)
-
-    def test_placeholder_articles_are_labelled_not_passed_off_as_published(self):
-        response = self.client.get('/')
-
-        self.assertContains(response, 'Sample')
-
-    def test_articles_without_a_url_are_not_rendered_as_links(self):
-        """Every placeholder lacks a URL; none may become a dead anchor."""
-        for article in get_insights():
-            self.assertFalse(article.has_link)
-
-    def test_section_is_omitted_when_there_is_no_content(self):
-        """An empty "Latest insight" strip says more about the site than none."""
-        with self.settings():
-            response = self.client.get('/')
-            self.assertContains(response, 'Latest insight')
-
-        # The template gates on featured_article, so an empty source removes it.
-        from unittest.mock import patch
-        with patch('web.views.get_insights', return_value=[]):
-            response = self.client.get('/')
-            self.assertNotContains(response, 'Latest insight')
-
-
-class SeoTests(SimpleTestCase):
+class SeoTests(TestCase):
     def test_beta_is_noindex_by_default(self):
         """Indexing is opt-in, so beta cannot be indexed by forgetting a flag."""
         response = self.client.get('/')
@@ -328,7 +303,7 @@ class SeoTests(SimpleTestCase):
         self.assertIn('property="og:title"', body)
 
 
-class HealthTests(SimpleTestCase):
+class HealthTests(TestCase):
     def test_health_returns_ok(self):
         response = self.client.get('/health/')
 
@@ -347,23 +322,27 @@ class DecouplingTests(SimpleTestCase):
     """This repository owns the public web layer and nothing else. These are the
     architectural boundaries written down as assertions."""
 
-    def test_no_database_is_configured(self):
-        """settings.py sets DATABASES = {}. Django's ConnectionHandler back-fills
-        a `default` alias with the *dummy* backend as soon as connections are
-        touched, so asserting `== {}` would pass at import and fail under the
-        test runner. The invariant that actually matters is that no engine
-        capable of connecting to anything is configured."""
-        engines = {
-            config.get('ENGINE', '')
-            for config in settings.DATABASES.values()
-        }
+    def test_exactly_one_database_and_it_is_this_apps_own(self):
+        """The boundary moved but did not loosen.
 
-        self.assertTrue(engines <= {'', 'django.db.backends.dummy'}, engines)
+        This app now has a database because it owns editorial content. What must
+        stay true is that there is exactly *one*, that nothing configures a
+        second connection to somebody else's, and that its name is not the
+        monolith's. A second alias here would be the beginning of the shared
+        backend this repository exists not to become.
+        """
+        self.assertEqual(list(settings.DATABASES), ['default'])
+        self.assertNotIn(
+            settings.DATABASES['default']['NAME'], {'haresign', 'haresign_net'},
+            'This must not point at the monolith database.',
+        )
 
-    def test_no_auth_session_or_admin_apps(self):
-        for app in ('django.contrib.auth', 'django.contrib.sessions',
-                    'django.contrib.admin', 'django.contrib.contenttypes'):
-            self.assertNotIn(app, settings.INSTALLED_APPS)
+    def test_no_model_is_imported_from_another_haresign_service(self):
+        """Applications integrate through contracts, never by sharing models."""
+        installed = set(settings.INSTALLED_APPS)
+        for app in ('modules.core.website', 'modules.core.practicedata',
+                    'modules.core.oauth_server'):
+            self.assertNotIn(app, installed)
 
     def test_platform_urls_are_configuration(self):
         """Subdomains will move during the migration; nothing may hard-code one."""

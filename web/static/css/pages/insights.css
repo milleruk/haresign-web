@@ -1,0 +1,320 @@
+/* ==========================================================================
+   pages/insights.css — the Insights index and article pages.
+
+   The important part is `.hs-prose`, which styles article bodies by *element*
+   rather than by class. Article HTML comes from TinyMCE and, later, from the
+   monolith's existing articles: those carry no Haresign classes, so anything
+   keyed to a class name would leave imported articles unstyled. Styling the raw
+   elements is what lets a legacy article inherit this design untouched.
+
+   Every value still comes from tokens.css.
+   ========================================================================== */
+
+/* --- Reading measure -----------------------------------------------------
+   Long-form text needs a narrower column than a landing page, but 46rem was
+   tighter than these articles want: they carry wide tables and full-width
+   charts, and a narrow column squeezed both. 54rem is ~78 characters at the
+   body size — still inside the readable 45–85 band, with room for the figures.
+
+   Tables and images may extend a little beyond the text column, so a 7-column
+   table is legible without the prose itself becoming a wall. */
+.hs-container--reading { max-width: 54rem; }
+
+/* --- Index --------------------------------------------------------------- */
+.hs-insights-head { padding-bottom: 0; }
+.hs-insights-empty { color: var(--hs-text-muted); margin: 0; }
+
+.hs-article-kicker {
+  margin: 0 0 var(--hs-space-2);
+  color: var(--hs-coral-ink);
+  font-size: var(--hs-text-sm);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Lead article — a wide editorial card, image beside the copy on desktop. */
+.hs-lead-article {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: stretch;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-lg);
+  background-color: var(--hs-surface);
+  box-shadow: var(--hs-shadow-md);
+  color: inherit;
+  transition: transform var(--hs-transition), box-shadow var(--hs-transition);
+}
+.hs-lead-article:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--hs-shadow-lg);
+  color: inherit;
+}
+.hs-lead-article__media { background-color: var(--hs-surface-sunken); min-height: 18rem; }
+.hs-lead-article__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hs-lead-article__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.75rem, 4vw, 3rem);
+}
+.hs-lead-article__title {
+  font-size: clamp(1.75rem, 3vw, 2.375rem);
+  margin: 0 0 var(--hs-space-4);
+}
+.hs-lead-article__summary { margin: 0 0 var(--hs-space-6); color: var(--hs-text); }
+.hs-lead-article__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  color: var(--hs-primary);
+  font-weight: var(--hs-weight-bold);
+}
+.hs-lead-article__more svg { width: 0.875rem; height: 0.875rem; }
+
+/* Index grid. */
+.hs-article-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--hs-space-6);
+}
+.hs-article-summary { color: inherit; overflow: hidden; }
+.hs-article-summary:hover { color: inherit; }
+.hs-article-summary__media {
+  display: block;
+  aspect-ratio: 16 / 9;
+  background-color: var(--hs-surface-sunken);
+}
+.hs-article-summary__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hs-article-summary__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hs-space-2);
+  padding: var(--hs-space-6);
+}
+.hs-article-summary__title {
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-xl);
+  font-weight: var(--hs-weight-bold);
+  line-height: var(--hs-leading-snug);
+  color: var(--hs-text-strong);
+}
+.hs-article-summary__excerpt { font-size: var(--hs-text-sm); color: var(--hs-text-muted); }
+
+/* --- Article page -------------------------------------------------------- */
+.hs-article__header { padding-block: var(--hs-section-y-tight) var(--hs-space-8); }
+.hs-article__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  margin-bottom: var(--hs-space-6);
+  color: var(--hs-text-muted);
+  font-size: var(--hs-text-sm);
+  font-weight: var(--hs-weight-semibold);
+}
+.hs-article__back:hover { color: var(--hs-primary); }
+/* One arrow icon, flipped, rather than a second SVG in the sprite. */
+.hs-icon--back { width: 0.875rem; height: 0.875rem; transform: rotate(180deg); }
+
+.hs-article__title { margin-bottom: var(--hs-space-5); }
+.hs-article__summary {
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-xl);
+  font-weight: var(--hs-weight-medium);
+  line-height: 1.55;
+  color: var(--hs-navy-soft);
+  margin-bottom: var(--hs-space-6);
+}
+.hs-article__byline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hs-space-4);
+  margin: 0;
+  padding-top: var(--hs-space-5);
+  border-top: 1px solid var(--hs-border);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+}
+.hs-article__byline span:first-child { color: var(--hs-text-strong); font-weight: var(--hs-weight-bold); }
+
+.hs-article__figure { margin: 0 0 var(--hs-space-10); }
+.hs-article__figure img { width: 100%; border-radius: var(--hs-radius-md); display: block; }
+
+.hs-article__tags { margin-top: var(--hs-space-12); padding-top: var(--hs-space-6); border-top: 1px solid var(--hs-border); }
+.hs-article__tags-heading {
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+  color: var(--hs-text-muted);
+  margin-bottom: var(--hs-space-3);
+}
+.hs-tag-list { display: flex; flex-wrap: wrap; gap: var(--hs-space-2); list-style: none; margin: 0; padding: 0; }
+.hs-tag {
+  padding: var(--hs-space-1) var(--hs-space-4);
+  border-radius: var(--hs-radius-pill);
+  background-color: var(--hs-surface-muted);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text);
+}
+.hs-article__foot { margin-block: var(--hs-space-10) var(--hs-section-y); }
+
+/* ==========================================================================
+   .hs-prose — long-form article bodies.
+
+   Styled by element, not class, so imported HTML inherits the design with no
+   edits. Covers everything TinyMCE can produce and everything the legacy blog
+   contains.
+   ========================================================================== */
+
+.hs-prose {
+  font-size: var(--hs-text-lg);
+  line-height: 1.8;
+  color: var(--hs-text);
+}
+
+.hs-prose > * + * { margin-top: var(--hs-space-6); }
+
+.hs-prose h2,
+.hs-prose h3,
+.hs-prose h4,
+.hs-prose h5,
+.hs-prose h6 {
+  font-family: var(--hs-font-display);
+  color: var(--hs-text-strong);
+  line-height: var(--hs-leading-snug);
+}
+/* Headings need more space above than below — the gap belongs to the section
+   they open, not to the paragraph they follow. */
+.hs-prose h2 { font-size: clamp(1.5rem, 3vw, 1.875rem); margin-top: var(--hs-space-12); margin-bottom: var(--hs-space-4); }
+.hs-prose h3 { font-size: clamp(1.25rem, 2.4vw, 1.5rem);  margin-top: var(--hs-space-10); margin-bottom: var(--hs-space-3); }
+.hs-prose h4 { font-size: var(--hs-text-xl);  margin-top: var(--hs-space-8); margin-bottom: var(--hs-space-3); }
+.hs-prose h5,
+.hs-prose h6 { font-size: var(--hs-text-lg); margin-top: var(--hs-space-6); margin-bottom: var(--hs-space-2); }
+.hs-prose > h2:first-child,
+.hs-prose > h3:first-child { margin-top: 0; }
+
+.hs-prose p { margin-bottom: 0; }
+
+.hs-prose strong, .hs-prose b { font-weight: var(--hs-weight-bold); color: var(--hs-text-strong); }
+.hs-prose em, .hs-prose i { font-style: italic; }
+
+/* Underlined in body copy: colour alone is not a sufficient affordance in
+   running text (WCAG 1.4.1). */
+.hs-prose a {
+  color: var(--hs-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.hs-prose a:hover { color: var(--hs-primary-hover); }
+
+.hs-prose ul, .hs-prose ol { padding-inline-start: var(--hs-space-6); }
+.hs-prose li + li { margin-top: var(--hs-space-2); }
+.hs-prose li > ul, .hs-prose li > ol { margin-top: var(--hs-space-2); }
+.hs-prose ul { list-style: disc; }
+.hs-prose ol { list-style: decimal; }
+.hs-prose li::marker { color: var(--hs-teal-deep); }
+
+.hs-prose blockquote {
+  margin-inline: 0;
+  padding: var(--hs-space-2) 0 var(--hs-space-2) var(--hs-space-6);
+  border-inline-start: 4px solid var(--hs-coral);
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-xl);
+  font-weight: var(--hs-weight-medium);
+  line-height: 1.6;
+  color: var(--hs-navy-soft);
+}
+.hs-prose blockquote p { margin: 0; }
+.hs-prose blockquote > * + * { margin-top: var(--hs-space-4); }
+
+.hs-prose img { border-radius: var(--hs-radius-md); display: block; }
+/* A standalone image is a figure in its own right; let it use the full width. */
+.hs-prose > p > img,
+.hs-prose > figure > img { width: 100%; }
+.hs-prose figure { margin-inline: 0; }
+.hs-prose figcaption {
+  margin-top: var(--hs-space-3);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+  text-align: center;
+}
+
+/* Tables. A wide legacy table must scroll inside its own box rather than push
+   the whole page sideways, so the element is given its own scroll container. */
+.hs-prose table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  /* Wide tables break the measure slightly rather than shrinking their type. */
+  margin-inline: calc(var(--hs-space-6) * -1);
+  width: calc(100% + var(--hs-space-12));
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--hs-text-sm);
+}
+.hs-prose thead { background-color: var(--hs-surface-muted); }
+.hs-prose th, .hs-prose td {
+  padding: var(--hs-space-3) var(--hs-space-4);
+  border: 1px solid var(--hs-border);
+  text-align: left;
+  vertical-align: top;
+}
+.hs-prose th { font-weight: var(--hs-weight-bold); color: var(--hs-text-strong); }
+.hs-prose tbody tr:nth-child(even) { background-color: var(--hs-surface-muted); }
+.hs-prose caption {
+  caption-side: bottom;
+  padding-top: var(--hs-space-3);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+  text-align: left;
+}
+
+.hs-prose code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--hs-radius-sm);
+  background-color: var(--hs-surface-sunken);
+  font-family: var(--hs-font-mono);
+  font-size: 0.875em;
+  color: var(--hs-navy);
+}
+.hs-prose pre {
+  padding: var(--hs-space-5);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-navy);
+  color: var(--hs-text-on-dark-strong);
+  overflow-x: auto;
+  font-family: var(--hs-font-mono);
+  font-size: var(--hs-text-sm);
+  line-height: 1.6;
+}
+.hs-prose pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+.hs-prose hr {
+  border: 0;
+  border-top: 1px solid var(--hs-border);
+  margin-block: var(--hs-space-10);
+}
+
+/* Legacy articles may carry width/height attributes or float styles from the
+   old editor; keep them inside the column whatever they ask for. */
+.hs-prose img,
+.hs-prose iframe,
+.hs-prose video { max-width: 100%; height: auto; }
+
+/* --- Responsive ---------------------------------------------------------- */
+@media (max-width: 991.98px) {
+  .hs-article-grid { grid-template-columns: repeat(2, 1fr); }
+  .hs-lead-article { grid-template-columns: 1fr; }
+  .hs-lead-article__media { min-height: 0; aspect-ratio: 16 / 9; }
+}
+
+@media (max-width: 767.98px) {
+  .hs-article-grid { grid-template-columns: 1fr; }
+  .hs-prose { font-size: var(--hs-text-base); }
+  /* No room to break the measure on a phone. */
+  .hs-prose table { margin-inline: 0; width: 100%; }
+  .hs-article__byline { gap: var(--hs-space-3); }
+}

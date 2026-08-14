@@ -1,0 +1,20 @@
+{% comment %}One article in the Insights index grid.
+
+Built on the shared .hs-card surface so it belongs to the same system as the
+platform cards, with editorial rather than product styling on top.
+{% endcomment %}
+<a class="hs-card hs-card--interactive hs-article-summary" href="{{ article.get_absolute_url }}">
+  {% if article.featured_image %}
+    <span class="hs-article-summary__media">
+      <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}" loading="lazy">
+    </span>
+  {% endif %}
+  <span class="hs-article-summary__body">
+    <span class="hs-article-card__meta">
+      {% for category in article.categories.all %}<span>{{ category.name }}</span>{% endfor %}
+      <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:'j F Y' }}</time>
+    </span>
+    <span class="hs-article-summary__title">{{ article.title }}</span>
+    <span class="hs-article-summary__excerpt">{{ article.summary|truncatewords:26 }}</span>
+  </span>
+</a>

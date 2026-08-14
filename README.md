@@ -8,6 +8,39 @@ Currently deployed as a preview at **`beta.haresign.net`**, where the future
 
 ---
 
+## Insights — and parallel running
+
+`haresign-web` owns Haresign's public editorial content through the `insights`
+app: articles, research, commentary and updates, published from Django Admin.
+
+**The monolith remains the live source of articles.** `haresign.net/blog/` is
+untouched and continues to be where publishing happens. Insights runs in
+parallel on beta so the two can be compared before any cutover. There is
+deliberately **no dual write and no synchronisation**: the two systems do not
+know about each other, and a single controlled import happens at cutover.
+
+Compare the same article in both:
+
+```
+https://haresign.net/blog/<slug>/          (monolith, live)
+https://beta.haresign.net/insights/<slug>/ (this app, beta)
+```
+
+### Cutover sequence (not implemented)
+
+1. Build and test Insights on beta · 2. copy representative articles ·
+3. compare old vs new · 4. finalise rendering and media · 5. import all
+articles · 6. verify counts, slugs and content · 7. briefly freeze article
+changes · 8. final delta import · 9. point `haresign.net` at `haresign-web` ·
+10. add permanent redirects from the old blog URLs · 11. keep the monolith blog
+available for rollback · 12. retire it only after validation.
+
+Redirect mappings belong in the **monolith** (its URLconf still owns
+`/blog/…`) or at Traefik, once the real URL structure is confirmed. The likely
+mapping is `/blog/<slug>/ → /insights/<slug>/`, and slugs are imported unchanged
+so it should hold — but it must be verified against the live URL list rather than
+assumed.
+
 ## Architecture statement
 
 > `haresign-web` owns the public Haresign web experience. It must not become the
@@ -276,6 +309,129 @@ research is a claim nobody made. They also carry no URL, so they render as
 static cards rather than dead links.
 
 No customer numbers, practice counts or performance claims appear anywhere.
+
+---
+
+## Database
+
+PostgreSQL, owned by this application. `docker-compose.yml` runs it as `web_db`
+on its own volume — **not** the monolith's database, and never to be pointed at
+it. `DecouplingTests` asserts there is exactly one alias and that its name is not
+the monolith's.
+
+```bash
+docker compose up -d --build
+docker compose exec haresign_web python manage.py migrate
+docker compose exec haresign_web python manage.py createsuperuser
+```
+
+Variables: `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`,
+`POSTGRES_PORT`, `DB_CONN_MAX_AGE`. Host and port are set by compose to the
+`web_db` service, so `.env` only needs them when running outside compose.
+
+Discrete variables rather than a `DATABASE_URL`, so a password containing `@` or
+`/` needs no encoding and cannot silently truncate a connection string.
+
+`/health/` deliberately does **not** touch the database. It answers "is this
+process serving requests", which is the only thing it can answer about itself; a
+health check that fails on a dependency turns a working deploy into a red light.
+
+## TinyMCE
+
+Articles are authored in TinyMCE and stored as HTML — the same model as the
+monolith's blog, deliberately, so legacy articles can be imported later without
+rewriting a single one. Integration is
+[`django-tinymce`](https://github.com/jazzband/django-tinymce) (Jazzband), served
+from the installed package rather than a CDN, so the admin works on a locked-down
+network and the site keeps no external runtime dependency.
+
+Configuration is `TINYMCE_DEFAULT_CONFIG` in `config/settings.py`. The toolbar is
+what Haresign articles actually use — headings, emphasis, links, lists, quotes,
+tables, images, and a source view for fixing imported markup. `block_formats` is
+restricted to the block types `.hs-prose` actually styles, so an author cannot
+pick a heading level the design does not render.
+
+`convert_urls: False` is set on purpose — see "Legacy image paths" below.
+
+## Media
+
+Uploaded images go to `MEDIA_ROOT` (bind-mounted at `./media`), never into
+PostgreSQL: the database stores the path, the volume stores the bytes.
+
+Storage is declared through `STORAGES['default']`, so moving to **Cloudflare R2**
+later is a settings change plus a file copy:
+
+```python
+STORAGES['default'] = {'BACKEND': 'storages.backends.s3.S3Storage'}
+```
+
+The `Article` model, the templates and the admin are unaffected, because they
+only ever touch `article.featured_image.url`.
+
+In beta, media is served by a WhiteNoise wrapper in `config/wsgi.py` with
+`autorefresh=True` — without it WhiteNoise indexes files once at boot and a newly
+uploaded image would 404 until the container restarted.
+
+### Legacy image paths
+
+Monolith article bodies reference images as `../../../../uploads/library/…` — a
+TinyMCE `convert_urls` artefact that resolves correctly only at the URL depth it
+was authored at. So that imported articles render **without rewriting their
+HTML**, beta also serves `/uploads/` from `MEDIA_ROOT/legacy`.
+
+That is a comparison affordance, not the migration plan. The real import should
+rewrite these paths to `MEDIA_URL`. The new editor sets `convert_urls: False` so
+no future article acquires them.
+
+## Migration from the monolith
+
+Legacy content is untouched. `insights/management/commands/import_legacy_articles.py`
+performs a **one-way** import from a JSON export — it never connects to the
+monolith's database, because that would be the shared-database coupling this
+repository exists to avoid, and would make beta depend on production being up.
+
+In the monolith:
+
+```bash
+docker compose exec haresign_net python manage.py dumpdata \
+    website.BlogPost website.BlogTag --indent 1 > legacy_articles.json
+```
+
+Then here:
+
+```bash
+docker compose run --rm \
+    -v "$(pwd)/legacy_articles.json:/tmp/legacy.json:ro" \
+    -v "/path/to/monolith/uploads:/tmp/legacy-media:ro" \
+    haresign_web python manage.py import_legacy_articles /tmp/legacy.json \
+    --media-root /tmp/legacy-media --dry-run --only <slug> <slug>
+```
+
+Drop `--dry-run` to commit, drop `--only` to take everything. Matched on slug and
+idempotent, so the delta import at cutover is the same command again.
+
+| legacy | → | `insights.Article` |
+|---|---|---|
+| `title` | → | `title` |
+| `slug` | → | `slug` (unchanged, so `/blog/x/` → `/insights/x/` holds) |
+| `excerpt` | → | `summary` |
+| `content` | → | `body` (HTML verbatim) |
+| `author_name` | → | `author_name` |
+| `published_date` (date) | → | `published_at` (aware datetime, 09:00 local) |
+| `is_published` | → | `status` |
+| `hero_image` | → | `featured_image` |
+| `tags` | → | `tags` |
+
+Legacy has **no categories, kicker, meta fields or featured flag**, so those are
+left empty rather than invented.
+
+## Backup
+
+Two things, and they are not the same thing:
+
+- **PostgreSQL** — `pg_dump` of the `web_db` volume. Articles, taxonomy, admin users.
+- **`./media`** — uploaded images. A database dump alone restores articles whose
+  images are all broken.
 
 ---
 

@@ -1,0 +1,46 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block title %}Insights — {{ SITE_NAME }}{% endblock %}
+{% block description %}Research, analysis and practical commentary on primary care from Haresign.{% endblock %}
+{% block og_title %}Haresign Insights{% endblock %}
+{% block og_description %}Research, analysis and practical commentary on primary care.{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/insights.css' %}">{% endblock %}
+
+{% block content %}
+
+<section class="hs-section hs-section--tight hs-insights-head" aria-labelledby="insights-title">
+  <div class="hs-container">
+    {% include 'web/partials/_section_header.html' with eyebrow='Research & analysis' heading='Insights' lead='Research, analysis and practical commentary on running primary care.' heading_id='insights-title' %}
+  </div>
+</section>
+
+{% if featured %}
+<section class="hs-section hs-section--tight" aria-label="Featured article">
+  <div class="hs-container">
+    {% include 'insights/partials/_lead_article.html' with article=featured %}
+  </div>
+</section>
+{% endif %}
+
+<section class="hs-section hs-section--muted" aria-labelledby="all-articles-title">
+  <div class="hs-container">
+    <h2 class="hs-visually-hidden" id="all-articles-title">All articles</h2>
+
+    {% if articles %}
+      <div class="hs-article-grid">
+        {% for article in articles %}
+          {% include 'insights/partials/_article_summary.html' with article=article %}
+        {% endfor %}
+      </div>
+    {% else %}
+      {% comment %}An empty state rather than a blank band. With one article
+      published, the featured slot holds it and this list is legitimately
+      empty.{% endcomment %}
+      <p class="hs-insights-empty">More articles are on the way.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

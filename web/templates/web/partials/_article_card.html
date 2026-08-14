@@ -1,39 +1,38 @@
-{% comment %}Article card, in two variants.
+{% comment %}Article card for the homepage "Latest insight" section, in two variants.
 
     {% include 'web/partials/_article_card.html' with article=a %}
     {% include 'web/partials/_article_card.html' with article=a featured=True %}
 
-`article` is a `content.Article`. The card renders as an <a> only when the
-article has a URL — placeholder entries have none, and a link that goes nowhere
-is worse than a card that simply does not offer one.
+`article` is an `insights.Article`. Every card links, because only live articles
+ever reach this template — `insights.selectors` filters on published status and
+publication time, so a draft or a scheduled piece cannot appear here.
 
-A placeholder is labelled as such. The section has to demonstrate the layout
-before there is real content behind it, but nothing here should read as a
-published Haresign article when it is not one.
+The Insights index has its own, wider card treatments; this one is the compact
+homepage form.
 {% endcomment %}
-{% if article.has_link %}<a class="hs-card hs-card--interactive hs-article-card{% if featured %} hs-article-card--featured{% else %} hs-article-card--link{% endif %}" href="{{ article.url }}">
-{% else %}<article class="hs-card hs-article-card{% if featured %} hs-article-card--featured{% endif %}">
-{% endif %}
+<a class="hs-card hs-card--interactive hs-article-card{% if featured %} hs-article-card--featured{% else %} hs-article-card--link{% endif %}"
+   href="{{ article.get_absolute_url }}">
 
   {% if featured %}
     <div class="hs-article-card__media">
-      {% if article.image %}<img src="{{ article.image }}" alt="" loading="lazy">{% endif %}
+      {% if article.featured_image %}
+        <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}" loading="lazy">
+      {% endif %}
     </div>
     <div class="hs-article-card__body">
       <p class="hs-article-card__meta">
-        <span>{{ article.category }}</span>
-        <time datetime="{{ article.published|date:'Y-m-d' }}">{{ article.published|date:'j F Y' }}</time>
-        {% if article.is_placeholder %}<span class="hs-badge">Sample</span>{% endif %}
+        <span>Featured</span>
+        {% for category in article.categories.all %}<span>{{ category.name }}</span>{% endfor %}
+        <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:'j F Y' }}</time>
       </p>
       <h3 class="hs-article-card__title">{{ article.title }}</h3>
-      <p class="hs-article-card__summary">{{ article.summary }}</p>
+      <p class="hs-article-card__summary">{{ article.summary|truncatewords:34 }}</p>
     </div>
   {% else %}
     <p class="hs-article-card__meta">
-      <time datetime="{{ article.published|date:'Y-m-d' }}">{{ article.published|date:'j F Y' }}</time>
-      {% if article.is_placeholder %}<span class="hs-badge">Sample</span>{% endif %}
+      <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:'j F Y' }}</time>
     </p>
     <h3 class="hs-article-card__title">{{ article.title }}</h3>
   {% endif %}
 
-{% if article.has_link %}</a>{% else %}</article>{% endif %}
+</a>
