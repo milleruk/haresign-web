@@ -400,3 +400,158 @@
 @media (max-width: 575.98px) {
   .hs-credibility { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   .hs-prose — long-form article bodies.
+
+   Used by Insights articles AND the legal pages, which is why it lives here
+   rather than in pages/: a rule needed by two page types is a component.
+
+   Styled by element, not class, so imported HTML inherits the design with no
+   edits. Covers everything TinyMCE can produce and everything the legacy blog
+   contains.
+   ========================================================================== */
+
+.hs-prose {
+  font-size: var(--hs-text-lg);
+  line-height: 1.8;
+  color: var(--hs-text);
+}
+
+.hs-prose > * + * { margin-top: var(--hs-space-6); }
+
+.hs-prose h2,
+.hs-prose h3,
+.hs-prose h4,
+.hs-prose h5,
+.hs-prose h6 {
+  font-family: var(--hs-font-display);
+  color: var(--hs-text-strong);
+  line-height: var(--hs-leading-snug);
+}
+/* Headings need more space above than below — the gap belongs to the section
+   they open, not to the paragraph they follow. */
+.hs-prose h2 { font-size: clamp(1.5rem, 3vw, 1.875rem); margin-top: var(--hs-space-12); margin-bottom: var(--hs-space-4); }
+.hs-prose h3 { font-size: clamp(1.25rem, 2.4vw, 1.5rem);  margin-top: var(--hs-space-10); margin-bottom: var(--hs-space-3); }
+.hs-prose h4 { font-size: var(--hs-text-xl);  margin-top: var(--hs-space-8); margin-bottom: var(--hs-space-3); }
+.hs-prose h5,
+.hs-prose h6 { font-size: var(--hs-text-lg); margin-top: var(--hs-space-6); margin-bottom: var(--hs-space-2); }
+.hs-prose > h2:first-child,
+.hs-prose > h3:first-child { margin-top: 0; }
+
+.hs-prose p { margin-bottom: 0; }
+
+.hs-prose strong, .hs-prose b { font-weight: var(--hs-weight-bold); color: var(--hs-text-strong); }
+.hs-prose em, .hs-prose i { font-style: italic; }
+
+/* Underlined in body copy: colour alone is not a sufficient affordance in
+   running text (WCAG 1.4.1). */
+.hs-prose a {
+  color: var(--hs-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.hs-prose a:hover { color: var(--hs-primary-hover); }
+
+.hs-prose ul, .hs-prose ol { padding-inline-start: var(--hs-space-6); }
+.hs-prose li + li { margin-top: var(--hs-space-2); }
+.hs-prose li > ul, .hs-prose li > ol { margin-top: var(--hs-space-2); }
+.hs-prose ul { list-style: disc; }
+.hs-prose ol { list-style: decimal; }
+.hs-prose li::marker { color: var(--hs-teal-deep); }
+
+.hs-prose blockquote {
+  margin-inline: 0;
+  padding: var(--hs-space-2) 0 var(--hs-space-2) var(--hs-space-6);
+  border-inline-start: 4px solid var(--hs-coral);
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-xl);
+  font-weight: var(--hs-weight-medium);
+  line-height: 1.6;
+  color: var(--hs-navy-soft);
+}
+.hs-prose blockquote p { margin: 0; }
+.hs-prose blockquote > * + * { margin-top: var(--hs-space-4); }
+
+.hs-prose img { border-radius: var(--hs-radius-md); display: block; }
+/* A standalone image is a figure in its own right; let it use the full width. */
+.hs-prose > p > img,
+.hs-prose > figure > img { width: 100%; }
+.hs-prose figure { margin-inline: 0; }
+.hs-prose figcaption {
+  margin-top: var(--hs-space-3);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+  text-align: center;
+}
+
+/* Tables. A wide legacy table must scroll inside its own box rather than push
+   the whole page sideways, so the element is given its own scroll container. */
+.hs-prose table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  /* Wide tables break the measure slightly rather than shrinking their type. */
+  margin-inline: calc(var(--hs-space-6) * -1);
+  width: calc(100% + var(--hs-space-12));
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--hs-text-sm);
+}
+.hs-prose thead { background-color: var(--hs-surface-muted); }
+.hs-prose th, .hs-prose td {
+  padding: var(--hs-space-3) var(--hs-space-4);
+  border: 1px solid var(--hs-border);
+  text-align: left;
+  vertical-align: top;
+}
+.hs-prose th { font-weight: var(--hs-weight-bold); color: var(--hs-text-strong); }
+.hs-prose tbody tr:nth-child(even) { background-color: var(--hs-surface-muted); }
+.hs-prose caption {
+  caption-side: bottom;
+  padding-top: var(--hs-space-3);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+  text-align: left;
+}
+
+.hs-prose code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--hs-radius-sm);
+  background-color: var(--hs-surface-sunken);
+  font-family: var(--hs-font-mono);
+  font-size: 0.875em;
+  color: var(--hs-navy);
+}
+.hs-prose pre {
+  padding: var(--hs-space-5);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-navy);
+  color: var(--hs-text-on-dark-strong);
+  overflow-x: auto;
+  font-family: var(--hs-font-mono);
+  font-size: var(--hs-text-sm);
+  line-height: 1.6;
+}
+.hs-prose pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+.hs-prose hr {
+  border: 0;
+  border-top: 1px solid var(--hs-border);
+  margin-block: var(--hs-space-10);
+}
+
+/* Legacy articles may carry width/height attributes or float styles from the
+   old editor; keep them inside the column whatever they ask for. */
+.hs-prose img,
+.hs-prose iframe,
+.hs-prose video { max-width: 100%; height: auto; }
+
+
+/* .hs-prose responsive. Lives with the component, not with one of the two page
+   types that use it. */
+@media (max-width: 767.98px) {
+  .hs-prose { font-size: var(--hs-text-base); }
+  /* No room to break the measure on a phone. */
+  .hs-prose table { margin-inline: 0; width: 100%; }
+}

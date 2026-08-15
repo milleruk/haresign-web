@@ -1,0 +1,68 @@
+{% extends 'web/base.html' %}
+{% load static %}{% comment %}Shared shell for the four legal pages.
+
+Each page supplies only its prose in {% block policy %}; the hero, contents nav,
+reading measure, metadata and footer note all come from here, so four documents
+do not become four near-identical templates. Title, lead, sections and the
+reviewed date come from web/legal.py.
+
+Body copy uses `.hs-prose`, the same long-form styling as Insights articles — a
+policy is a document, and it should read like one rather than like a UI.
+{% endcomment %}
+
+{% block title %}{{ page.title }} — {{ SITE_NAME }}{% endblock %}
+{% block description %}{{ page.meta_description }}{% endblock %}
+{% block og_title %}{{ page.title }} — {{ SITE_NAME }}{% endblock %}
+{% block og_description %}{{ page.meta_description }}{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/legal.css' %}">{% endblock %}
+
+{% block content %}
+
+<header class="hs-legal-hero">
+  <div class="hs-container hs-container--reading">
+    <p class="hs-eyebrow">Legal</p>
+    <h1 class="hs-legal-hero__title">{{ page.title }}</h1>
+    <p class="hs-legal-hero__lead">{{ page.lead }}</p>
+    <p class="hs-legal-hero__meta">Last reviewed: {{ last_reviewed }}</p>
+  </div>
+</header>
+
+<div class="hs-container hs-container--reading">
+
+  {% comment %}Contents built from the same list the tests check against, so a
+  link here cannot point at a heading that no longer exists.{% endcomment %}
+  <nav class="hs-legal-toc" aria-labelledby="contents-heading">
+    <h2 class="hs-legal-toc__heading" id="contents-heading">Contents</h2>
+    <ol class="hs-legal-toc__list">
+      {% for anchor, label in page.sections %}
+        <li><a href="#{{ anchor }}">{{ label }}</a></li>
+      {% endfor %}
+    </ol>
+  </nav>
+
+  <div class="hs-prose hs-legal-body">
+    {% block policy %}{% endblock %}
+  </div>
+
+  <aside class="hs-legal-note">
+    <p>
+      Questions about this page? Email
+      <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+    </p>
+  </aside>
+
+  <div class="hs-legal-related">
+    <h2 class="hs-legal-related__heading">Other policies</h2>
+    <ul class="hs-legal-related__list">
+      {% for slug, other in legal_pages.items %}
+        {% if slug != page.slug %}
+          <li><a href="{% url 'legal_'|add:slug %}">{{ other.title }}</a></li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+
+{% endblock %}

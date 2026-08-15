@@ -1,0 +1,153 @@
+{% extends 'web/legal/base.html' %}{% comment %}Accessibility Statement.
+
+Every measure listed is one actually implemented in this repository and, where
+it can be, asserted by a test. Contrast ratios are computed values, not
+estimates.
+
+It deliberately does *not* claim compliance. The site has not been independently
+audited and has not been tested with a screen reader or by disabled users, so
+"designed to meet WCAG 2.2 AA" is the honest claim and the limitations section
+says exactly what is missing. An accessibility statement that overstates is
+worse than none: it tells someone the site will work for them when nobody has
+checked.
+{% endcomment %}
+
+{% block policy %}
+
+<h2 id="commitment">Our commitment</h2>
+<p>
+  Haresign works with people running general practice — a setting where access
+  needs are taken seriously — and we want this website to be usable by as many
+  people as possible, including those using assistive technology.
+</p>
+<p>
+  This statement covers the public Haresign website. It says what we have built
+  in, and it is honest about what has not yet been checked.
+</p>
+
+<h2 id="standard">The standard we work to</h2>
+<p>
+  This site is <strong>designed to meet the Web Content Accessibility Guidelines
+  (WCAG) 2.2 at level AA</strong>.
+</p>
+<blockquote>
+  <p>
+    We do not claim formal compliance. The site has not been independently
+    audited, and “designed to meet” is a description of how it was built, not a
+    verified conformance claim.
+  </p>
+</blockquote>
+
+<h2 id="what-we-do">What we have built in</h2>
+<ul>
+  <li>
+    <strong>Semantic structure.</strong> Real landmarks — header, main, footer —
+    one <code>&lt;h1&gt;</code> per page, and headings that descend in order, so
+    the page can be navigated by structure rather than by sight.
+  </li>
+  <li>
+    <strong>Skip link.</strong> The first thing a keyboard user reaches is a link
+    straight to the main content, so no visit begins by tabbing through the
+    navigation.
+  </li>
+  <li>
+    <strong>Keyboard navigation.</strong> Every interactive element is reachable
+    and operable by keyboard. The mobile menu closes on <kbd>Escape</kbd> and
+    returns focus to the button that opened it.
+  </li>
+  <li>
+    <strong>Visible focus.</strong> A clear focus ring on every focusable
+    element, with a high-contrast variant for Windows High Contrast Mode.
+  </li>
+  <li>
+    <strong>Colour contrast.</strong> Text and interface colours are checked
+    against WCAG thresholds rather than chosen by eye. Body text is 7.6:1 on
+    white; the primary button is 5.0:1; the brand colours were also checked for
+    separation under red-green colour-vision deficiency.
+  </li>
+  <li>
+    <strong>Colour is never the only cue.</strong> Anything distinguished by
+    colour is also labelled in words.
+  </li>
+  <li>
+    <strong>Reduced motion.</strong> Movement on the site is decorative, and it
+    is removed entirely when your system asks for reduced motion.
+  </li>
+  <li>
+    <strong>Responsive layout.</strong> The site reflows to a single column on
+    small screens rather than being scaled down, and text can be zoomed without
+    content being lost.
+  </li>
+  <li>
+    <strong>Touch targets.</strong> Controls are at least 44&nbsp;&times;&nbsp;44
+    pixels.
+  </li>
+  <li>
+    <strong>Meaningful links.</strong> Link text describes its destination, so it
+    makes sense read out of context. In body copy links are underlined, not
+    signalled by colour alone.
+  </li>
+  <li>
+    <strong>Images.</strong> Decorative graphics are hidden from assistive
+    technology; images that carry meaning are given alternative text.
+  </li>
+  <li>
+    <strong>No hidden dependencies.</strong> The site loads no external fonts,
+    scripts or trackers, so it behaves the same on a restricted network.
+  </li>
+</ul>
+
+<h2 id="limitations">Known limitations</h2>
+<p>We would rather tell you these than let you discover them.</p>
+<ul>
+  <li>
+    <strong>No independent audit.</strong> The site has not been assessed by an
+    external accessibility auditor.
+  </li>
+  <li>
+    <strong>No screen-reader or user testing yet.</strong> Accessibility has been
+    built in and checked by code review and automated assertions, but the site has
+    not been tested with a screen reader or with disabled users. That is planned
+    before it replaces the current haresign.net.
+  </li>
+  <li>
+    <strong>Older articles.</strong> Articles written before this site existed may
+    contain images without alternative text, or tables whose structure is not
+    fully marked up. We are reviewing these as they are brought across.
+  </li>
+  <li>
+    <strong>Data tables and charts.</strong> Some analysis includes wide tables
+    and chart images. Wide tables scroll within their own area rather than
+    breaking the page, but a chart supplied as an image may not yet have a full
+    text equivalent.
+  </li>
+  <li>
+    <strong>This site is in beta.</strong> It is under active development and
+    parts of it will change.
+  </li>
+</ul>
+
+<h2 id="reporting">Reporting a problem</h2>
+<p>
+  If something on this site is difficult or impossible to use, please tell us —
+  it is the fastest way for us to fix it.
+</p>
+<p>
+  Email <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+  It helps if you can say what page you were on, what you were trying to do, and
+  what browser or assistive technology you were using. We will acknowledge your
+  message and tell you what we intend to do about it.
+</p>
+<p>
+  If you need something on this site in another format, ask us and we will do
+  what we reasonably can.
+</p>
+
+<h2 id="changes">Changes to this statement</h2>
+<p>
+  We will update this statement as the site changes and as testing is completed.
+  The “last reviewed” date at the top of the page reflects the most recent
+  change.
+</p>
+
+{% endblock %}

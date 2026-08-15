@@ -1,0 +1,160 @@
+{% extends 'web/legal/base.html' %}{% comment %}Privacy Notice.
+
+Adapted from the existing haresign.net privacy policy. The identity, controller,
+lawful bases, rights and ICO wording are carried over unchanged in meaning.
+
+What is deliberately *not* carried over, because it is not true of this site:
+contact-form processing (there is no form here — enquiries arrive by email),
+Google Analytics (none is deployed), Google Fonts (self-hosted), and
+PracticeConnect embedded content (none). Claiming processing that does not
+happen is as wrong as omitting processing that does.
+{% endcomment %}
+
+{% block policy %}
+
+<h2 id="who-we-are">Who we are</h2>
+<p>
+  This website is operated by <strong>Haresign Consulting Services</strong>, a
+  sole trader business providing practice and business management consulting for
+  GP practices and Primary Care Networks across England.
+</p>
+<p>
+  The data controller is <strong>Ben Haresign</strong>. You can contact us at
+  <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+</p>
+
+<h2 id="what-this-covers">What this notice covers</h2>
+<p>
+  This notice covers the <strong>public Haresign website</strong> only — the pages
+  you are reading now, including Insights articles.
+</p>
+<p>
+  Haresign Intelligence, Haresign Community, Haresign Workspace and Haresign
+  Account are separate services. Where they process personal data they do so
+  under their own arrangements, and using them may involve additional or
+  service-specific privacy information. Nothing in this notice describes them.
+</p>
+
+<h2 id="what-we-collect">What information we collect</h2>
+<p>This website is deliberately minimal in what it collects.</p>
+
+<h3>Information you send us</h3>
+<p>
+  There are no forms on this website. Where the site invites you to get in touch,
+  it opens an email to us. If you email us we receive your email address, your
+  name if you give it, and whatever you choose to write.
+</p>
+
+<h3>Technical information</h3>
+<p>
+  Like any website, our servers keep access logs. These record the request made,
+  the time, the response, your IP address, and the browser user-agent string.
+  They exist to keep the service running securely and to diagnose faults.
+</p>
+
+<h3>Analytics</h3>
+<p>
+  <strong>This website does not use analytics.</strong> There is no Google
+  Analytics, no tag manager, and no third-party measurement of any kind. The site
+  makes no requests to any external service: fonts, styles, scripts and images
+  are all served from our own servers.
+</p>
+
+<h3>Cookies</h3>
+<p>
+  This website sets <strong>no cookies</strong> when you browse it. See the
+  <a href="{% url 'legal_cookies' %}">Cookie Policy</a> for detail, including the
+  cookies used by the staff area.
+</p>
+
+<h2 id="how-we-use-it">How we use it, and our lawful basis</h2>
+<ul>
+  <li>
+    <strong>Email enquiries</strong> — used only to reply to you and to carry on
+    any resulting conversation. Lawful basis: <em>legitimate interests</em>, in
+    responding to an enquiry you have initiated.
+  </li>
+  <li>
+    <strong>Server logs</strong> — used to operate the site securely and
+    investigate problems. Lawful basis: <em>legitimate interests</em>, in keeping
+    the service available and secure.
+  </li>
+</ul>
+<p>
+  We do not use your information for marketing without your explicit agreement,
+  and we do not add you to any mailing list because you emailed us.
+</p>
+
+<h2 id="sharing">Who we share it with</h2>
+<p>
+  We do not sell personal information and we do not share it with third parties
+  for their own purposes.
+</p>
+<p>
+  We use suppliers who process information on our behalf in order to run the
+  service — a hosting provider, and an email provider for correspondence. They
+  act on our instructions and are not permitted to use the information for
+  anything else.
+</p>
+
+<h2 id="retention">How long we keep it</h2>
+<ul>
+  <li>
+    <strong>Email correspondence</strong> — kept for as long as it remains
+    relevant to the enquiry or the working relationship, then deleted.
+  </li>
+  <li>
+    <strong>Server logs</strong> — kept only as long as needed to operate and
+    secure the service, then rotated and discarded.
+  </li>
+</ul>
+
+<h2 id="security">Security</h2>
+<p>
+  The site is served over HTTPS. Access to the systems behind it is restricted to
+  those who need it, and the staff publishing area requires an account.
+</p>
+
+<h2 id="your-rights">Your rights</h2>
+<p>Under UK GDPR you have the right to:</p>
+<ul>
+  <li>access the personal information we hold about you;</li>
+  <li>ask us to correct information that is inaccurate;</li>
+  <li>ask us to delete information;</li>
+  <li>object to, or ask us to restrict, our processing;</li>
+  <li>ask for a copy of information you provided, in a portable form;</li>
+  <li>complain to the Information Commissioner's Office.</li>
+</ul>
+<p>
+  To exercise any of these, email
+  <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+</p>
+
+<h2 id="other-services">Other Haresign services</h2>
+<p>
+  Links from this site to Haresign Consulting, Haresign Intelligence, Haresign
+  Community, Haresign Workspace or Haresign Account take you to separate
+  services. Some are not yet available. When you use one, its own privacy
+  information applies in addition to this notice, and this notice does not
+  describe what it collects.
+</p>
+
+<h2 id="changes">Changes to this notice</h2>
+<p>
+  We may update this notice. The “last reviewed” date at the top of the page
+  reflects the most recent change.
+</p>
+
+<h2 id="contact">Contact and complaints</h2>
+<p>
+  Email <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>
+  with any question about this notice or about how we handle your information.
+</p>
+<p>
+  If you are unhappy with our response you can complain to the Information
+  Commissioner's Office at
+  <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a>. We
+  would ask you to raise it with us first so we have the chance to put it right.
+</p>
+
+{% endblock %}

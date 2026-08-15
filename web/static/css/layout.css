@@ -16,6 +16,16 @@
   padding-inline: var(--hs-container-pad);
 }
 
+/* --- Reading measure -----------------------------------------------------
+   Long-form text needs a narrower column than a landing page, but 46rem was
+   tighter than these articles want: they carry wide tables and full-width
+   charts, and a narrow column squeezed both. 54rem is ~78 characters at the
+   body size — still inside the readable 45–85 band, with room for the figures.
+
+   Tables and images may extend a little beyond the text column, so a 7-column
+   table is legible without the prose itself becoming a wall. */
+.hs-container--reading { max-width: 54rem; }
+
 /* --- Sections ------------------------------------------------------------ */
 .hs-section { padding-block: var(--hs-section-y); }
 .hs-section--tight { padding-block: var(--hs-section-y-tight); }

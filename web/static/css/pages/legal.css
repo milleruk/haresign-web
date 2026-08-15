@@ -1,0 +1,124 @@
+/* ==========================================================================
+   pages/legal.css — the four legal and policy pages.
+
+   Small on purpose. The body of every policy is `.hs-prose` (pages/insights.css),
+   which already styles headings, lists, links, quotes and tables for long-form
+   reading — a policy is a document, so it should read like one. What is added
+   here is the page shell: hero, contents nav, callouts and the closing note.
+   ========================================================================== */
+
+/* --- Hero ---------------------------------------------------------------- */
+.hs-legal-hero {
+  padding-block: var(--hs-section-y-tight) var(--hs-space-8);
+  background-color: var(--hs-surface-warm);
+  border-bottom: 1px solid var(--hs-border-subtle);
+  margin-bottom: var(--hs-space-10);
+}
+.hs-legal-hero__title { margin-bottom: var(--hs-space-4); }
+.hs-legal-hero__lead {
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-xl);
+  font-weight: var(--hs-weight-medium);
+  line-height: 1.55;
+  color: var(--hs-navy-soft);
+  margin-bottom: var(--hs-space-5);
+}
+.hs-legal-hero__meta {
+  margin: 0;
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+}
+
+/* --- Contents ------------------------------------------------------------
+   Policy pages are long and people arrive looking for one section. Numbered,
+   because the sections are referred to by position in correspondence. */
+.hs-legal-toc {
+  padding: var(--hs-space-6) var(--hs-space-8);
+  margin-bottom: var(--hs-space-10);
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-surface-muted);
+}
+.hs-legal-toc__heading {
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+  color: var(--hs-text-muted);
+  margin-bottom: var(--hs-space-4);
+}
+.hs-legal-toc__list {
+  columns: 2;
+  column-gap: var(--hs-space-8);
+  margin: 0;
+  padding-inline-start: var(--hs-space-5);
+  font-size: var(--hs-text-sm);
+}
+.hs-legal-toc__list li { margin-bottom: var(--hs-space-2); break-inside: avoid; }
+.hs-legal-toc__list a { color: var(--hs-text); }
+.hs-legal-toc__list a:hover { color: var(--hs-primary); text-decoration: underline; }
+
+/* --- Body ---------------------------------------------------------------- */
+/* Numbered sections, matching how the contents lists them, without putting the
+   numbers in the markup where they would be read out twice. */
+.hs-legal-body { counter-reset: hs-legal-section; }
+.hs-legal-body h2 { counter-increment: hs-legal-section; }
+.hs-legal-body h2::before {
+  content: counter(hs-legal-section) ". ";
+  color: var(--hs-teal-deep);
+}
+
+/* --- Callout -------------------------------------------------------------
+   For a statement that must not be mistaken for settled text. */
+.hs-callout {
+  padding: var(--hs-space-5) var(--hs-space-6);
+  border-radius: var(--hs-radius-md);
+  border-inline-start: 4px solid var(--hs-teal);
+  background-color: var(--hs-surface-muted);
+  font-size: var(--hs-text-base);
+}
+.hs-callout--todo {
+  border-inline-start-color: var(--hs-coral);
+  background-color: var(--hs-tint-coral);
+  color: var(--hs-navy-soft);
+}
+
+/* Wide tables inside a policy get their own scroll box, as in articles. */
+.hs-table-wrap { overflow-x: auto; }
+
+/* --- Closing note and cross-links ---------------------------------------- */
+.hs-legal-note {
+  margin-top: var(--hs-space-12);
+  padding: var(--hs-space-5) var(--hs-space-6);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-surface-muted);
+  border-inline-start: 4px solid var(--hs-teal);
+}
+.hs-legal-note p { margin: 0; }
+
+.hs-legal-related {
+  margin-block: var(--hs-space-10) var(--hs-section-y);
+  padding-top: var(--hs-space-6);
+  border-top: 1px solid var(--hs-border);
+}
+.hs-legal-related__heading {
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+  color: var(--hs-text-muted);
+  margin-bottom: var(--hs-space-3);
+}
+.hs-legal-related__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hs-space-6);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 575.98px) {
+  .hs-legal-toc__list { columns: 1; }
+  .hs-legal-toc { padding: var(--hs-space-5); }
+}

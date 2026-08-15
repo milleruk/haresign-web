@@ -1,0 +1,144 @@
+{% extends 'web/legal/base.html' %}{% comment %}Terms of Use.
+
+New content. The monolith has no terms page — its footer "Terms of Use" link
+points at the privacy policy — so there was nothing to adapt and nothing whose
+meaning could be preserved.
+
+Everything here is confined to the public website. It deliberately creates no
+terms for Haresign Intelligence, Community or Workspace: those are services with
+their own arrangements, and a website notice must not quietly become a contract
+for them.
+
+Governing law is a TODO rather than a guess. England and Wales is the obvious
+answer for a sole trader operating in England, but a jurisdiction clause is a
+legal commitment and not something to infer. See README / the handover note.
+{% endcomment %}
+
+{% block policy %}
+
+<h2 id="about">About these terms</h2>
+<p>
+  These terms apply to your use of the public Haresign website. By using the
+  site you accept them. If you do not accept them, please do not use the site.
+</p>
+<p>
+  The site is operated by <strong>Haresign Consulting Services</strong>, a sole
+  trader business. You can contact us at
+  <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+</p>
+
+<h2 id="using">Using this website</h2>
+<p>
+  You may read, print and share pages from this site for your own use and for the
+  internal purposes of your practice, PCN or organisation.
+</p>
+<p>
+  The site is provided for information. Using it does not create a consulting,
+  professional or contractual relationship between us — that begins only when we
+  agree one in writing.
+</p>
+
+<h2 id="content">The nature of our content</h2>
+<p>
+  Articles, analysis and commentary on this site are <strong>general information,
+  not advice</strong>. They are not clinical, legal, financial or employment
+  advice, and they are not a substitute for advice about your own circumstances.
+</p>
+<p>
+  Much of what we publish draws on national datasets and published guidance. That
+  material changes, and figures can be revised or superseded after we write about
+  them. We take care to be accurate at the time of writing but do not warrant
+  that everything remains current or complete.
+</p>
+<p>
+  Decisions about your practice, your patients or your organisation remain yours.
+  Please check anything material against the primary source before acting on it.
+</p>
+
+<h2 id="ip">Intellectual property</h2>
+<p>
+  The content of this site — text, analysis, graphics, layout and code — belongs
+  to Haresign Consulting Services unless stated otherwise, and is protected by
+  copyright.
+</p>
+<p>
+  You may quote from it with clear attribution and a link to the original page.
+  You may not republish it wholesale, present it as your own, or use it in a
+  commercial product without our written permission.
+</p>
+<p>
+  Where we reproduce public-sector information, that material remains the property
+  of its publisher and is used under its own licence terms. NHS and other
+  third-party names and marks belong to their owners.
+</p>
+
+<h2 id="acceptable-use">Acceptable use</h2>
+<p>You agree not to:</p>
+<ul>
+  <li>use the site unlawfully, or for any fraudulent or harmful purpose;</li>
+  <li>attempt to gain unauthorised access to any part of it, or to the systems behind it;</li>
+  <li>interfere with its operation, or with anyone else's use of it;</li>
+  <li>introduce malicious code;</li>
+  <li>scrape or systematically extract content to build a competing product.</li>
+</ul>
+
+<h2 id="external-links">Links to other sites</h2>
+<p>
+  We link to external sites — NHS publications, source data, and other Haresign
+  services — where they are useful. We do not control them and are not
+  responsible for their content or availability. A link is not an endorsement.
+</p>
+
+<h2 id="availability">Availability</h2>
+<p>
+  We aim to keep the site available but do not guarantee it. It may be
+  unavailable during maintenance, and we may change, suspend or withdraw any part
+  of it without notice.
+</p>
+
+<h2 id="liability">Liability</h2>
+<p>
+  The site and its content are provided “as is”. To the extent permitted by law we
+  exclude liability for any loss arising from reliance on the content of this
+  site, from its unavailability, or from your use of it.
+</p>
+<p>
+  Nothing in these terms limits or excludes liability for death or personal
+  injury caused by negligence, for fraud or fraudulent misrepresentation, or for
+  anything else that cannot lawfully be limited or excluded.
+</p>
+<p>
+  Nothing here affects your statutory rights as a consumer, or the terms of any
+  separate written agreement between us.
+</p>
+
+<h2 id="other-services">Other Haresign services</h2>
+<p>
+  These terms cover this website only. Haresign Consulting, Haresign
+  Intelligence, Haresign Community, Haresign Workspace and Haresign Account are
+  separate services, some of which are not yet available. Each has, or will have,
+  its own terms, and using one is governed by those rather than by this page.
+</p>
+
+<h2 id="changes">Changes to these terms</h2>
+<p>
+  We may update these terms. The “last reviewed” date at the top of the page
+  reflects the most recent change, and continued use of the site after an update
+  means you accept the revised terms.
+</p>
+
+<h2 id="law">Governing law</h2>
+<p class="hs-callout hs-callout--todo">
+  <strong>To be confirmed.</strong> A governing law and jurisdiction clause is a
+  legal commitment, and there is no existing Haresign wording to carry over — so
+  rather than assume one, this section is deliberately left for confirmation
+  before the site goes to production.
+</p>
+
+<h2 id="contact">Contact</h2>
+<p>
+  Questions about these terms? Email
+  <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+</p>
+
+{% endblock %}

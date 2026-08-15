@@ -1,9 +1,10 @@
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
 from .content import PLATFORMS, PRINCIPLES, get_insights
+from .legal import LAST_REVIEWED, LEGAL_PAGES
 
 
 # How many areas a card lists. The cards stretch to the tallest in the row, so
@@ -57,6 +58,29 @@ def home(request):
         # template so the shape of the section is a decision in Python.
         'featured_article': insights[0] if insights else None,
         'recent_articles': insights[1:4],
+    })
+
+
+def legal_page(request, slug):
+    """One view for all four legal pages.
+
+    They differ only in their prose, so four views (and four near-identical
+    templates) would be four places for the shell to drift. The metadata comes
+    from `web/legal.py`; the document is `web/legal/<slug>.html`.
+
+    Public and unauthenticated, deliberately and permanently: a privacy notice
+    behind a login is not a privacy notice.
+    """
+    page = LEGAL_PAGES.get(slug)
+    if page is None:
+        raise Http404(f'No legal page: {slug}')
+    return render(request, f'web/legal/{slug}.html', {
+        # `slug` is added here rather than stored in LEGAL_PAGES so the two
+        # cannot disagree; the template uses it to drop the current page from
+        # the "other policies" list.
+        'page': {**page, 'slug': slug},
+        'legal_pages': LEGAL_PAGES,
+        'last_reviewed': LAST_REVIEWED,
     })
 
 

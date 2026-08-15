@@ -1,8 +1,7 @@
 {% load static %}{% comment %}Site footer.
 
-Platform links resolve through the service registry. Legal links are prepared but
-point at routes that do not exist yet, so they render as plain text with a
-"Coming soon" note rather than as links to 404s — see `legal_links` below.
+Platform links resolve through the service registry; the legal links point at the
+four policy pages in web/legal/.
 
 Company/registration details come from settings.LEGAL and are *omitted when
 unset*. Nothing here is invented: the real registration and ICO details belong to
@@ -62,14 +61,13 @@ the business and are supplied by configuration (see README).
         </ul>
 
         <h2 class="hs-footer__heading" id="footer-legal">Legal</h2>
-        {% comment %}Structure is in place; the pages are not written yet. They
-        are text, not links — a Privacy link that 404s on a healthcare site is
-        worse than one that is visibly still to come.{% endcomment %}
+        {% comment %}These pages now exist, so they are real links — the "Soon"
+        placeholders are gone.{% endcomment %}
         <ul class="hs-footer__list" aria-labelledby="footer-legal">
-          <li>Privacy <span class="hs-badge hs-badge--on-dark">Soon</span></li>
-          <li>Cookies <span class="hs-badge hs-badge--on-dark">Soon</span></li>
-          <li>Terms <span class="hs-badge hs-badge--on-dark">Soon</span></li>
-          <li>Accessibility <span class="hs-badge hs-badge--on-dark">Soon</span></li>
+          <li><a href="{% url 'legal_privacy' %}">Privacy</a></li>
+          <li><a href="{% url 'legal_cookies' %}">Cookies</a></li>
+          <li><a href="{% url 'legal_terms' %}">Terms</a></li>
+          <li><a href="{% url 'legal_accessibility' %}">Accessibility</a></li>
         </ul>
       </div>
 

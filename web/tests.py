@@ -351,3 +351,172 @@ class DecouplingTests(SimpleTestCase):
         for slug in ('consulting', 'intelligence', 'community', 'workspace',
                      'account', 'api'):
             self.assertTrue(registry[slug]['url'].startswith('https://'))
+
+
+class LegalPageTests(TestCase):
+    """The four policy pages.
+
+    Their content is a legal matter and not something a test can validate, so
+    what is asserted here is everything mechanical: that they resolve, that they
+    are public, that the shell is wired to the metadata, and that no link on
+    them is broken.
+    """
+
+    PAGES = {
+        'privacy': ('/privacy/', 'Privacy Notice'),
+        'cookies': ('/cookies/', 'Cookie Policy'),
+        'terms': ('/terms/', 'Terms of Use'),
+        'accessibility': ('/accessibility/', 'Accessibility Statement'),
+    }
+
+    def test_all_four_routes_resolve(self):
+        for slug, (path, title) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                response = self.client.get(path)
+
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, title)
+
+    def test_each_page_uses_its_own_template_and_the_shared_shell(self):
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                response = self.client.get(path)
+
+                self.assertTemplateUsed(response, f'web/legal/{slug}.html')
+                self.assertTemplateUsed(response, 'web/legal/base.html')
+                self.assertTemplateUsed(response, 'web/base.html')
+
+    def test_pages_are_public(self):
+        """A privacy notice behind a login is not a privacy notice. Nothing here
+        may ever redirect to an auth flow."""
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                response = self.client.get(path)
+
+                self.assertEqual(response.status_code, 200)
+                self.assertNotIn('Location', response)
+
+    def test_titles_and_descriptions_are_unique_per_page(self):
+        titles, descriptions = set(), set()
+        for slug, (path, _) in self.PAGES.items():
+            body = self.client.get(path).content.decode()
+            titles.add(re.search(r'<title>(.*?)</title>', body, re.S).group(1).strip())
+            descriptions.add(
+                re.search(r'<meta name="description" content="(.*?)"', body, re.S).group(1))
+
+        self.assertEqual(len(titles), 4)
+        self.assertEqual(len(descriptions), 4)
+
+    def test_canonical_uses_the_configured_origin(self):
+        response = self.client.get('/privacy/')
+
+        self.assertContains(
+            response, f'href="{settings.SITE_BASE_URL}/privacy/"')
+
+    def test_open_graph_metadata_is_present(self):
+        body = self.client.get('/terms/').content.decode()
+
+        self.assertIn('property="og:title"', body)
+        self.assertIn('property="og:description"', body)
+        self.assertIn('Terms of Use', body)
+
+    def test_beta_noindex_behaviour_is_unchanged(self):
+        """Legal pages must follow the same environment-driven rule as the rest
+        of the site, so beta cannot be indexed by adding a page."""
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                self.assertContains(self.client.get(path), 'noindex, nofollow')
+
+    @override_settings(SITE_INDEXABLE=True)
+    def test_legal_pages_are_indexable_in_production(self):
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                self.assertNotContains(self.client.get(path), 'noindex')
+
+    def test_footer_links_to_every_legal_page(self):
+        """Checked on the homepage, so a broken footer link is caught wherever
+        the footer appears."""
+        body = self.client.get('/').content.decode()
+
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                self.assertIn(f'href="{path}"', body)
+
+    def test_footer_has_no_placeholder_legal_links_left(self):
+        """Scoped to the Legal list: "Soon" is still correct in the Platforms and
+        Account columns, where the services genuinely are not live."""
+        body = self.client.get('/').content.decode()
+        start = body.index('aria-labelledby="footer-legal"')
+        legal_list = body[start:body.index('</ul>', start)]
+
+        self.assertNotIn('Soon', legal_list)
+        self.assertEqual(legal_list.count('<a href="/'), 4)
+
+    def test_contents_anchors_all_exist(self):
+        """Every contents entry must point at a heading that is really there —
+        otherwise renaming a section silently breaks the nav."""
+        from web.legal import LEGAL_PAGES
+
+        for slug, (path, _) in self.PAGES.items():
+            body = self.client.get(path).content.decode()
+            for anchor, label in LEGAL_PAGES[slug]['sections']:
+                with self.subTest(slug=slug, anchor=anchor):
+                    self.assertIn(f'href="#{anchor}"', body)
+                    self.assertIn(f'id="{anchor}"', body)
+
+    def test_pages_cross_link_to_the_others_but_not_to_themselves(self):
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                body = self.client.get(path).content.decode()
+                # Just the related block — slicing to the end of the document
+                # would include the footer, which links to all four.
+                start = body.index('hs-legal-related__list')
+                related = body[start:body.index('</ul>', start)]
+
+                for other, (other_path, _) in self.PAGES.items():
+                    if other == slug:
+                        self.assertNotIn(f'href="{other_path}"', related)
+                    else:
+                        self.assertIn(f'href="{other_path}"', related)
+
+    def test_body_uses_the_shared_prose_component(self):
+        """Legal pages read as documents, using the same long-form styling as
+        articles rather than a second copy of it."""
+        response = self.client.get('/privacy/')
+
+        self.assertContains(response, 'hs-prose')
+        self.assertContains(response, 'hs-container--reading')
+
+    def test_pages_have_exactly_one_h1(self):
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                self.assertEqual(
+                    self.client.get(path).content.decode().count('<h1'), 1)
+
+    def test_no_template_syntax_leaks(self):
+        for slug, (path, _) in self.PAGES.items():
+            with self.subTest(slug=slug):
+                body = self.client.get(path).content.decode()
+                for token in ('{#', '{%', '{{'):
+                    self.assertNotIn(token, body)
+
+    def test_unknown_legal_slug_404s(self):
+        from django.http import Http404
+        from django.test import RequestFactory
+
+        from web.views import legal_page
+
+        with self.assertRaises(Http404):
+            legal_page(RequestFactory().get('/nope/'), slug='nope')
+
+    def test_cookie_policy_states_what_the_site_actually_does(self):
+        """The site sets no cookies to public visitors and loads nothing
+        external. If that ever changes, this test should fail and the policy
+        should be rewritten before it ships."""
+        response = self.client.get('/')
+
+        self.assertNotIn('Set-Cookie', response)
+        body = response.content.decode()
+        self.assertNotIn('googletagmanager', body)
+        self.assertNotIn('google-analytics', body)
+        self.assertNotIn('fonts.googleapis.com', body)

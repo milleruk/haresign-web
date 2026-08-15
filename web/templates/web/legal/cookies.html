@@ -1,0 +1,117 @@
+{% extends 'web/legal/base.html' %}{% comment %}Cookie Policy.
+
+Written against what this site actually does, checked by request rather than
+assumed: a public page returns no Set-Cookie header at all, makes no external
+requests, and loads no analytics.
+
+The monolith's policy lists _ga cookies and a consent banner. Neither exists
+here, so neither is described — inventing cookies is as misleading as hiding
+them, and a consent banner for cookies that are not set would be theatre.
+
+The structure anticipates that changing: the "essential" and "optional" sections
+are tables ready for rows, so adding analytics later is an edit, not a rewrite.
+{% endcomment %}
+
+{% block policy %}
+
+<h2 id="what-are-cookies">What cookies are</h2>
+<p>
+  Cookies are small text files a website asks your browser to store. They are
+  used to make sites work, to keep them secure, and — on many sites — to measure
+  how they are used. This policy should be read alongside our
+  <a href="{% url 'legal_privacy' %}">Privacy Notice</a>.
+</p>
+
+<h2 id="what-this-site-uses">What this site uses</h2>
+<blockquote>
+  <p>
+    Browsing this website sets <strong>no cookies at all</strong>. There is no
+    analytics, no advertising, no tracking, and no third-party content — so there
+    is nothing to consent to, and no cookie banner.
+  </p>
+</blockquote>
+<p>
+  That is a description of how the site is built today, not a promise about
+  forever. If that changes, this page changes with it and anything non-essential
+  will ask for your consent first.
+</p>
+
+<h2 id="essential">Essential cookies</h2>
+<p>
+  Essential cookies are strictly necessary for a site to work securely. They do
+  not require consent, and they cannot be switched off without breaking the thing
+  they protect.
+</p>
+<p>
+  On this website they are used <strong>only in the staff publishing area</strong>
+  at <code>/admin/</code>, which is not part of the public site. If you are simply
+  reading these pages, none of them is set.
+</p>
+
+<div class="hs-table-wrap">
+  <table>
+    <caption>Cookies used by the staff publishing area only.</caption>
+    <thead>
+      <tr><th scope="col">Name</th><th scope="col">Purpose</th><th scope="col">When it is set</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>csrftoken</code></td>
+        <td>Protects form submissions against cross-site request forgery.</td>
+        <td>On a page containing a form that posts data.</td>
+      </tr>
+      <tr>
+        <td><code>sessionid</code></td>
+        <td>Keeps a signed-in member of staff signed in.</td>
+        <td>On signing in to the publishing area.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="optional">Analytics and optional cookies</h2>
+<p>
+  <strong>None are currently used.</strong> This site performs no measurement of
+  its visitors and sets no optional cookies.
+</p>
+<p>
+  If analytics is introduced later it will be listed here in the same form as the
+  table above, it will be optional, and it will not run until you have agreed to
+  it.
+</p>
+
+<h2 id="third-party">Third-party content</h2>
+<p>
+  This site loads nothing from anyone else. Fonts, stylesheets, scripts and
+  images are all served from our own servers, so no third party sees your visit
+  or can set a cookie through it.
+</p>
+<p>
+  Links to other Haresign services, or to external sites such as NHS England, take
+  you somewhere we do not control. Those sites have their own cookie policies.
+</p>
+
+<h2 id="controlling">Controlling cookies</h2>
+<p>
+  Because the public site sets no cookies, there is nothing here to opt out of.
+</p>
+<p>
+  Every major browser lets you view, block and delete cookies through its
+  settings, and you can apply that to this site as to any other. Blocking
+  essential cookies would prevent the staff publishing area from working, but
+  will not affect your reading of these pages.
+</p>
+
+<h2 id="changes">Changes to this policy</h2>
+<p>
+  We may update this policy. The “last reviewed” date at the top of the page
+  reflects the most recent change.
+</p>
+
+<h2 id="contact">Contact</h2>
+<p>
+  Questions about cookies or your information? Email
+  <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+</p>
+
+{% endblock %}
