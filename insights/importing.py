@@ -42,15 +42,39 @@ Five rules, each with a reason:
    button while leaving the class would make each article's contents list
    unreachable on a phone. Dropping `collapse` leaves it visible at every width.
 
-6. **A body `<h1>` becomes an `<h2>`.** 22 of the 67 legacy articles open with
-   their own `<h1>`, a variant headline written above the body. The page template
-   already renders the title as the page's one `<h1>`, so importing them
-   unchanged gives every one of those articles two — which is both a duplicated
-   headline on screen and a broken document outline for a screen reader.
+6. **A leading `<h1>` is lifted out of the body into the article's own fields.**
+   22 of the 67 legacy articles open with a headline block — a category badge, an
+   `<h1>` and a standfirst — written into the body above the article proper. The
+   page template already renders a kicker, a title and a summary in exactly those
+   roles, so importing the block unchanged printed a second headline under the
+   first and gave the page two `<h1>`s.
 
-   Demoted rather than deleted: only six of the 22 repeat the title exactly, and
-   the other sixteen are a *different* headline. Removing them would throw away
-   editorial writing to fix a structural problem.
+   Demoting the `<h1>` to `<h2>` fixed the outline but left the duplicate
+   headline on screen. So the block is *moved* rather than deleted or demoted:
+
+   - the headline text is offered as `meta_title`, because the legacy pattern is
+     a punchy `title` ("A benchmark is a signal—not a diagnosis") with a long
+     searchable headline in the body ("Benchmarking Is Not a League Table: How GP
+     Practices Should Use Comparative Data"), and the second is precisely what a
+     `<title>` tag wants.
+
+     The **command** decides whether to use it, and only does so when it is
+     longer than the title. The pattern is not universal — a few articles have it
+     the other way round — and taking those would *shorten* the search title of a
+     live article for no reason. Where it is not taken, the text stays in
+     `body_source` rather than being adopted: the article already has a headline
+     saying the same thing, which is what made it a duplicate;
+   - the badge text becomes `kicker`, a field the template already renders and
+     that nothing was filling;
+   - both elements are removed from the body.
+
+   The standfirst paragraph stays: it is a real opening paragraph, and it differs
+   from the summary in 10 of the 13 cases where both exist. Nothing is thrown
+   away — every part of the block ends up doing a job.
+
+   The rule only fires when the `<h1>` is the body's **first** heading, which in
+   this corpus is all 22 of them. An `<h1>` further down would be a different
+   thing and is demoted instead.
 """
 import re
 from dataclasses import dataclass, field
@@ -87,6 +111,12 @@ class LinkReport:
     removed_controls: int = 0
     unhidden_panels: int = 0
     demoted_headings: int = 0
+    lifted_headlines: int = 0
+    lifted_kickers: int = 0
+
+    # Values rule 6 pulled out of the body for the caller to store on the
+    # article. Per-body, so `merge` deliberately does not combine them.
+    extracted: dict = field(default_factory=dict)
 
     def merge(self, other):
         self.article_links += other.article_links
@@ -98,6 +128,8 @@ class LinkReport:
         self.removed_controls += other.removed_controls
         self.unhidden_panels += other.unhidden_panels
         self.demoted_headings += other.demoted_headings
+        self.lifted_headlines += other.lifted_headlines
+        self.lifted_kickers += other.lifted_kickers
 
 
 def _absolutise(url, base_path):
@@ -162,6 +194,42 @@ def rewrite_body(html, *, slug, known_slugs, legacy_path=None):
         report.unhidden_panels += 1
 
     # --- Rule 6: the page owns the h1 -------------------------------------
+    headings = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+    first = headings[0] if headings else None
+
+    if first is not None and first.name == 'h1':
+        # The article's own headline block. Lift it out rather than demote it —
+        # a demoted h1 fixes the outline and leaves the duplicate headline on
+        # screen.
+        headline = ' '.join(first.get_text().split())
+        if headline:
+            report.extracted['meta_title'] = headline
+            report.lifted_headlines += 1
+
+        # The category badge that goes with it, if there is one. Scoped to the
+        # h1's own container and to markup *before* it, so an unrelated badge
+        # further down the article cannot be mistaken for a kicker.
+        container = first.parent
+        if container is not None:
+            for badge in container.select('.badge'):
+                if badge in first.find_all_previous():
+                    kicker = ' '.join(badge.get_text().split())
+                    if kicker:
+                        report.extracted['kicker'] = kicker
+                        report.lifted_kickers += 1
+                    # Unwrap a wrapper left holding nothing but the badge.
+                    wrapper = badge.parent
+                    badge.decompose()
+                    if (wrapper is not None and wrapper is not container
+                            and not wrapper.get_text().strip()
+                            and not wrapper.find(['img', 'svg'])):
+                        wrapper.decompose()
+                    break
+
+        first.decompose()
+
+    # Any h1 further down is a different thing: it is not the article's headline,
+    # so it is demoted to keep the outline valid rather than removed.
     for heading in soup.find_all('h1'):
         heading.name = 'h2'
         report.demoted_headings += 1

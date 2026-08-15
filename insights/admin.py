@@ -12,6 +12,30 @@ from django.utils.html import format_html
 from .models import Article, Category, Tag
 
 
+class HasImageAltFilter(admin.SimpleListFilter):
+    """Find articles whose featured image has no description.
+
+    Not a defect list — decorative is a legitimate and usually correct answer
+    here. It is a work queue for the editorial review, so that "we decided" and
+    "we never looked" stop looking the same.
+    """
+    title = 'featured image alt text'
+    parameter_name = 'has_alt'
+
+    def lookups(self, request, model_admin):
+        return [('yes', 'Described'), ('no', 'Decorative (no alt text)'),
+                ('none', 'No image')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.exclude(featured_image_alt='')
+        if self.value() == 'no':
+            return queryset.filter(featured_image_alt='').exclude(featured_image='')
+        if self.value() == 'none':
+            return queryset.filter(featured_image='')
+        return queryset
+
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug', 'article_count']
@@ -36,9 +60,10 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ['title', 'visibility', 'status', 'published_at',
+    list_display = ['title', 'visibility', 'image_alt', 'status', 'published_at',
                     'is_featured', 'author_name']
-    list_filter = ['status', 'is_featured', 'categories', 'tags', 'published_at']
+    list_filter = ['status', 'is_featured', 'categories', 'tags', 'published_at',
+                   HasImageAltFilter]
     list_editable = ['is_featured']
     search_fields = ['title', 'summary', 'body', 'author_name', 'slug']
     prepopulated_fields = {'slug': ('title',)}
@@ -65,8 +90,17 @@ class ArticleAdmin(admin.ModelAdmin):
         }),
         ('Featured image', {
             'fields': ('featured_image', 'featured_image_alt'),
-            'description': 'The alt text describes the image to screen readers. '
-                           'Leave it empty only when the image is decorative.',
+            'description': (
+                'Leave the alt text empty when the image is <strong>decorative</strong> '
+                '&mdash; which it is whenever the picture only repeats the headline '
+                'printed beside it, as the imported header cards do. The page then '
+                'marks it decorative explicitly, so a screen reader skips it rather '
+                'than announcing an unlabelled image.<br><br>'
+                'Fill it in when the image carries something the headline does not '
+                '&mdash; a chart with figures in it, for instance. The '
+                '<em>Image alt</em> column and the filter beside this list show which '
+                'articles have one.'
+            ),
         }),
         ('Taxonomy', {
             'fields': ('categories', 'tags'),
@@ -81,6 +115,22 @@ class ArticleAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at'),
         }),
     )
+
+    @admin.display(description='Image alt')
+    def image_alt(self, obj):
+        """Whether the featured image is described or explicitly decorative.
+
+        Every imported article arrived without alt text, because the monolith has
+        no such field and inventing 67 descriptions would have been fabrication.
+        Decorative is the right answer for a header card that repeats the
+        headline — but "right answer" and "nobody looked" are indistinguishable
+        without this column, which is what makes the editorial review possible.
+        """
+        if not obj.featured_image:
+            return format_html('<span style="color:#9ca3af;">&mdash;</span>')
+        if obj.featured_image_alt:
+            return format_html('<span style="color:#0b7d7d;">&#9679; Described</span>')
+        return format_html('<span style="color:#6b7280;">&#9675; Decorative</span>')
 
     @admin.display(description='Live', boolean=False)
     def visibility(self, obj):

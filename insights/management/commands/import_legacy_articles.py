@@ -119,6 +119,7 @@ class Command(BaseCommand):
 
         stats = _Stats(source_total=source_total, skipped=skipped)
         report = LinkReport()
+        self.meta_titles_taken = 0
 
         try:
             with transaction.atomic():
@@ -200,6 +201,12 @@ class Command(BaseCommand):
         )
         report.merge(link_report)
 
+        # Rule 6 lifted the article's own headline block out of the body. Those
+        # values are set here rather than in the rewriter, which only ever
+        # returns HTML — and only where the field is empty, so an editor who has
+        # since written a better meta title keeps it through a re-import.
+        extracted = link_report.extracted
+
         fields = {
             'title': record['title'],
             'slug': record['slug'],
@@ -213,6 +220,17 @@ class Command(BaseCommand):
             'legacy_id': record.get('legacy_id'),
             'legacy_path': record.get('legacy_path', ''),
         }
+        # Only when it is *more* descriptive than the title. These articles are
+        # live on haresign.net with the title as their <title>, and swapping in a
+        # shorter headline would make 21 search results worse to fix a layout
+        # duplicate. Where it is not taken it stays in body_source.
+        headline = extracted.get('meta_title', '')
+        if (headline and len(headline) > len(record['title'])
+                and not (existing and existing.meta_title)):
+            fields['meta_title'] = headline
+            self.meta_titles_taken += 1
+        if extracted.get('kicker') and not (existing and existing.kicker):
+            fields['kicker'] = extracted['kicker']
 
         if existing:
             for key, value in fields.items():
@@ -393,8 +411,13 @@ class Command(BaseCommand):
                   f'(404 on haresign.net today; final segment named a known article)')
         out.write(f'  Dead controls removed: {report.removed_controls}')
         out.write(f'  Panels unhidden      : {report.unhidden_panels}')
-        out.write(f'  Body h1 -> h2        : {report.demoted_headings}  '
-                  f'(the page template owns the one h1)')
+        out.write(f'  Headlines lifted     : {report.lifted_headlines}  '
+                  f'(duplicate body headline removed; the page owns the one h1)')
+        out.write(f'    -> used as meta_title: {self.meta_titles_taken}  '
+                  f'(only where longer than the title)')
+        out.write(f'  Kickers lifted       : {report.lifted_kickers}  '
+                  f'(body badge -> kicker)')
+        out.write(f'  Later h1 -> h2       : {report.demoted_headings}')
         out.write(f'  Tool links left alone: {len(report.tool_links)}  (Intelligence owns these)')
         out.write(f'  External links       : {len(set(u for _, u in report.external_links))} unique')
 

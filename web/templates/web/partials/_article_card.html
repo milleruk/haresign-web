@@ -16,7 +16,7 @@ homepage form.
   {% if featured %}
     <div class="hs-article-card__media">
       {% if article.featured_image %}
-        <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}" loading="lazy">
+        {% include 'insights/partials/_featured_image.html' with article=article lazy=True %}
       {% endif %}
     </div>
     <div class="hs-article-card__body">

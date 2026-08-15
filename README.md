@@ -201,7 +201,33 @@ documented in `insights/importing.py` and tested in `insights/tests_importing.py
 | Dead paths repaired | 6 | Over-deep relative links that **404 on haresign.net today** — verified, not assumed |
 | Bootstrap collapse controls removed | 91 | No Bootstrap JS here, so they cannot work |
 | …and their panels unhidden | 95 | Removing the button alone would hide each article's contents list on mobile, permanently |
-| Body `<h1>` → `<h2>` | 22 | The template owns the page's one `<h1>`; production renders two |
+| Leading headline block lifted out | 21 | Legacy articles open with a badge, an `<h1>` and a standfirst — the roles the template already fills, so it printed a second headline under the first |
+| A later `<h1>` demoted to `<h2>` | 1 | Not the article's headline, so it is a section: kept, with the outline fixed |
+
+Nothing in that block is thrown away. The headline text is offered as
+`meta_title` and taken in **9 of 21** cases — only where it is longer than the
+title, because these articles are live with the title as their `<title>` and
+swapping in a shorter headline would make real search results worse to fix a
+layout duplicate. The category badge becomes `kicker`, a field the template
+already rendered and nothing was filling (5 of 5 available). The standfirst stays
+as the article's opening paragraph — it differs from the summary in 10 of the 13
+cases where both exist. Everything untaken remains in `body_source`.
+
+### Featured images and alt text
+
+No alt text was invented for the 67 imported images, because the monolith has no
+such field. Instead the decision is made explicit: an image with a description
+gets it, and an image without one is marked `alt="" role="presentation"` —
+*declared* decorative rather than left with an empty alt indistinguishable from
+somebody having forgotten.
+
+Decorative is the correct answer here rather than a shrug: each image is a
+designed header card whose visible text is the headline already printed beside
+it, in all four places these render. An alt repeating it would make a screen
+reader say the same words twice. The rule lives in
+`insights/partials/_featured_image.html` — one file, because four copies of a
+decision is how three of them end up wrong — and the admin has an **Image alt**
+column and filter so "we decided" and "we never looked" stop looking the same.
 
 Four legacy paths still need a decision at cutover and were **left unchanged
 rather than guessed** — `/articles` and three `/media/downloads/*` files that do

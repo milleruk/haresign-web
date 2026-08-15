@@ -131,25 +131,83 @@ class BootstrapTests(SimpleTestCase):
         self.assertIn('card-body', out)
 
 
-class HeadingTests(SimpleTestCase):
-    """Rule 6."""
+class HeadlineBlockTests(SimpleTestCase):
+    """Rule 6 — the leading headline block is moved, not deleted.
 
-    def test_a_body_h1_is_demoted(self):
-        """The page template owns the page's one h1. 22 of the 67 legacy
-        articles carry their own, which would give those pages two."""
-        out, report = rewrite('<h1>A headline</h1><h2>A section</h2>')
+    The real markup: a category badge, an h1 and a standfirst, inside a
+    <header> above the article proper. The page template renders a kicker, a
+    title and a summary in exactly those roles, so importing it unchanged
+    printed a second headline under the first.
+    """
+
+    HEADER = (
+        '<article><header class="mb-5">'
+        '<div class="mb-3"><span class="badge text-bg-primary"> Data &amp; Insight </span></div>'
+        '<h1 class="h1 fw-bold">Benchmarking Is Not a League Table</h1>'
+        '<p class="lead">A standfirst that is not the summary.</p>'
+        '<div class="alert">The central principle.</div>'
+        '</header><p>Body.</p></article>'
+    )
+
+    def test_the_duplicate_headline_leaves_the_body(self):
+        out, report = rewrite(self.HEADER)
 
         self.assertNotIn('<h1', out)
-        self.assertIn('<h2>A headline</h2>', out)
+        self.assertNotIn('Benchmarking Is Not a League Table', out)
+        self.assertEqual(report.lifted_headlines, 1)
+
+    def test_the_headline_text_is_handed_back_rather_than_lost(self):
+        _, report = rewrite(self.HEADER)
+
+        self.assertEqual(report.extracted['meta_title'],
+                         'Benchmarking Is Not a League Table')
+
+    def test_the_badge_becomes_a_kicker(self):
+        """A field the template already renders and nothing was filling."""
+        out, report = rewrite(self.HEADER)
+
+        self.assertEqual(report.extracted['kicker'], 'Data & Insight')
+        self.assertNotIn('badge', out)
+
+    def test_the_standfirst_stays(self):
+        """It is a real opening paragraph and differs from the summary in 10 of
+        the 13 cases where both exist. Removing it would lose writing."""
+        out, _ = rewrite(self.HEADER)
+
+        self.assertIn('A standfirst that is not the summary.', out)
+
+    def test_editorial_content_inside_the_header_survives(self):
+        """The <header> is not stripped wholesale — these blocks contain real
+        callouts, and taking the lot to remove one heading would be
+        destructive."""
+        out, _ = rewrite(self.HEADER)
+
+        self.assertIn('The central principle.', out)
+
+    def test_a_later_h1_is_demoted_rather_than_lifted(self):
+        """Only the *first* heading is the article's own headline. An h1 further
+        down is a section, and removing it would lose a section title."""
+        out, report = rewrite('<h2>A section</h2><h1>Not the headline</h1>')
+
+        self.assertIn('<h2>Not the headline</h2>', out)
         self.assertEqual(report.demoted_headings, 1)
+        self.assertEqual(report.lifted_headlines, 0)
 
-    def test_it_is_demoted_rather_than_deleted(self):
-        """Only six of the 22 repeat the title; the rest are a different
-        headline. Deleting them would throw away editorial writing to fix a
-        structural problem."""
-        out, _ = rewrite('<h1>A different headline entirely</h1>')
+    def test_an_unrelated_badge_further_down_is_not_taken_as_a_kicker(self):
+        html = ('<div><h1>Headline</h1></div>'
+                '<div><span class="badge">Some label</span></div>')
 
-        self.assertIn('A different headline entirely', out)
+        _, report = rewrite(html)
+
+        self.assertNotIn('kicker', report.extracted)
+
+    def test_a_body_with_no_headline_block_is_untouched(self):
+        html = '<p>Straight into it.</p><h2>A section</h2>'
+
+        out, report = rewrite(html)
+
+        self.assertEqual(report.lifted_headlines, 0)
+        self.assertIn('<h2>A section</h2>', out)
 
 
 class NonDestructiveTests(SimpleTestCase):

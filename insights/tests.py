@@ -4,9 +4,12 @@ The centre of gravity is visibility: which articles the public may see. That is
 the rule with real consequences — getting it wrong publishes unfinished work —
 and it is the one thing several code paths could each get wrong independently.
 """
+import pathlib
+import shutil
+import tempfile
 from datetime import timedelta
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -290,3 +293,72 @@ class HeadingStructureTests(TestCase):
             reverse('insights:detail', kwargs={'slug': 'a-published-piece'}))
 
         self.assertContains(response, 'A published piece')
+
+
+class FeaturedImageAltTests(TestCase):
+    """An image with no description is *explicitly* decorative.
+
+    Every imported article arrived without alt text: the monolith has no such
+    field, and inventing 67 descriptions would have been fabrication. Decorative
+    is the correct answer for a header card that repeats the headline printed
+    beside it — but it has to be declared, because an empty alt and a forgotten
+    alt look identical.
+    """
+
+    def setUp(self):
+        # Its own MEDIA_ROOT. Saving an ImageField writes a real file, and a
+        # test that writes into the deployment's media volume both fails on
+        # permissions and leaves litter in the live upload tree.
+        self._media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self._media, ignore_errors=True)
+        override = override_settings(MEDIA_ROOT=self._media)
+        override.enable()
+        self.addCleanup(override.disable)
+
+        self.article = make_article(slug='with-image')
+
+    def _attach_image(self, alt=''):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        # A 1x1 GIF: the smallest thing Pillow will accept as an image.
+        gif = (b'GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!'
+               b'\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00'
+               b'\x00\x02\x02D\x01\x00;')
+        self.article.featured_image = SimpleUploadedFile('hero.gif', gif, 'image/gif')
+        self.article.featured_image_alt = alt
+        self.article.save()
+
+    def test_an_undescribed_image_is_marked_presentational(self):
+        self._attach_image()
+
+        response = self.client.get(self.article.get_absolute_url())
+
+        self.assertContains(response, 'alt="" role="presentation"')
+
+    def test_a_described_image_keeps_its_description(self):
+        self._attach_image(alt='A chart of appointment volumes by month')
+
+        response = self.client.get(self.article.get_absolute_url())
+
+        self.assertContains(response, 'A chart of appointment volumes by month')
+        self.assertNotContains(response, 'role="presentation"')
+
+    def test_the_rule_is_defined_once(self):
+        """It renders in four places. Four copies of a decision is how three of
+        them end up wrong."""
+        import pathlib
+
+        for template in list(pathlib.Path('insights/templates').rglob('*.html')) + \
+                list(pathlib.Path('web/templates').rglob('*.html')):
+            if template.name == '_featured_image.html':
+                continue
+            with self.subTest(template=str(template)):
+                self.assertNotIn('featured_image_alt', template.read_text())
+
+    def test_no_alt_text_was_invented_during_the_import(self):
+        """The importer must never fill this field: the source has nothing to
+        fill it from."""
+        source = pathlib.Path(
+            'insights/management/commands/import_legacy_articles.py').read_text()
+
+        self.assertNotIn('featured_image_alt', source)

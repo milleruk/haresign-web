@@ -6,7 +6,7 @@ platform cards, with editorial rather than product styling on top.
 <a class="hs-card hs-card--interactive hs-article-summary" href="{{ article.get_absolute_url }}">
   {% if article.featured_image %}
     <span class="hs-article-summary__media">
-      <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}" loading="lazy">
+      {% include 'insights/partials/_featured_image.html' with article=article lazy=True %}
     </span>
   {% endif %}
   <span class="hs-article-summary__body">

@@ -1,0 +1,28 @@
+{% comment %}An article's featured image, with its alt text handled once.
+
+    {% include 'insights/partials/_featured_image.html' with article=article %}
+    {% include 'insights/partials/_featured_image.html' with article=article lazy=True %}
+
+It renders in four places (the article page, the index card, the lead article and
+the homepage card) and the alt-text rule was repeated in all four. It is a
+decision, not markup, so it lives in one file.
+
+**The rule.** A described image gets its description. An image with no
+description is marked *explicitly decorative* — `alt=""` plus
+`role="presentation"` — rather than left with an empty alt that is
+indistinguishable from somebody having forgotten.
+
+**Why decorative is the right answer here and not a cop-out.** Every one of these
+images is a designed header card whose visible text is the article's own
+headline, and in all four render sites that headline is already on the page as
+text, right beside the image. An alt that repeated it would make a screen reader
+announce the same words twice; describing the artwork ("a laptop on a desk beside
+a chart") would announce decoration as though it were information. WCAG's own
+guidance is that an image adding nothing beyond adjacent text is decorative.
+
+Where an image ever does carry something the headline does not — a chart with
+figures in it — `featured_image_alt` is the field for it, and the admin lists
+which articles have one so the review is possible rather than theoretical.
+{% endcomment %}<img src="{{ article.featured_image.url }}"
+     {% if article.featured_image_alt %}alt="{{ article.featured_image_alt }}"{% else %}alt="" role="presentation"{% endif %}
+     {% if lazy %}loading="lazy"{% endif %}>

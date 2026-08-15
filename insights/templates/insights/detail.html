@@ -36,7 +36,7 @@
   {% if article.featured_image %}
     <div class="hs-container hs-container--reading">
       <figure class="hs-article__figure">
-        <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}">
+        {% include 'insights/partials/_featured_image.html' with article=article %}
       </figure>
     </div>
   {% endif %}

@@ -6,7 +6,7 @@ read from the same `Article`, so neither can show a different summary.
 <a class="hs-lead-article" href="{{ article.get_absolute_url }}">
   {% if article.featured_image %}
     <div class="hs-lead-article__media">
-      <img src="{{ article.featured_image.url }}" alt="{{ article.featured_image_alt }}" loading="lazy">
+      {% include 'insights/partials/_featured_image.html' with article=article lazy=True %}
     </div>
   {% endif %}
   <div class="hs-lead-article__body">
