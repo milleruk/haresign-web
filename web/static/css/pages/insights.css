@@ -160,3 +160,102 @@
   .hs-article-grid { grid-template-columns: 1fr; }
   .hs-article__byline { gap: var(--hs-space-3); }
 }
+
+/* --- Filters -------------------------------------------------------------
+   Chips that print their own counts. These tags are topical labels rather than
+   a taxonomy — the largest covers more than half the archive — so the count is
+   not decoration: it is the chip telling the reader what it will do.
+   ------------------------------------------------------------------------- */
+.hs-insights-filters { padding-block: 0 var(--hs-space-8); }
+
+.hs-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hs-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hs-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  /* Comfortably past the 24px minimum target at every text size. */
+  min-height: 2.25rem;
+  padding: var(--hs-space-2) var(--hs-space-4);
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-pill);
+  background-color: var(--hs-surface);
+  color: var(--hs-text-strong);
+  font-size: var(--hs-text-sm);
+  font-weight: var(--hs-weight-semibold);
+  transition: border-color var(--hs-transition), background-color var(--hs-transition),
+              color var(--hs-transition);
+}
+.hs-filter:hover { border-color: var(--hs-primary); color: var(--hs-primary); }
+
+/* The active filter is marked by fill *and* by aria-current, never by colour
+   alone — the state has to survive greyscale and a screen reader. */
+.hs-filter--active {
+  background-color: var(--hs-primary);
+  border-color: var(--hs-primary);
+  color: var(--hs-text-on-dark-strong);
+}
+.hs-filter--active:hover { background-color: var(--hs-primary-hover); color: var(--hs-text-on-dark-strong); }
+
+.hs-filter__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--hs-weight-normal);
+  color: var(--hs-text-muted);
+}
+.hs-filter--active .hs-filter__count { color: rgba(255, 255, 255, 0.75); }
+
+/* --- Pagination ----------------------------------------------------------
+   Previous / position / next, not a strip of page numbers: six pages of numbers
+   is a row of near-identical small targets on a phone, and "page 2 of 6"
+   answers the question the numbers exist to answer.
+   ------------------------------------------------------------------------- */
+.hs-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hs-space-4);
+  margin-top: var(--hs-space-12);
+  padding-top: var(--hs-space-8);
+  border-top: 1px solid var(--hs-border);
+}
+.hs-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  min-height: 2.75rem;
+  padding: var(--hs-space-2) var(--hs-space-5);
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-pill);
+  color: var(--hs-text-strong);
+  font-weight: var(--hs-weight-semibold);
+}
+.hs-pagination__link:hover { border-color: var(--hs-primary); color: var(--hs-primary); }
+
+/* Rendered as a <span>, never a disabled-looking link: there is no destination,
+   so there is no anchor. Same rule the platform cards follow. */
+.hs-pagination__link--disabled {
+  color: var(--hs-text-muted);
+  border-color: var(--hs-border-subtle);
+  cursor: default;
+}
+.hs-pagination__status {
+  margin: 0;
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 575.98px) {
+  /* Prev and next either side, position beneath — at 320px all three on one
+     row squeezes the controls below a comfortable target. */
+  .hs-pagination { justify-content: center; }
+  .hs-pagination__status { order: 3; width: 100%; text-align: center; }
+  .hs-pagination__link { flex: 1 1 auto; justify-content: center; }
+}

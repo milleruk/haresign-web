@@ -14,7 +14,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from insights.models import Article, Category, Tag
-from insights.selectors import featured_article, recent_articles
+from insights.selectors import (PAGE_SIZE, featured_article, filter_tags,
+                                recent_articles)
 
 
 def make_article(**kwargs):
@@ -362,3 +363,197 @@ class FeaturedImageAltTests(TestCase):
             'insights/management/commands/import_legacy_articles.py').read_text()
 
         self.assertNotIn('featured_image_alt', source)
+
+
+class IndexPaginationTests(TestCase):
+    """Paging the archive.
+
+    The reason for paginating was never HTML weight — the whole archive was 70KB
+    of markup. It was images: 64.8MB of hero images behind one page, growing with
+    every article published.
+    """
+
+    def setUp(self):
+        for index in range(20):
+            make_article(
+                title=f'Article {index:02d}', slug=f'article-{index:02d}',
+                published_at=timezone.now() - timedelta(days=index))
+
+    def test_the_first_page_shows_a_page_worth(self):
+        response = self.client.get(reverse('insights:index'))
+
+        # 12 in the grid, plus the featured article pulled out above it.
+        self.assertEqual(len(response.context['articles']), PAGE_SIZE)
+        self.assertIsNotNone(response.context['featured'])
+
+    def test_later_pages_carry_the_rest(self):
+        response = self.client.get(reverse('insights:index'), {'page': 2})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page'].number, 2)
+
+    def test_no_article_appears_on_two_pages(self):
+        seen = []
+        for number in (1, 2):
+            response = self.client.get(reverse('insights:index'), {'page': number})
+            seen += [a.pk for a in response.context['articles']]
+            if response.context['featured']:
+                seen.append(response.context['featured'].pk)
+
+        self.assertEqual(len(seen), len(set(seen)))
+
+    def test_the_featured_article_leads_page_one_only(self):
+        """On page two it would be stale furniture at the top of the page."""
+        response = self.client.get(reverse('insights:index'), {'page': 2})
+
+        self.assertIsNone(response.context['featured'])
+
+    def test_a_page_past_the_end_is_a_404(self):
+        """It names a page that does not exist. Answering with an empty list
+        invites the reader to conclude the archive is empty."""
+        response = self.client.get(reverse('insights:index'), {'page': 99})
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_a_page_that_is_not_a_number_is_a_404_not_a_500(self):
+        """Django raises PageNotAnInteger here, which is a *sibling* of
+        EmptyPage rather than a subclass — catching only EmptyPage turned a junk
+        query string into a server error."""
+        for value in ('abc', '-1', '0', ''):
+            with self.subTest(page=value):
+                response = self.client.get(reverse('insights:index'), {'page': value})
+
+                self.assertIn(response.status_code, (200, 404))
+                self.assertNotEqual(response.status_code, 500)
+
+    def test_pagination_controls_only_appear_when_there_is_more_than_one_page(self):
+        Article.objects.exclude(slug='article-00').delete()
+
+        body = self.client.get(reverse('insights:index')).content.decode()
+
+        self.assertNotIn('hs-pagination', body)
+
+
+class IndexFilterTests(TestCase):
+    """Filtering by tag."""
+
+    def setUp(self):
+        self.governance = Tag.objects.create(name='Governance', slug='governance')
+        self.workforce = Tag.objects.create(name='Workforce', slug='workforce')
+        for index in range(5):
+            article = make_article(title=f'G{index}', slug=f'g-{index}')
+            article.tags.add(self.governance)
+        article = make_article(title='W', slug='w')
+        article.tags.add(self.workforce)
+
+    def test_filtering_narrows_the_list(self):
+        response = self.client.get(reverse('insights:index'), {'tag': 'workforce'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['articles']), 1)
+        self.assertEqual(response.context['active_tag'], self.workforce)
+
+    def test_the_featured_article_is_dropped_when_filtering(self):
+        """It would be an article ignoring the filter the reader just set."""
+        response = self.client.get(reverse('insights:index'), {'tag': 'workforce'})
+
+        self.assertIsNone(response.context['featured'])
+
+    def test_an_unknown_tag_is_a_404(self):
+        response = self.client.get(reverse('insights:index'), {'tag': 'nonsense'})
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_filters_show_their_counts(self):
+        """These tags are topical labels, not a taxonomy: the largest covers more
+        than half the archive. A chip that silently returns most of it feels
+        broken; one that says so is telling the reader what it will do."""
+        body = self.client.get(reverse('insights:index')).content.decode()
+
+        self.assertIn('Governance', body)
+        self.assertIn('hs-filter__count', body)
+        self.assertIn('>5<', body)
+
+    def test_counts_are_of_live_articles_only(self):
+        """A count must never promise more than the filter delivers."""
+        Article.objects.filter(slug='g-0').update(status=Article.STATUS_DRAFT)
+
+        counts = {tag.name: tag.article_count for tag in filter_tags()}
+
+        self.assertEqual(counts['Governance'], 4)
+
+    def test_the_active_filter_is_marked_for_assistive_technology(self):
+        """Not by chip colour alone."""
+        body = self.client.get(
+            reverse('insights:index'), {'tag': 'workforce'}).content.decode()
+
+        self.assertIn('aria-current="page"', body)
+
+    def test_filtering_needs_no_javascript(self):
+        """Every filtered view has its own URL, so it can be bookmarked and
+        shared and the back button behaves."""
+        body = self.client.get(reverse('insights:index')).content.decode()
+        main = body[body.index('<main'):body.index('</main>')]
+
+        self.assertNotIn('<script', main)
+        self.assertIn('href="/insights/?tag=governance"', main)
+
+    def test_each_view_canonicalises_to_itself(self):
+        """Pointing every page at page one would tell a search engine that five
+        sixths of the archive duplicates the first sixth."""
+        response = self.client.get(reverse('insights:index'), {'tag': 'governance'})
+
+        self.assertContains(response, 'insights/?tag=governance"')
+
+
+class FeaturedImageFormatTests(TestCase):
+    """`<picture>` with a WebP source and the original as fallback."""
+
+    def setUp(self):
+        self._media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self._media, ignore_errors=True)
+        override = override_settings(MEDIA_ROOT=self._media)
+        override.enable()
+        self.addCleanup(override.disable)
+        self.article = make_article(slug='with-image')
+
+    def _attach_image(self, with_webp=False):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        gif = (b'GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff!'
+               b'\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00'
+               b'\x00\x02\x02D\x01\x00;')
+        self.article.featured_image = SimpleUploadedFile('hero.gif', gif, 'image/gif')
+        self.article.save()
+        if with_webp:
+            sibling = pathlib.Path(self._media) / pathlib.Path(
+                self.article.featured_image.name).with_suffix('.webp')
+            sibling.parent.mkdir(parents=True, exist_ok=True)
+            sibling.write_bytes(b'not really webp, but it exists')
+
+    def test_no_webp_source_when_the_file_does_not_exist(self):
+        """A <source> pointing at a missing file shows a broken image to every
+        browser that prefers WebP — which is nearly all of them."""
+        self._attach_image(with_webp=False)
+
+        response = self.client.get(self.article.get_absolute_url())
+
+        self.assertNotContains(response, '<picture>')
+        self.assertNotContains(response, 'image/webp')
+
+    def test_the_webp_is_offered_when_it_exists(self):
+        self._attach_image(with_webp=True)
+
+        response = self.client.get(self.article.get_absolute_url())
+
+        self.assertContains(response, '<picture>')
+        self.assertContains(response, 'type="image/webp"')
+
+    def test_the_original_remains_the_fallback(self):
+        """One extra element buys a working image on a browser that has never
+        heard of WebP — which this audience's locked-down desktops may be."""
+        self._attach_image(with_webp=True)
+
+        response = self.client.get(self.article.get_absolute_url())
+
+        self.assertContains(response, self.article.featured_image.url)

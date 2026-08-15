@@ -1,28 +1,40 @@
-{% comment %}An article's featured image, with its alt text handled once.
+{% comment %}An article's featured image: alt text and format handled once.
 
     {% include 'insights/partials/_featured_image.html' with article=article %}
     {% include 'insights/partials/_featured_image.html' with article=article lazy=True %}
 
 It renders in four places (the article page, the index card, the lead article and
-the homepage card) and the alt-text rule was repeated in all four. It is a
-decision, not markup, so it lives in one file.
+the homepage card). Both decisions below were previously repeated in all four,
+which is how three of them end up wrong.
 
-**The rule.** A described image gets its description. An image with no
-description is marked *explicitly decorative* — `alt=""` plus
-`role="presentation"` — rather than left with an empty alt that is
-indistinguishable from somebody having forgotten.
+**Alt text.** A described image gets its description. An image without one is
+marked *explicitly decorative* — `alt=""` plus `role="presentation"` — rather
+than left with an empty alt indistinguishable from somebody having forgotten.
 
-**Why decorative is the right answer here and not a cop-out.** Every one of these
-images is a designed header card whose visible text is the article's own
-headline, and in all four render sites that headline is already on the page as
-text, right beside the image. An alt that repeated it would make a screen reader
-announce the same words twice; describing the artwork ("a laptop on a desk beside
-a chart") would announce decoration as though it were information. WCAG's own
-guidance is that an image adding nothing beyond adjacent text is decorative.
+Decorative is the right answer here and not a cop-out: every one of these is a
+designed header card whose visible text is the article's own headline, and in all
+four render sites that headline is already on the page as text beside it. An alt
+repeating it would make a screen reader announce the same words twice; describing
+the artwork would announce decoration as information. Where an image ever carries
+something the headline does not — a chart with figures in it —
+`featured_image_alt` is the field for it, and the admin lists which articles have
+one so the review is possible rather than theoretical.
 
-Where an image ever does carry something the headline does not — a chart with
-figures in it — `featured_image_alt` is the field for it, and the admin lists
-which articles have one so the review is possible rather than theoretical.
-{% endcomment %}<img src="{{ article.featured_image.url }}"
+**Format.** `<picture>` offers the WebP written by `manage.py optimise_images`
+and falls back to the original file. WebP alone would be smaller still, but this
+audience includes locked-down NHS desktops: the fallback costs one element and
+means a browser that has never heard of WebP gets a resized original rather than
+a broken image. The `<source>` appears only when the file genuinely exists —
+see `Article.featured_image_webp_url`.
+
+`width`/`height` are deliberately absent: these images vary in aspect ratio and
+CSS sizes them in every context. The containers have their own aspect-ratio
+rules, which is what stops the layout jumping.
+{% endcomment %}{% if article.featured_image_webp_url %}<picture>
+  <source srcset="{{ article.featured_image_webp_url }}" type="image/webp">
+  <img src="{{ article.featured_image.url }}"
+       {% if article.featured_image_alt %}alt="{{ article.featured_image_alt }}"{% else %}alt="" role="presentation"{% endif %}
+       {% if lazy %}loading="lazy" decoding="async"{% endif %}>
+</picture>{% else %}<img src="{{ article.featured_image.url }}"
      {% if article.featured_image_alt %}alt="{{ article.featured_image_alt }}"{% else %}alt="" role="presentation"{% endif %}
-     {% if lazy %}loading="lazy"{% endif %}>
+     {% if lazy %}loading="lazy" decoding="async"{% endif %}>{% endif %}

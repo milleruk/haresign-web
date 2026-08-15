@@ -38,6 +38,8 @@ VIEWPORTS = [
 PAGES = [
     ('home', '/'),
     ('insights', '/insights/'),
+    ('insights-page2', '/insights/?page=2'),
+    ('insights-filtered', '/insights/?tag=governance'),
     # A real imported article: Bootstrap cards, a contents panel, tables and
     # images. The single most likely page to break on a phone.
     ('article', '/insights/benchmarking-is-not-a-league-table/'),

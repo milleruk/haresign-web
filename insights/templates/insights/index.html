@@ -1,10 +1,27 @@
 {% extends 'web/base.html' %}
-{% load static %}
+{% load static %}{% comment %}The Insights index — paginated and filterable.
 
-{% block title %}Insights — {{ SITE_NAME }}{% endblock %}
-{% block description %}Research, analysis and practical commentary on primary care from Haresign.{% endblock %}
-{% block og_title %}Haresign Insights{% endblock %}
+The filter chips print their counts on purpose: these tags are topical labels
+rather than a taxonomy, and the largest covers more than half the archive. A chip
+that silently returns 36 of 67 articles feels broken; one that says so is telling
+the reader what it will do before they spend a click on it. See
+`selectors.filter_tags`.
+
+Everything here is a plain link. No JavaScript filters the page, so the archive
+works with scripts off, every filtered view has its own URL to bookmark or share,
+and the back button behaves.
+{% endcomment %}
+
+{% block title %}{% if active_tag %}{{ active_tag.name }} — Insights{% else %}Insights{% endif %}{% if page.number > 1 %} — page {{ page.number }}{% endif %} — {{ SITE_NAME }}{% endblock %}
+{% block description %}{% if active_tag %}Haresign research, analysis and commentary on {{ active_tag.name|lower }} in primary care.{% else %}Research, analysis and practical commentary on primary care from Haresign.{% endif %}{% endblock %}
+{% block og_title %}{% if active_tag %}{{ active_tag.name }} — Haresign Insights{% else %}Haresign Insights{% endif %}{% endblock %}
 {% block og_description %}Research, analysis and practical commentary on primary care.{% endblock %}
+
+{% comment %}Each filtered or paginated view canonicalises to *itself*, not to
+the bare index: they list different articles, so pointing them all at page one
+would tell a search engine that five sixths of the archive is a duplicate of the
+first sixth.{% endcomment %}
+{% block canonical %}{{ SITE_BASE_URL }}{% url 'insights:index' %}{% if active_tag %}?tag={{ active_tag.slug }}{% if page.number > 1 %}&amp;page={{ page.number }}{% endif %}{% elif page.number > 1 %}?page={{ page.number }}{% endif %}{% endblock %}
 
 {% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/insights.css' %}">{% endblock %}
 
@@ -19,13 +36,47 @@ not a section header.{% endcomment %}
   <div class="hs-container">
     <div class="hs-section-header">
       <p class="hs-eyebrow">Research &amp; analysis</p>
-      <h1 class="hs-section-header__title" id="insights-title">Insights</h1>
+      <h1 class="hs-section-header__title" id="insights-title">
+        {% if active_tag %}{{ active_tag.name }}{% else %}Insights{% endif %}
+      </h1>
       <p class="hs-section-header__lead">
-        Research, analysis and practical commentary on running primary care.
+        {% if active_tag %}
+          Articles tagged {{ active_tag.name }}. Research, analysis and practical
+          commentary on running primary care.
+        {% else %}
+          Research, analysis and practical commentary on running primary care.
+        {% endif %}
       </p>
     </div>
   </div>
 </section>
+
+{% comment %}A <nav>, because it is a set of links to other views of the archive.
+`aria-current="page"` marks the active filter, so the state is conveyed to a
+screen reader rather than only by the chip's colour.{% endcomment %}
+<nav class="hs-section hs-section--tight hs-insights-filters" aria-labelledby="filter-heading">
+  <div class="hs-container">
+    <h2 class="hs-visually-hidden" id="filter-heading">Filter articles by topic</h2>
+    <ul class="hs-filter-list">
+      <li>
+        <a class="hs-filter{% if not active_tag %} hs-filter--active{% endif %}"
+           href="{% url 'insights:index' %}"
+           {% if not active_tag %}aria-current="page"{% endif %}>
+          All <span class="hs-filter__count">{{ total }}</span>
+        </a>
+      </li>
+      {% for tag in tags %}
+        <li>
+          <a class="hs-filter{% if active_tag == tag %} hs-filter--active{% endif %}"
+             href="{% url 'insights:index' %}?tag={{ tag.slug }}"
+             {% if active_tag == tag %}aria-current="page"{% endif %}>
+            {{ tag.name }} <span class="hs-filter__count">{{ tag.article_count }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</nav>
 
 {% if featured %}
 <section class="hs-section hs-section--tight" aria-label="Featured article">
@@ -37,7 +88,9 @@ not a section header.{% endcomment %}
 
 <section class="hs-section hs-section--muted" aria-labelledby="all-articles-title">
   <div class="hs-container">
-    <h2 class="hs-visually-hidden" id="all-articles-title">All articles</h2>
+    <h2 class="hs-visually-hidden" id="all-articles-title">
+      {% if active_tag %}Articles tagged {{ active_tag.name }}{% else %}All articles{% endif %}
+    </h2>
 
     {% if articles %}
       <div class="hs-article-grid">
@@ -45,28 +98,59 @@ not a section header.{% endcomment %}
           {% include 'insights/partials/_article_summary.html' with article=article %}
         {% endfor %}
       </div>
+
+      {% if page.paginator.num_pages > 1 %}
+        {% comment %}Prev/next plus a position, not a numbered strip. Six pages
+        of numbers is a lot of near-identical 24px targets on a phone for very
+        little navigational value, and "page 2 of 6" answers the question the
+        numbers exist to answer.{% endcomment %}
+        <nav class="hs-pagination" aria-label="Insights pages">
+          {% if page.has_previous %}
+            <a class="hs-pagination__link" rel="prev"
+               href="?{% if active_tag %}tag={{ active_tag.slug }}&amp;{% endif %}page={{ page.previous_page_number }}">
+              {% include 'web/partials/_icon.html' with name='arrow-right' extra_class='hs-icon--back' %}
+              Newer
+            </a>
+          {% else %}
+            <span class="hs-pagination__link hs-pagination__link--disabled">Newer</span>
+          {% endif %}
+
+          <p class="hs-pagination__status" aria-live="polite">
+            Page {{ page.number }} of {{ page.paginator.num_pages }}
+          </p>
+
+          {% if page.has_next %}
+            <a class="hs-pagination__link" rel="next"
+               href="?{% if active_tag %}tag={{ active_tag.slug }}&amp;{% endif %}page={{ page.next_page_number }}">
+              Older
+              {% include 'web/partials/_icon.html' with name='arrow-right' %}
+            </a>
+          {% else %}
+            <span class="hs-pagination__link hs-pagination__link--disabled">Older</span>
+          {% endif %}
+        </nav>
+      {% endif %}
     {% else %}
-      {% comment %}An empty state rather than a blank band. With one article
-      published, the featured slot holds it and this list is legitimately
-      empty.{% endcomment %}
-      <p class="hs-insights-empty">More articles are on the way.</p>
+      {% comment %}An empty state rather than a blank band. A tag with no live
+      articles is possible if everything under it is later archived.{% endcomment %}
+      <p class="hs-insights-empty">
+        {% if active_tag %}
+          Nothing under {{ active_tag.name }} yet.
+          <a href="{% url 'insights:index' %}">See all articles</a>.
+        {% else %}
+          More articles are on the way.
+        {% endif %}
+      </p>
     {% endif %}
   </div>
 </section>
 
-{% comment %}The newsletter belongs here more than anywhere else on the site:
-this is the page it is a subscription to. `source='insights'` is recorded against
-the subscription, so "which placement actually works" becomes answerable rather
-than a matter of opinion.{% endcomment %}
 <section class="hs-section hs-section--tight hs-section--warm" aria-labelledby="newsletter-title-insights">
   <div class="hs-container">
     {% include 'web/partials/_newsletter.html' with source='insights' %}
   </div>
 </section>
 
-{% comment %}A route back out into the ecosystem. Insights is where people arrive
-from a search result, so it is the page most in need of an answer to "what is the
-rest of this?".{% endcomment %}
 {% include 'web/partials/_ecosystem_cta.html' %}
 
 {% endblock %}

@@ -774,6 +774,85 @@ wildcard for `*.haresign.net`, and Cloudflare DNS for `beta` already resolves.
 
 ---
 
+## The Insights index: paging, filters and image weight
+
+67 articles were rendering on one page. The markup was fine — 70KB for the lot —
+but the hero images behind it came to **64.8 MB**, averaging 991 KB each, and
+that grows with every article published. Lazy loading meant nothing looked
+broken, which is why it went unnoticed: the cost lands on whoever is reading on
+a phone on mobile data.
+
+### Paging
+
+12 per page, six pages. Previous / position / next rather than a strip of page
+numbers — six numbered links is a row of near-identical small targets on a phone,
+and "Page 2 of 6" answers the question the numbers exist to answer.
+
+The featured article leads **page one only, and only unfiltered**: on page two it
+is stale furniture, and under a filter it is an article ignoring the filter the
+reader just set.
+
+An unknown tag or an out-of-range page is a **404, not an empty list** — those
+URLs name something that does not exist, and "no articles found" invites the
+reader to conclude the archive is empty. Note `InvalidPage`, not `EmptyPage`:
+Django raises `PageNotAnInteger` for `?page=abc`, which is a *sibling* rather
+than a subclass, and catching only `EmptyPage` turned a junk query string into a
+500.
+
+### Filters, and why they print their counts
+
+The tags are topical labels rather than a taxonomy. The median article carries
+five, and the largest covers more than half the archive:
+
+```
+Governance 36 · Practice Management 32 · Workforce 31 · Operational Risk 29
+Compliance 29 · NHS Contracts 22 · Access 19 · Digital Tools 18 · Finance 17
+```
+
+A chip that silently returns 36 of 67 articles feels broken. One that says
+`Governance (36)` is telling the reader what it will do before they spend a click
+finding out — which is why the counts are part of the control rather than
+decoration, and why only the top ten are offered.
+
+Counts are taken over **live** articles, so a count can never promise more than
+the filter delivers. Everything is a plain link: no JavaScript filters the page,
+every filtered view has its own URL to bookmark, the back button behaves, and
+each view canonicalises to itself rather than to page one.
+
+### Images
+
+```bash
+python manage.py optimise_images --dry-run
+python manage.py optimise_images
+```
+
+| | Before | After |
+|---|---|---|
+| What a WebP browser downloads | 64.8 MB | **4.9 MB** (−93%) |
+| What a browser without WebP downloads | 64.8 MB | 57.2 MB (−12%) |
+
+Two files per image: the original path is resized in place **in its own format**,
+so it stays the `<img src>` and every existing reference keeps working; and a
+`.webp` sibling is written and offered first through `<picture>`.
+
+WebP alone would be smaller still, but this audience includes locked-down NHS
+desktops — the fallback costs one element and means a browser that has never
+heard of WebP gets an image rather than a broken one. The `<source>` is emitted
+only when the file genuinely exists (`Article.featured_image_webp_url`), because
+a `<source>` pointing at a missing file breaks the image for *everyone else*.
+
+**Originals are never destroyed**: every file is copied to `insights/original/`
+before it is touched, and that directory is served by nothing. Re-run the command
+after any import; it skips what it has already done.
+
+The fallback only improves 12% because these are PNG exports already at or below
+the width limit — PNG is simply the wrong format for a photographic composite,
+and converting it would change the file extension and therefore every stored URL.
+Since WebP has been universal since Safari 14, the 4.9 MB figure is what nearly
+every reader actually experiences.
+
+---
+
 ## Responsive and accessibility QA
 
 ```bash
@@ -782,7 +861,7 @@ python qa/responsive.py                 # against beta
 python qa/responsive.py --screenshots   # also writes qa/screenshots/
 ```
 
-**1,080 checks across 7 viewports (320–1440px) and 13 pages**, driven through a
+**1,228 checks across 7 viewports (320–1440px) and 15 pages**, driven through a
 real Chromium. Deliberately outside `manage.py test`: the unit suite must not
 need a browser or a network, and "does this overflow at 320px" has no answer
 without layout.

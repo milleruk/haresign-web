@@ -15,6 +15,8 @@ with a `published_at` in the future is scheduled, not live. Every public query
 goes through `Article.objects.live()` so no view can get that wrong by writing
 its own filter and forgetting the clock.
 """
+from pathlib import Path
+
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -186,6 +188,27 @@ class Article(models.Model):
             and self.published_at is not None
             and self.published_at <= timezone.now()
         )
+
+    @property
+    def featured_image_webp_url(self):
+        """URL of the WebP sibling written by `manage.py optimise_images`, or ''.
+
+        Checked for existence rather than assumed: an image uploaded through the
+        admin has no WebP until the command runs again, and a `<source>`
+        pointing at a missing file would show a broken image to every browser
+        that prefers WebP — which is nearly all of them.
+
+        One `storage.exists()` per rendered image. On the index that is twelve
+        local stat calls, which is cheaper than the 900KB it saves each of them.
+        """
+        if not self.featured_image:
+            return ''
+        from django.core.files.storage import default_storage
+
+        candidate = str(Path(self.featured_image.name).with_suffix('.webp'))
+        if default_storage.exists(candidate):
+            return default_storage.url(candidate)
+        return ''
 
     @property
     def seo_title(self):
