@@ -12,10 +12,11 @@ Re-posting it is harmless: subscribing is idempotent.
 """
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .forms import SubscribeForm
-from .models import Subscriber
+from .models import Issue, Subscriber
 
 # Per-IP limit. Generous enough that nobody legitimate meets it, tight enough
 # that the endpoint is not a way to test which addresses are already on a list.
@@ -106,11 +107,48 @@ def unsubscribe(request, token):
     if request.method == 'POST':
         if subscriber.active:
             subscriber.active = False
-            subscriber.save(update_fields=['active'])
+            subscriber.unsubscribed_at = timezone.now()
+            subscriber.save(update_fields=['active', 'unsubscribed_at'])
         return render(request, 'newsletter/unsubscribed.html',
                       {'subscriber': subscriber})
 
     return render(request, 'newsletter/unsubscribe.html', {
         'subscriber': subscriber,
         'already_gone': not subscriber.active,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Public archive
+# ---------------------------------------------------------------------------
+# A record of what was sent, not a way to send. These views read `Issue` and
+# nothing here can put an email in a queue — that is the monolith's job until a
+# separate decision is taken.
+
+
+def issue_index(request):
+    """The newsletter archive.
+
+    `public()` — sent issues only, the same rule the monolith's archive applies.
+    A draft on a public page is unfinished writing somebody can find.
+    """
+    return render(request, 'newsletter/issue_index.html', {
+        'issues': Issue.objects.public().prefetch_related('articles'),
+    })
+
+
+def issue_detail(request, slug):
+    """One issue.
+
+    Looked up through `public()`, so a draft 404s exactly as an unknown slug
+    does — no separate "not sent yet" page that would confirm it exists.
+    """
+    issue = get_object_or_404(
+        Issue.objects.public().prefetch_related('articles'), slug=slug)
+    return render(request, 'newsletter/issue_detail.html', {
+        'issue': issue,
+        # Only live articles: an issue may reference something later archived,
+        # and the archive must not become a back door to unpublished work.
+        'articles': [a for a in issue.articles.all() if a.is_live],
+        'other_issues': Issue.objects.public().exclude(pk=issue.pk)[:4],
     })

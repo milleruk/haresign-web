@@ -60,7 +60,10 @@ change honestly rather than the form being smuggled in.
   </form>
 
   <p class="hs-newsletter__note">
-    No spam, and you can unsubscribe from any email. See our
+    {% comment %}The archive link is the honest version of "no spam": read one
+    before deciding, rather than taking our word for what arrives.{% endcomment %}
+    No spam, and you can unsubscribe from any email.
+    <a href="{% url 'newsletter:issues' %}">Read a past issue</a> or see our
     <a href="{% url 'legal_privacy' %}">Privacy Notice</a>.
   </p>
 </div>

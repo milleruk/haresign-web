@@ -26,12 +26,16 @@ import os
 def _live_services():
     """Slugs of services currently reachable, from HARESIGN_LIVE_SERVICES.
 
-    Defaults to Intelligence and the documentation — the two that verifiably
-    answer today. Deliberately an allow-list: a service added to the registry
-    later is "not live" until somebody says otherwise, which is the safe way to
-    be wrong.
+    Defaults to Intelligence, Community and the documentation — the three that
+    verifiably answer today. Deliberately an allow-list: a service added to the
+    registry later is "not live" until somebody says otherwise, which is the safe
+    way to be wrong.
+
+    Community was added once community.haresign.net was confirmed serving. Note
+    what did *not* have to change for it: no template, no card, no nav item, no
+    FAQ answer and no CTA route. Every one of them asks this registry.
     """
-    raw = os.environ.get('HARESIGN_LIVE_SERVICES', 'intelligence,docs')
+    raw = os.environ.get('HARESIGN_LIVE_SERVICES', 'intelligence,community,docs')
     return {slug.strip().lower() for slug in raw.split(',') if slug.strip()}
 
 

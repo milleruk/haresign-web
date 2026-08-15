@@ -55,7 +55,12 @@
   font-size: var(--hs-text-sm);
 }
 .hs-legal-toc__list li { margin-bottom: var(--hs-space-2); break-inside: avoid; }
-.hs-legal-toc__list a { color: var(--hs-text); }
+.hs-legal-toc__list a {
+  /* 24px minimum target: these measured 20px and are a list of links, not
+     prose. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem; color: var(--hs-text); }
 .hs-legal-toc__list a:hover { color: var(--hs-primary); text-decoration: underline; }
 
 /* --- Body ---------------------------------------------------------------- */
@@ -76,11 +81,6 @@
   border-inline-start: 4px solid var(--hs-teal);
   background-color: var(--hs-surface-muted);
   font-size: var(--hs-text-base);
-}
-.hs-callout--todo {
-  border-inline-start-color: var(--hs-coral);
-  background-color: var(--hs-tint-coral);
-  color: var(--hs-navy-soft);
 }
 
 /* Wide tables inside a policy get their own scroll box, as in articles. */
@@ -121,4 +121,13 @@
 @media (max-width: 575.98px) {
   .hs-legal-toc__list { columns: 1; }
   .hs-legal-toc { padding: var(--hs-space-5); }
+}
+
+/* Same 24px minimum as the contents rail. The closing note and the cross-links
+   to the other policies are standalone links, not prose. */
+.hs-legal-note a,
+.hs-legal-related__list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
 }

@@ -1,0 +1,104 @@
+/* ==========================================================================
+   pages/newsletter.css — the public archive: index and one issue.
+
+   The sign-up block itself is a component (.hs-newsletter in components.css).
+   ========================================================================== */
+
+.hs-issue-hero {
+  padding-block: clamp(3rem, 6vw, 4.5rem) clamp(2rem, 4vw, 3rem);
+  background-color: var(--hs-surface-warm);
+  border-bottom: 1px solid var(--hs-border-subtle);
+}
+.hs-issue-hero__title {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  margin-bottom: var(--hs-space-4);
+}
+.hs-issue-hero__lead { max-width: 42rem; margin-bottom: 0; font-size: var(--hs-text-lg); }
+.hs-issue-hero__meta { margin-bottom: 0; color: var(--hs-text-muted); font-size: var(--hs-text-sm); }
+
+/* --- Index ---------------------------------------------------------------
+   A list, not a grid of cards. An archive is scanned by date, and four issues
+   in a three-column card grid would look like a broken layout rather than a
+   short history. This also stays legible as it grows to forty. */
+.hs-issue-list { list-style: none; margin: 0; padding: 0; }
+.hs-issue-row {
+  padding-block: var(--hs-space-6);
+  border-bottom: 1px solid var(--hs-border);
+}
+.hs-issue-row:first-child { padding-top: 0; }
+.hs-issue-row__date {
+  margin-bottom: var(--hs-space-2);
+  color: var(--hs-text-muted);
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.hs-issue-row__title {
+  font-size: var(--hs-heading-card);
+  margin-bottom: var(--hs-space-2);
+}
+.hs-issue-row__title a { color: var(--hs-text-strong); }
+.hs-issue-row__title a:hover { color: var(--hs-primary); }
+.hs-issue-row__meta { margin-bottom: 0; font-size: var(--hs-text-sm); color: var(--hs-text-muted); }
+
+/* --- One issue ----------------------------------------------------------- */
+.hs-issue__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  color: inherit;
+}
+
+.hs-issue__articles {
+  margin-top: var(--hs-space-12);
+  padding-top: var(--hs-space-8);
+  border-top: 1px solid var(--hs-border);
+}
+.hs-issue__articles-title { font-size: var(--hs-text-xl); margin-bottom: var(--hs-space-5); }
+.hs-issue__article-list { list-style: none; margin: 0; padding: 0; }
+.hs-issue__article-list li {
+  padding-block: var(--hs-space-4);
+  border-bottom: 1px solid var(--hs-border-subtle);
+}
+.hs-issue__article-list a {
+  display: block;
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-lg);
+  font-weight: var(--hs-weight-bold);
+  color: var(--hs-text-strong);
+}
+.hs-issue__article-list a:hover { color: var(--hs-primary); }
+.hs-issue__article-summary {
+  display: block;
+  margin-top: var(--hs-space-1);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+}
+
+.hs-issue__more {
+  margin-block: var(--hs-space-12);
+  padding-top: var(--hs-space-8);
+  border-top: 1px solid var(--hs-border);
+}
+.hs-issue__more-title {
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+  color: var(--hs-text-muted);
+  margin-bottom: var(--hs-space-4);
+}
+.hs-issue__more ul { list-style: none; margin: 0; padding: 0; }
+.hs-issue__more li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--hs-space-3);
+  padding-block: var(--hs-space-3);
+  border-bottom: 1px solid var(--hs-border-subtle);
+}
+.hs-issue__more-date { font-size: var(--hs-text-sm); color: var(--hs-text-muted); }
+.hs-issue__more a,
+.hs-issue__article-list a { min-height: 1.5rem; }

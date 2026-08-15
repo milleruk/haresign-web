@@ -52,3 +52,11 @@
 @media (max-width: 575.98px) {
   .hs-contact-grid { grid-template-columns: 1fr; }
 }
+
+/* 24px minimum target. The email address under the cards is the page's fallback
+   route, so it is exactly the link that must be easy to hit. */
+.hs-contact-direct a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}

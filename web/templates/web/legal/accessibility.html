@@ -10,6 +10,13 @@ audited and has not been tested with a screen reader or by disabled users, so
 says exactly what is missing. An accessibility statement that overstates is
 worse than none: it tells someone the site will work for them when nobody has
 checked.
+
+**Updated after the responsive QA pass.** Browser testing across seven viewport
+widths has now happened (`qa/responsive.py`, 1,080 automated checks), so the
+limitation that said mobile behaviour had not been browser-tested was no longer
+true and had to go — a statement that understates goes stale in exactly the same
+way one that overstates goes wrong. Screen-reader and disabled-user testing
+still have not happened, and still say so.
 {% endcomment %}
 
 {% block policy %}
@@ -74,13 +81,15 @@ checked.
     is removed entirely when your system asks for reduced motion.
   </li>
   <li>
-    <strong>Responsive layout.</strong> The site reflows to a single column on
-    small screens rather than being scaled down, and text can be zoomed without
-    content being lost.
+    <strong>Responsive layout, tested in a browser.</strong> Every page is
+    checked automatically at seven widths from 320 to 1440 pixels: nothing
+    scrolls sideways, no image escapes its column, and wide tables scroll inside
+    their own area rather than breaking the page.
   </li>
   <li>
-    <strong>Touch targets.</strong> Controls are at least 44&nbsp;&times;&nbsp;44
-    pixels.
+    <strong>Touch targets.</strong> Controls are at least
+    24&nbsp;&times;&nbsp;24 pixels, and the main actions considerably larger.
+    This is checked automatically at every mobile width rather than by eye.
   </li>
   <li>
     <strong>Meaningful links.</strong> Link text describes its destination, so it
@@ -106,20 +115,33 @@ checked.
   </li>
   <li>
     <strong>No screen-reader or user testing yet.</strong> Accessibility has been
-    built in and checked by code review and automated assertions, but the site has
-    not been tested with a screen reader or with disabled users. That is planned
-    before it replaces the current haresign.net.
+    built in, checked by code review, and tested in a browser at seven screen
+    sizes — but the site has not been tested with a screen reader or with
+    disabled users. That is planned before it replaces the current haresign.net.
   </li>
   <li>
-    <strong>Older articles.</strong> Articles written before this site existed may
-    contain images without alternative text, or tables whose structure is not
-    fully marked up. We are reviewing these as they are brought across.
+    <strong>Article header images have no description.</strong> Every article
+    carries a header image, and each is presented as decorative because it
+    repeats the headline that sits beside it in text — so nothing is lost by not
+    describing it. Where such an image ever carries information the headline does
+    not, it needs a description, and we are reviewing them.
+  </li>
+  <li>
+    <strong>A few older articles skip a heading level.</strong> Four places in
+    the archive jump from a second-level heading to a fourth. It makes those
+    pages slightly harder to navigate by structure. They are being corrected as
+    editorial work rather than by a script rewriting published articles.
   </li>
   <li>
     <strong>Data tables and charts.</strong> Some analysis includes wide tables
     and chart images. Wide tables scroll within their own area rather than
     breaking the page, but a chart supplied as an image may not yet have a full
     text equivalent.
+  </li>
+  <li>
+    <strong>Printable checklists in some articles.</strong> A few articles
+    include tick-box checklists meant to be printed. The boxes can be focused and
+    ticked on screen, but nothing is saved.
   </li>
   <li>
     <strong>This site is in beta.</strong> It is under active development and

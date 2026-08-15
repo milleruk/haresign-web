@@ -1,0 +1,69 @@
+{% extends 'web/base.html' %}
+{% load static %}{% comment %}The newsletter archive.
+
+Reached from the footer (Resources) and from the newsletter sign-up block — not
+from the main nav. The nav is already at its ceiling, and an archive is something
+you look for after deciding to subscribe rather than a primary destination.
+
+Sent issues only. `Issue.objects.public()` enforces that in one place so no
+template can accidentally list a draft.
+{% endcomment %}
+
+{% block title %}Newsletter archive — {{ SITE_NAME }}{% endblock %}
+{% block description %}Past editions of the Haresign newsletter: primary care analysis, research, tools and updates.{% endblock %}
+{% block og_title %}Haresign newsletter archive{% endblock %}
+{% block og_description %}Every edition of the Haresign newsletter, in one place.{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/newsletter.css' %}">{% endblock %}
+
+{% block content %}
+
+<header class="hs-issue-hero">
+  <div class="hs-container">
+    <p class="hs-eyebrow">Newsletter</p>
+    <h1 class="hs-issue-hero__title">The archive.</h1>
+    <p class="hs-issue-hero__lead">
+      Every edition we have sent — primary care analysis, research, tools and
+      Haresign updates. Read one before deciding whether to subscribe.
+    </p>
+  </div>
+</header>
+
+<section class="hs-section hs-section--tight" aria-labelledby="issues-title">
+  <div class="hs-container">
+    <h2 class="hs-visually-hidden" id="issues-title">Past issues</h2>
+
+    {% if issues %}
+      <ol class="hs-issue-list">
+        {% for issue in issues %}
+          <li class="hs-issue-row">
+            {% comment %}The date leads. An archive is browsed by "when", and the
+            subject line is what the issue actually called itself — a more useful
+            heading than the internal title.{% endcomment %}
+            <p class="hs-issue-row__date">
+              <time datetime="{{ issue.sent_at|date:'Y-m-d' }}">{{ issue.sent_at|date:'j F Y' }}</time>
+            </p>
+            <h3 class="hs-issue-row__title">
+              <a href="{% url 'newsletter:issue' issue.slug %}">{{ issue.subject }}</a>
+            </h3>
+            {% if issue.articles.exists %}
+              <p class="hs-issue-row__meta">
+                {{ issue.articles.count }} article{{ issue.articles.count|pluralize }}
+              </p>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    {% else %}
+      <p class="hs-insights-empty">No issues have been published yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="hs-section hs-section--tight hs-section--warm" aria-labelledby="newsletter-title-archive">
+  <div class="hs-container">
+    {% include 'web/partials/_newsletter.html' with source='archive' heading='Get the next one.' %}
+  </div>
+</section>
+
+{% endblock %}

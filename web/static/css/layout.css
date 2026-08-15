@@ -181,6 +181,17 @@
 }
 .hs-footer a { color: var(--hs-text-on-dark); }
 .hs-footer a:hover { color: var(--hs-text-on-dark-strong); }
+
+/* WCAG 2.2 SC 2.5.8: a target is at least 24x24 CSS pixels. Footer links are
+   standalone items in a list, not words inside a sentence, so the "inline"
+   exception does not cover them — at 17px type they measured 22px tall and were
+   caught by the responsive QA pass. inline-flex plus a min-height grows the hit
+   area without moving anything visually. */
+.hs-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+}
 /* Section headings inside the footer stack; the second in a column needs air. */
 .hs-footer__heading + .hs-footer__list { margin-bottom: var(--hs-space-8); }
 .hs-footer__list + .hs-footer__heading { margin-top: 0; }

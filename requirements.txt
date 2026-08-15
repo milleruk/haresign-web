@@ -6,3 +6,9 @@ whitenoise[brotli]==6.8.2
 psycopg[binary]==3.2.3      # PostgreSQL driver (psycopg 3)
 django-tinymce==4.1.0       # Jazzband; the same authoring model as the monolith
 Pillow==11.1.0              # ImageField support for featured images
+
+# Legacy import. Article bodies are real-world TinyMCE HTML — nested Bootstrap
+# markup, tables, relative URLs — and rewriting that with regular expressions is
+# how an importer silently corrupts an article. Used only by the import commands
+# and their tests; nothing in the request path imports it.
+beautifulsoup4==4.12.3

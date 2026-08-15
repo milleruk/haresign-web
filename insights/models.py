@@ -134,6 +134,27 @@ class Article(models.Model):
     categories = models.ManyToManyField(Category, blank=True, related_name='articles')
     tags = models.ManyToManyField(Tag, blank=True, related_name='articles')
 
+    # --- Migration provenance ------------------------------------------------
+    # Never shown publicly. These exist so a re-import is safe and so an
+    # imported article can be traced back to what it came from.
+    legacy_id = models.PositiveIntegerField(
+        null=True, blank=True, unique=True, db_index=True,
+        help_text='Primary key of the monolith BlogPost this came from. The '
+                  'import matches on this before falling back to slug, so a '
+                  'slug corrected on either side cannot create a second copy.',
+    )
+    legacy_path = models.CharField(
+        max_length=255, blank=True,
+        help_text='Where this lived on haresign.net, e.g. /blog/<slug>/. Used to '
+                  'build the cutover redirect map.',
+    )
+    body_source = models.TextField(
+        blank=True,
+        help_text='The monolith HTML exactly as exported, before the import '
+                  'rewrote links and removed dead controls. Kept so the '
+                  'rewriting is auditable and re-runnable; never rendered.',
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

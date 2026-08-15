@@ -808,9 +808,11 @@ class EcosystemCtaTests(TestCase):
                 self.assertNotIn('haresign.net', route['action'])
 
     def test_an_unlaunched_platform_is_named_but_not_linked(self):
+        """Consulting and Workspace, since Community went live."""
         body = self.client.get('/').content.decode()
 
-        self.assertNotIn('href="https://community.haresign.net"', body)
+        self.assertNotIn('href="https://consulting.haresign.net"', body)
+        self.assertNotIn('href="https://clients.haresign.net"', body)
         self.assertIn('hs-ecosystem__link--soon', body)
 
     def test_it_appears_once_per_page(self):
@@ -917,3 +919,81 @@ class NavigationTests(TestCase):
         nav = body[body.index('<nav'):body.index('</nav>')]
 
         self.assertNotIn('readthedocs', nav)
+
+
+class CommunityIsLiveTests(TestCase):
+    """Haresign Community is live, and marking it so was one config change.
+
+    The value of the registry is that this needed no template edit at all — the
+    cards, the nav, the footer, the FAQ and the ecosystem band all ask it. These
+    assertions are what prove that claim rather than just asserting it.
+    """
+
+    def test_the_registry_says_community_is_live(self):
+        registry = build_registry()
+
+        self.assertTrue(registry['community']['available'])
+        self.assertEqual(registry['community']['url'], 'https://community.haresign.net')
+
+    def test_it_is_linked_everywhere_the_registry_is_read(self):
+        for path in ('/', '/faq/', '/insights/'):
+            with self.subTest(path=path):
+                self.assertContains(
+                    self.client.get(path), 'href="https://community.haresign.net"')
+
+    def test_no_coming_soon_is_left_against_community(self):
+        """A live service still labelled "Soon" is worse than one that is not
+        listed: it tells people not to click something that works."""
+        body = self.client.get('/').content.decode()
+
+        for marker in ('hs-nav__link--unavailable', 'hs-footer__link--unavailable',
+                       'hs-ecosystem__link--soon'):
+            for match in re.finditer(re.escape(marker) + r'[^<]*>([^<]*)', body):
+                self.assertNotIn('Community', match.group(1))
+
+    def test_the_status_is_not_hard_coded_in_any_template(self):
+        """Grep, deliberately. A template that decides availability for itself
+        cannot be flipped by configuration, which is the whole design."""
+        import pathlib
+
+        for template in pathlib.Path('web/templates').rglob('*.html'):
+            source = template.read_text()
+            with self.subTest(template=str(template)):
+                self.assertNotIn('community.haresign.net', source)
+
+
+class GoverningLawTests(TestCase):
+    """The clause resolved in this task.
+
+    Asserted because a legal commitment disappearing in an unrelated edit is
+    exactly the kind of change that nothing else would catch.
+    """
+
+    def test_governing_law_is_stated(self):
+        response = self.client.get('/terms/')
+
+        self.assertContains(response, 'Governing law')
+        self.assertContains(response, 'law of England and Wales')
+        self.assertContains(response, 'courts of England and Wales')
+
+    def test_no_todo_marker_survives_anywhere_in_the_legal_pages(self):
+        for path in ('/terms/', '/privacy/', '/cookies/', '/accessibility/'):
+            with self.subTest(path=path):
+                body = self.client.get(path).content.decode()
+
+                for marker in ('TODO', 'To be confirmed', 'hs-callout--todo',
+                               'FIXME', 'placeholder'):
+                    self.assertNotIn(marker, body)
+
+    def test_the_consumer_right_is_preserved(self):
+        """A UK consumer keeps the right to sue where they live whatever a
+        website says. A clause claiming otherwise is unenforceable and reads as
+        trying it on."""
+        self.assertContains(self.client.get('/terms/'), 'country where you live')
+
+    def test_website_terms_do_not_become_service_terms(self):
+        """These are the terms of a website. They must not quietly become the
+        terms of a consulting engagement or a subscription."""
+        response = self.client.get('/terms/')
+
+        self.assertContains(response, 'not the terms of any consulting')

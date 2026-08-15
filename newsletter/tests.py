@@ -230,3 +230,137 @@ class BoundaryTests(TestCase):
         call_command('export_subscribers', stdout=out)
 
         self.assertEqual(json.loads(out.getvalue()), [])
+
+
+class LegacyImportTests(TestCase):
+    """The subscriber importer, and the three rules that matter.
+
+    Written against small synthetic exports rather than the real 175-row file:
+    the file is personal data and does not belong in a test fixture.
+    """
+
+    def _run(self, rows, **options):
+        import json
+        import tempfile
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as handle:
+            json.dump({'subscribers': rows}, handle)
+            path = handle.name
+
+        out = StringIO()
+        call_command('import_legacy_subscribers', path, stdout=out, **options)
+        return out.getvalue()
+
+    def test_active_and_unsubscribed_rows_are_both_imported(self):
+        """Importing only the active list is precisely how somebody who opted
+        out gets mailed again."""
+        self._run([
+            {'legacy_id': 1, 'email': 'a@example.nhs.uk', 'active': True},
+            {'legacy_id': 2, 'email': 'b@example.nhs.uk', 'active': False},
+        ])
+
+        self.assertEqual(Subscriber.objects.count(), 2)
+        self.assertFalse(Subscriber.objects.get(email='b@example.nhs.uk').active)
+
+    def test_a_local_unsubscribe_outranks_a_source_that_says_active(self):
+        """The export may simply predate the unsubscribe. The safe direction of
+        that disagreement is obvious."""
+        Subscriber.objects.create(
+            email='gone@example.nhs.uk', active=False, legacy_id=7)
+
+        output = self._run([
+            {'legacy_id': 7, 'email': 'gone@example.nhs.uk', 'active': True}])
+
+        self.assertFalse(Subscriber.objects.get(email='gone@example.nhs.uk').active)
+        self.assertIn('kept local unsubscribe', output)
+
+    def test_a_source_unsubscribe_deactivates_a_local_active_row(self):
+        Subscriber.objects.create(email='left@example.nhs.uk', legacy_id=8)
+
+        self._run([{'legacy_id': 8, 'email': 'left@example.nhs.uk', 'active': False}])
+
+        self.assertFalse(Subscriber.objects.get(email='left@example.nhs.uk').active)
+
+    def test_email_matching_is_case_insensitive(self):
+        """One person, one inbox — whatever case the source stored."""
+        Subscriber.objects.create(email='person@example.nhs.uk')
+
+        self._run([{'legacy_id': 3, 'email': 'Person@Example.NHS.uk', 'active': True}])
+
+        self.assertEqual(Subscriber.objects.count(), 1)
+
+    def test_the_unsubscribe_token_is_carried_over(self):
+        """The single most important field in the export: without it, the
+        unsubscribe link in every already-sent email stops working at cutover."""
+        token = '11111111-2222-3333-4444-555555555555'
+
+        self._run([{'legacy_id': 4, 'email': 'c@example.nhs.uk',
+                    'active': True, 'unsubscribe_token': token}])
+
+        self.assertEqual(
+            str(Subscriber.objects.get(email='c@example.nhs.uk').unsubscribe_token),
+            token)
+
+    def test_the_original_subscribed_date_is_preserved(self):
+        """subscribed_at is auto_now_add, so it has to be written afterwards —
+        otherwise every migrated row claims to have subscribed on migration day."""
+        self._run([{'legacy_id': 5, 'email': 'd@example.nhs.uk', 'active': True,
+                    'subscribed_at': '2026-01-15T10:30:00+00:00'}])
+
+        self.assertEqual(
+            Subscriber.objects.get(email='d@example.nhs.uk').subscribed_at.year, 2026)
+
+    def test_no_unsubscribe_date_is_invented(self):
+        """The monolith records none. Stamping the migration date would
+        manufacture a consent record that does not exist."""
+        self._run([{'legacy_id': 6, 'email': 'e@example.nhs.uk', 'active': False}])
+
+        self.assertIsNone(
+            Subscriber.objects.get(email='e@example.nhs.uk').unsubscribed_at)
+
+    def test_invalid_addresses_are_reported_not_imported(self):
+        output = self._run([
+            {'legacy_id': 9, 'email': 'not-an-address', 'active': True},
+            {'legacy_id': 10, 'email': '', 'active': True},
+        ])
+
+        self.assertEqual(Subscriber.objects.count(), 0)
+        self.assertIn('invalid', output.lower())
+
+    def test_duplicates_in_the_source_are_reported(self):
+        output = self._run([
+            {'legacy_id': 11, 'email': 'dup@example.nhs.uk', 'active': True},
+            {'legacy_id': 12, 'email': 'DUP@example.nhs.uk', 'active': True},
+        ])
+
+        self.assertEqual(Subscriber.objects.count(), 1)
+        self.assertIn('duplicate', output.lower())
+
+    def test_it_is_idempotent(self):
+        rows = [{'legacy_id': 13, 'email': 'f@example.nhs.uk', 'active': True}]
+
+        self._run(rows)
+        self._run(rows)
+
+        self.assertEqual(Subscriber.objects.count(), 1)
+
+    def test_dry_run_writes_nothing(self):
+        self._run([{'legacy_id': 14, 'email': 'g@example.nhs.uk', 'active': True}],
+                  dry_run=True)
+
+        self.assertEqual(Subscriber.objects.count(), 0)
+
+    def test_unsubscribing_here_records_when(self):
+        """Unlike migrated rows, an unsubscribe that happens on this site has a
+        real date to record."""
+        subscriber = Subscriber.objects.create(email='h@example.nhs.uk')
+
+        self.client.post(reverse('newsletter:unsubscribe',
+                                 kwargs={'token': subscriber.unsubscribe_token}))
+
+        subscriber.refresh_from_db()
+        self.assertFalse(subscriber.active)
+        self.assertIsNotNone(subscriber.unsubscribed_at)

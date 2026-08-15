@@ -207,6 +207,20 @@ TINYMCE_DEFAULT_CONFIG = {
 # runtime dependency and the admin works on a locked-down network.
 TINYMCE_JS_URL = None
 
+# --- Email: deliberately disabled ------------------------------------------
+# This application holds the newsletter list but is **not** the sending system;
+# the monolith is, until a separate decision is taken (see README, "Newsletter").
+#
+# The dummy backend makes that structural rather than a matter of nobody having
+# written the code yet: anything that tried to send would silently discard
+# instead of reaching a mail server. With 175 real subscribers imported, the cost
+# of an accidental send is somebody's inbox, so it is worth closing the door
+# rather than leaving it merely unopened.
+#
+# Switching this is the visible, deliberate act that moving sending here would
+# require — which is exactly what it should be.
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
+
 # --- Security --------------------------------------------------------------
 
 # Behind Traefik, which terminates TLS. Without this Django never sees a secure

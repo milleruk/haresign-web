@@ -14,9 +14,16 @@ staticfiles/
 # Uploaded media — content, not code. Backed up separately (see README).
 media/
 
-# Legacy export files are a migration artefact, never committed: they are a full
-# copy of the monolith's article content.
+# Migration artefacts, never committed. legacy_articles.json is the whole article
+# corpus; legacy_subscribers.json is a list of real people's email addresses.
+# Both are working files that should be deleted once an import is verified.
 legacy_articles*.json
+legacy_newsletters*.json
+legacy_subscribers*.json
+_migration/
+
+# Responsive QA output — screenshots are review artefacts, not site assets.
+qa/screenshots/
 
 .pytest_cache/
 .ruff_cache/

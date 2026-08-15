@@ -1,0 +1,76 @@
+{% extends 'web/base.html' %}
+{% load static %}{% comment %}One newsletter issue.
+
+The body is rendered through `.hs-prose`, the same long-form styling as an
+article and a legal page — an issue is a document, and it should read like one.
+
+`|safe` is scoped to exactly this element. Issue bodies are HTML written by
+editorial staff in TinyMCE, or imported from the monolith where the same was
+true; escaping is never disabled globally and no other field here is marked safe.
+{% endcomment %}
+
+{% block title %}{{ issue.subject }} — Haresign newsletter{% endblock %}
+{% block description %}{{ issue.subject }} — Haresign newsletter, {{ issue.sent_at|date:'F Y' }}.{% endblock %}
+{% block og_title %}{{ issue.subject }}{% endblock %}
+{% block og_description %}Haresign newsletter, {{ issue.sent_at|date:'j F Y' }}.{% endblock %}
+{% block og_type %}article{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/newsletter.css' %}">{% endblock %}
+
+{% block content %}
+
+<article class="hs-issue">
+
+  <header class="hs-issue-hero">
+    <div class="hs-container hs-container--reading">
+      <p class="hs-eyebrow">
+        <a class="hs-issue__back" href="{% url 'newsletter:issues' %}">Newsletter archive</a>
+      </p>
+      <h1 class="hs-issue-hero__title">{{ issue.subject }}</h1>
+      <p class="hs-issue-hero__meta">
+        Sent <time datetime="{{ issue.sent_at|date:'Y-m-d' }}">{{ issue.sent_at|date:'j F Y' }}</time>
+      </p>
+    </div>
+  </header>
+
+  <div class="hs-container hs-container--reading">
+    <div class="hs-prose">{{ issue.body_html|safe }}</div>
+
+    {% if articles %}
+      {% comment %}The reading list the issue carried, re-resolved to live
+      articles here rather than trusted from the email — an issue may name
+      something since archived, and the archive must not become a back door to
+      it.{% endcomment %}
+      <section class="hs-issue__articles" aria-labelledby="issue-articles-title">
+        <h2 class="hs-issue__articles-title" id="issue-articles-title">In this issue</h2>
+        <ul class="hs-issue__article-list">
+          {% for article in articles %}
+            <li>
+              <a href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+              <span class="hs-issue__article-summary">{{ article.summary|truncatewords:24 }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% include 'web/partials/_newsletter.html' with source='issue' variant='inline' heading='Get the next one.' %}
+
+    {% if other_issues %}
+      <nav class="hs-issue__more" aria-labelledby="more-issues-title">
+        <h2 class="hs-issue__more-title" id="more-issues-title">Other issues</h2>
+        <ul>
+          {% for other in other_issues %}
+            <li>
+              <a href="{% url 'newsletter:issue' other.slug %}">{{ other.subject }}</a>
+              <span class="hs-issue__more-date">{{ other.sent_at|date:'M Y' }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+
+</article>
+
+{% endblock %}

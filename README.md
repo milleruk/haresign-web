@@ -105,6 +105,122 @@ pages stay true by failing rather than by being remembered.
 
 ---
 
+## Migration from the monolith — done, and repeatable
+
+The full public editorial corpus has been copied across. **This was a snapshot,
+not a cutover**: haresign.net remains production, remains the publishing system
+and remains the sending system. A delta run happens again shortly before launch.
+
+| | Source | Imported |
+|---|---|---|
+| Articles | 67 | 67 (all published) |
+| Tags | 24 | 24 |
+| Newsletter issues | 4 | 4 (3 sent, 1 draft) |
+| Subscribers | 175 | 175 (175 active, 0 opted out) |
+| Featured images | 67 | 67 |
+| Inline media files | 131 | 131 |
+
+Nothing was skipped and no counts differ.
+
+### The three commands
+
+```bash
+# 1. Export, read-only, from the monolith. Changes nothing there — which is why
+#    the script lives in *this* repository and is piped in.
+cd /path/to/haresign.net
+docker compose exec -T haresign_net python manage.py shell \
+    < /path/to/haresign-web/tools/export_from_monolith.py
+docker compose cp haresign_net:/app/legacy_articles.json     _migration/
+docker compose cp haresign_net:/app/legacy_newsletters.json  _migration/
+docker compose cp haresign_net:/app/legacy_subscribers.json  _migration/
+docker compose cp haresign_net:/app/uploads/blog    _migration/media/blog
+docker compose cp haresign_net:/app/uploads/library _migration/media/library
+
+# 2. Import here. Always dry-run first; --dry-run writes nothing, not even files.
+python manage.py import_legacy_articles _migration/legacy_articles.json \
+    --media-root _migration/media --dry-run
+python manage.py import_legacy_articles _migration/legacy_articles.json \
+    --media-root _migration/media --link-report _migration/links.json
+python manage.py import_legacy_newsletters _migration/legacy_newsletters.json
+python manage.py import_legacy_subscribers _migration/legacy_subscribers.json
+
+# 3. Clean up. legacy_subscribers.json is a list of real email addresses.
+rm -rf _migration/
+```
+
+Order matters once: articles before newsletters, because an issue's reading list
+is resolved by article slug.
+
+Every importer supports `--dry-run`, `--update-existing` / `--no-update-existing`
+and `--since YYYY-MM-DD`.
+
+### Idempotency, and where it was nearly wrong
+
+Re-running is safe and is the intended way to do the final delta — matched on
+`legacy_id` first (the source primary key) and slug second, so a slug corrected
+on either side updates the same row rather than creating a second.
+
+**Row-level idempotency is not file-level idempotency**, and that distinction
+cost 147 duplicate image files before it was caught. Django's storage appends a
+random suffix when a filename is taken, so `hero.png` is stored as
+`hero_be1J5P7.png` — and a "have I already copied this?" check comparing whole
+filenames never matches. Three import runs produced 214 files for 67 articles.
+The check now compares the source *stem*. Same class of bug: `--dry-run` used to
+copy 127MB of media and leave it there, because `transaction.atomic` rolls back
+rows and not files.
+
+### Delta import at cutover
+
+```bash
+# Re-export, then:
+python manage.py import_legacy_articles     _migration/legacy_articles.json \
+    --media-root _migration/media --since 2026-08-15 --dry-run
+python manage.py import_legacy_articles     _migration/legacy_articles.json \
+    --media-root _migration/media --since 2026-08-15
+python manage.py import_legacy_newsletters  _migration/legacy_newsletters.json --since 2026-08-15
+python manage.py import_legacy_subscribers  _migration/legacy_subscribers.json
+python manage.py redirect_map --output redirects.csv
+```
+
+Note the asymmetry: **subscribers are re-run in full, without `--since`.**
+`--since` filters on `subscribed_at`, so it would skip somebody who subscribed
+last year and unsubscribed last week — and their unsubscribe is precisely what
+must not be missed. The full run is cheap and correct.
+
+### What the import does to article HTML
+
+Bodies are copied byte-for-byte into `Article.body_source` and rewritten on the
+way to `Article.body`, so every transform is auditable and re-runnable. Six rules,
+documented in `insights/importing.py` and tested in `insights/tests_importing.py`:
+
+| Rule | Applied | Why |
+|---|---|---|
+| Relative URLs → absolute | 33 | TinyMCE wrote `../../../../uploads/x.png`, which only resolves at the depth it was authored at |
+| Legacy uploads → own media | 33 | An imported article must not depend on the monolith's volume being mounted |
+| `/blog/x/` → `/insights/x/` | 10 | Only where `x` is genuinely being imported |
+| Dead paths repaired | 6 | Over-deep relative links that **404 on haresign.net today** — verified, not assumed |
+| Bootstrap collapse controls removed | 91 | No Bootstrap JS here, so they cannot work |
+| …and their panels unhidden | 95 | Removing the button alone would hide each article's contents list on mobile, permanently |
+| Body `<h1>` → `<h2>` | 22 | The template owns the page's one `<h1>`; production renders two |
+
+Four legacy paths still need a decision at cutover and were **left unchanged
+rather than guessed** — `/articles` and three `/media/downloads/*` files that do
+not exist in the monolith either. Run with `--link-report` to list them.
+
+### Redirect map
+
+```bash
+python manage.py redirect_map --output redirects.csv    # 74 rows
+python manage.py redirect_map --format nginx
+python manage.py redirect_map --format traefik
+```
+
+Derived from the `legacy_path` recorded on every imported row, so it cannot drift
+from the content. **Deploy nothing yet** — these belong in the monolith's URLconf
+or at Traefik when the domain actually moves.
+
+---
+
 ## Architecture statement
 
 > `haresign-web` owns the public Haresign web experience. It must not become the
@@ -515,45 +631,11 @@ no future article acquires them.
 
 ## Migration from the monolith
 
-Legacy content is untouched. `insights/management/commands/import_legacy_articles.py`
-performs a **one-way** import from a JSON export — it never connects to the
-monolith's database, because that would be the shared-database coupling this
-repository exists to avoid, and would make beta depend on production being up.
+Superseded — see **"Migration from the monolith — done, and repeatable"**
+near the top of this file. The corpus has been imported; that section carries
+the commands, the reconciliation and the delta-import procedure.
 
-In the monolith:
-
-```bash
-docker compose exec haresign_net python manage.py dumpdata \
-    website.BlogPost website.BlogTag --indent 1 > legacy_articles.json
-```
-
-Then here:
-
-```bash
-docker compose run --rm \
-    -v "$(pwd)/legacy_articles.json:/tmp/legacy.json:ro" \
-    -v "/path/to/monolith/uploads:/tmp/legacy-media:ro" \
-    haresign_web python manage.py import_legacy_articles /tmp/legacy.json \
-    --media-root /tmp/legacy-media --dry-run --only <slug> <slug>
-```
-
-Drop `--dry-run` to commit, drop `--only` to take everything. Matched on slug and
-idempotent, so the delta import at cutover is the same command again.
-
-| legacy | → | `insights.Article` |
-|---|---|---|
-| `title` | → | `title` |
-| `slug` | → | `slug` (unchanged, so `/blog/x/` → `/insights/x/` holds) |
-| `excerpt` | → | `summary` |
-| `content` | → | `body` (HTML verbatim) |
-| `author_name` | → | `author_name` |
-| `published_date` (date) | → | `published_at` (aware datetime, 09:00 local) |
-| `is_published` | → | `status` |
-| `hero_image` | → | `featured_image` |
-| `tags` | → | `tags` |
-
-Legacy has **no categories, kicker, meta fields or featured flag**, so those are
-left empty rather than invented.
+---
 
 ## Backup
 
@@ -663,6 +745,49 @@ wildcard for `*.haresign.net`, and Cloudflare DNS for `beta` already resolves.
 2. `SITE_BASE_URL=https://haresign.net`, `SITE_ENVIRONMENT_LABEL=`,
    `SITE_INDEXABLE=true`.
 3. Publish the legal pages and replace the footer placeholders.
+
+---
+
+## Responsive and accessibility QA
+
+```bash
+pip install playwright && python -m playwright install --with-deps chromium
+python qa/responsive.py                 # against beta
+python qa/responsive.py --screenshots   # also writes qa/screenshots/
+```
+
+**1,080 checks across 7 viewports (320–1440px) and 13 pages**, driven through a
+real Chromium. Deliberately outside `manage.py test`: the unit suite must not
+need a browser or a network, and "does this overflow at 320px" has no answer
+without layout.
+
+Functional assertions, not screenshot diffs — a pixel-comparison suite on a site
+under active design breaks on every intentional change and teaches everyone to
+ignore it. What is asserted is what never intentionally changes: no horizontal
+overflow, images inside their column, one `<h1>`, headings that descend, 24px
+minimum targets, the mobile nav opening and closing on Escape, `<details>`
+working by keyboard, a visible focus ring, and reduced motion being honoured.
+Screenshots are written for a person to look at, not compared.
+
+It found four real defects, all now fixed:
+
+- **Tap targets below 24px** (WCAG 2.2 SC 2.5.8) throughout the footer, the legal
+  contents rails, the policy cross-links and every `.hs-link-arrow` — 20–22px
+  tall at 17px type. These are lists of links, not words in a sentence, so the
+  standard's inline exception does not cover them.
+- **`.hs-icon` had no default size.** `_icon.html` sets no width or height, so an
+  icon in any context without a container rule fell back to the browser's
+  default replaced-element size. The 390px homepage screenshot showed the arrow
+  inside "Explore our platforms" several times the height of its own label — a
+  defect no CSS reading would have found.
+- Two bugs in the QA suite itself: it checked focus by calling `.focus()`, which
+  deliberately does not match `:focus-visible`, and reported a defect that was
+  purely an artefact of how it looked; and it named an article slug that does not
+  exist.
+
+One warning is left and is content, not layout: four places in the archive skip
+from an `<h2>` to an `<h4>`. That is editorial work, not something a script
+should do to published articles.
 
 ---
 
