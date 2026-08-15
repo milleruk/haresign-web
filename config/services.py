@@ -26,11 +26,12 @@ import os
 def _live_services():
     """Slugs of services currently reachable, from HARESIGN_LIVE_SERVICES.
 
-    Defaults to Intelligence alone — the only one of the four that exists today.
-    Deliberately an allow-list: a service added to the registry later is "not
-    live" until somebody says otherwise, which is the safe way to be wrong.
+    Defaults to Intelligence and the documentation — the two that verifiably
+    answer today. Deliberately an allow-list: a service added to the registry
+    later is "not live" until somebody says otherwise, which is the safe way to
+    be wrong.
     """
-    raw = os.environ.get('HARESIGN_LIVE_SERVICES', 'intelligence')
+    raw = os.environ.get('HARESIGN_LIVE_SERVICES', 'intelligence,docs')
     return {slug.strip().lower() for slug in raw.split(',') if slug.strip()}
 
 
@@ -86,6 +87,22 @@ def build_registry():
             'nav_label': 'Sign in',
             'url': _url('HARESIGN_URL_ACCOUNT', 'https://auth.haresign.net'),
             'accent': 'navy',
+        },
+        # Documentation. It is **not copied into this repository** — Web links to
+        # the service that owns the content, which is the ownership boundary
+        # applied to docs as much as to tools.
+        #
+        # Read its contents before deciding where it belongs: Platform, Tools,
+        # Data Sources, Developer API. That is Haresign Intelligence
+        # documentation, not ecosystem documentation, so it is labelled as such
+        # and lives under Resources in the footer rather than in the main nav —
+        # most visitors to the umbrella site are not looking for a tools manual.
+        'docs': {
+            'name': 'Documentation',
+            'nav_label': 'Docs',
+            'url': _url('HARESIGN_URL_DOCS', 'https://haresign.readthedocs.io/en/latest/'),
+            'accent': 'teal',
+            'owner': 'intelligence',
         },
         # Developer-facing, listed for completeness so nothing else invents a
         # name or a URL for it.

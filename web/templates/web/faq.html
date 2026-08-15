@@ -1,0 +1,79 @@
+{% extends 'web/base.html' %}
+{% load static %}{% comment %}The umbrella FAQ.
+
+Ecosystem questions only. Consulting's own FAQs (how engagements start, pricing,
+what is in a client portal) stay with Haresign Consulting — copying them here
+would rebuild the mixed old homepage this architecture exists to separate.
+
+**No FAQPage structured data, deliberately.** Google restricted FAQ rich results
+to authoritative government and health-body sites, so a private company marking
+up an FAQ now gets the maintenance burden and none of the result. If that changes,
+add it from `FAQ_SECTIONS` rather than hand-writing JSON — the risk with FAQ
+markup has always been the structured copy drifting from the visible copy, and
+generating it from the same source is the only real defence.
+{% endcomment %}
+
+{% block title %}Frequently asked questions — {{ SITE_NAME }}{% endblock %}
+{% block description %}What Haresign is, who it is for, how the platforms fit together, where the data comes from, and how to get in touch.{% endblock %}
+{% block og_title %}Haresign — frequently asked questions{% endblock %}
+{% block og_description %}What Haresign is, who it is for, and how the platforms fit together.{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/faq.css' %}">{% endblock %}
+
+{% block content %}
+
+<header class="hs-faq-hero">
+  <div class="hs-container">
+    <p class="hs-eyebrow">Questions</p>
+    <h1 class="hs-faq-hero__title">Haresign, explained.</h1>
+    <p class="hs-faq-hero__lead">
+      What Haresign is, who it is for, how the parts fit together and where the
+      data comes from. Questions about consultancy itself are answered on the
+      Consulting site.
+    </p>
+  </div>
+</header>
+
+<div class="hs-section hs-section--tight">
+  <div class="hs-container hs-faq-layout">
+
+    {% comment %}A contents rail rather than an in-page search: twelve questions
+    is small enough to scan and far too small to justify filtering. Sticky on
+    desktop, an ordinary list of pills on mobile.{% endcomment %}
+    <nav class="hs-faq-nav" aria-labelledby="faq-contents-heading">
+      <h2 class="hs-faq-nav__heading" id="faq-contents-heading">Contents</h2>
+      <ul class="hs-faq-nav__list">
+        {% for section in sections %}
+          <li><a href="#{{ section.anchor }}">{{ section.heading }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="hs-faq">
+      {% for section in sections %}
+        <section class="hs-faq__section" id="{{ section.anchor }}"
+                 aria-labelledby="{{ section.anchor }}-heading">
+          <h2 class="hs-faq__heading" id="{{ section.anchor }}-heading">{{ section.heading }}</h2>
+
+          {% for item in section.items %}
+            {% include 'web/partials/_faq_item.html' with question=item.question link_service=item.link_service open=forloop.first %}
+          {% endfor %}
+        </section>
+      {% endfor %}
+
+      <aside class="hs-faq__aside">
+        <h2 class="hs-faq__aside-title">Still have a question?</h2>
+        <p>
+          If it is not covered here, ask us — the Contact page routes it to the
+          right part of Haresign.
+        </p>
+        <a class="hs-btn hs-btn--primary" href="{% url 'contact' %}">Talk to Haresign</a>
+      </aside>
+    </div>
+
+  </div>
+</div>
+
+{% include 'web/partials/_ecosystem_cta.html' %}
+
+{% endblock %}

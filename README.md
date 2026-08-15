@@ -41,6 +41,70 @@ mapping is `/blog/<slug>/ → /insights/<slug>/`, and slugs are imported unchang
 so it should hold — but it must be verified against the live URL list rather than
 assumed.
 
+## Newsletter — two lists, deliberately, and how they end up as one
+
+The newsletter belongs to `haresign-web` under the ownership boundary: it is
+advertised beside Insights, it carries Insights, and it is a subscription to this
+site's editorial content.
+
+**Right now two lists exist**, and that is the honest position rather than a
+tidy one:
+
+| System | Table | Collects from | Sends |
+|---|---|---|---|
+| Monolith | `website.NewsletterSubscriber` | haresign.net | **Yes** — django-q + Graph email |
+| This app | `newsletter.Subscriber` | beta.haresign.net | **No** |
+
+This app **collects but does not send**. There is no SMTP configuration, no
+queue, and the admin has `actions = None` so no bulk-mail action can be added by
+accident. A list mailed from two systems is a list mailed twice.
+
+Three things keep the duplication bounded rather than accidental:
+
+1. **Beta is `noindex` and unlinked**, so the volume here is approximately zero
+   until cutover.
+2. **The fields are the monolith's fields.** `email`, `name`, `subscribed_at`,
+   `active` and `unsubscribe_token` match `website.NewsletterSubscriber` exactly,
+   including the UUID default — so a merge is a row copy with no field mapping.
+   `source` is the one addition and is additive.
+3. **A file crosses the boundary, not a connection.** `manage.py
+   export_subscribers` emits that shape as JSON, the same one-way pattern as
+   `import_legacy_articles`. This app never connects to the monolith's database.
+
+```bash
+python manage.py export_subscribers --output subscribers.json
+python manage.py export_subscribers --all          # include unsubscribed rows
+```
+
+Unsubscribed rows are excluded by default: exporting somebody who opted out is
+exactly how they get mailed again.
+
+### Deciding sending, before cutover
+
+Whichever way this goes, it is a decision to take rather than to drift into:
+
+- **Keep sending from the monolith** (nothing to build): export from here,
+  import there, and the monolith keeps mailing until it is retired.
+- **Move sending here** (not built): needs an email provider, a queue, a send
+  model and per-issue templates. Effectively re-implementing the monolith's
+  `newsletter` app in this repository.
+- **Move to a mail provider** (Buttondown, Mailchimp, Listmonk): the sign-up
+  form and the model stay, and a small sync pushes new rows to the provider.
+
+`unsubscribe_token` is stable and carried in the export precisely so links in
+already-sent emails keep working through any of these.
+
+### One consequence worth knowing about
+
+`{% templatetag openblock %} csrf_token {% templatetag closeblock %}` in the sign-up form sets a **`csrftoken` cookie** on every
+page carrying it. It is strictly necessary, so no consent is required — but the
+site previously set no cookies at all, so the Cookie Policy and the Privacy
+Notice were both rewritten to say so. `web/tests.py` asserts that `csrftoken` is
+the only cookie set anywhere and that a page without the form sets none, so those
+pages stay true by failing rather than by being remembered.
+
+---
+
 ## Architecture statement
 
 > `haresign-web` owns the public Haresign web experience. It must not become the
@@ -111,8 +175,13 @@ haresign-web/
 │   ├── services.py          # the Haresign service registry (platform URLs)
 │   ├── urls.py
 │   └── wsgi.py
+├── insights/                # editorial content (articles, categories, tags)
+├── newsletter/              # subscriber list — collects, never sends
 ├── web/
-│   ├── content.py           # page copy + the insights content seam
+│   ├── content.py           # platform cards, credibility, ecosystem routes
+│   ├── faq.py               # umbrella FAQ content
+│   ├── contact.py           # contact routes
+│   ├── legal.py             # legal page metadata
 │   ├── context_processors.py
 │   ├── views.py
 │   ├── tests.py
@@ -120,6 +189,9 @@ haresign-web/
 │   ├── templates/web/
 │   │   ├── base.html
 │   │   ├── home.html
+│   │   ├── faq.html
+│   │   ├── contact.html
+│   │   ├── legal/           # shared shell + four documents
 │   │   └── partials/
 │   │       ├── header.html
 │   │       ├── footer.html
@@ -127,6 +199,11 @@ haresign-web/
 │   │       ├── _article_card.html
 │   │       ├── _section_header.html
 │   │       ├── _service_link.html
+│   │       ├── _credibility.html
+│   │       ├── _ecosystem_cta.html
+│   │       ├── _newsletter.html
+│   │       ├── _contact_route.html
+│   │       ├── _faq_item.html
 │   │       ├── _signin.html
 │   │       └── _icon.html
 │   └── static/
@@ -135,7 +212,7 @@ haresign-web/
 │       │   ├── base.css
 │       │   ├── layout.css
 │       │   ├── components.css
-│       │   └── pages/home.css
+│       │   └── pages/        # home, insights, legal, faq, contact
 │       ├── js/site.js
 │       ├── images/
 │       └── vendor/bootstrap/
@@ -150,6 +227,12 @@ haresign-web/
 | Route | Purpose |
 |---|---|
 | `/` | The umbrella homepage |
+| `/faq/` | Umbrella FAQ — **ecosystem questions only** (see below) |
+| `/contact/` | Contact *routing* — five routes, no form (see below) |
+| `/insights/`, `/insights/<slug>/` | Editorial content |
+| `/privacy/`, `/cookies/`, `/terms/`, `/accessibility/` | Legal pages |
+| `/newsletter/subscribe/` | POST only; 405 on GET |
+| `/newsletter/unsubscribe/<uuid>/` | GET offers, POST performs |
 | `/health/` | Liveness probe — `{"status": "ok"}`, uncached, touches no dependency |
 | `/robots.txt` | Follows `SITE_INDEXABLE`; disallows everything on beta |
 
@@ -252,11 +335,21 @@ cue. Re-run this before changing any brand colour.
 | `_service_link.html` | A link to another platform — **or a plain label when it is not live** |
 | `_signin.html` | Sign in, disabled until identity exists |
 | `_icon.html` | Inline SVG by name; solid shapes, decorative and `aria-hidden` |
+| `_credibility.html` | "Built around primary care" — principle + the fact behind it |
+| `_ecosystem_cta.html` | The pre-footer band: four routes into Haresign |
+| `_newsletter.html` | Sign-up block; `variant='inline'` for after an article |
+| `_contact_route.html` | One contact route, with its pre-filled mail subject |
+| `_faq_item.html` | `<details>`/`<summary>` disclosure — works with no JavaScript |
 
-Plus CSS-only components: `.hs-credibility` (the factual strip), `.hs-cta-band`
-(the closing band), and button variants `--primary` (teal), `--navy`, `--light`,
-`--secondary`, `--on-dark`. **Coral is never a button fill** — it is the warmth
-and emphasis colour, and making it the default action would spend it.
+Plus CSS-only components: `.hs-link-arrow`, `.hs-input`, `.hs-notice`, and
+button variants `--primary` (teal), `--navy`, `--light`, `--secondary`,
+`--on-dark`. **Coral is never a button fill** — it is the warmth and emphasis
+colour, and making it the default action would spend it.
+
+Two components carry a rule worth restating: `_ecosystem_cta.html` and
+`_newsletter.html` are included on pages whose own `pages/*.css` is not loaded,
+so **their styles must live in `components.css`**. `.hs-section--cta` moved out
+of `pages/home.css` for exactly this reason.
 
 ### Section rhythm
 
@@ -291,24 +384,61 @@ repository's scope, and a working-looking Sign in button implies otherwise. Add
 
 ## Content
 
-Page copy lives in `web/content.py`, not in markup — so it can be tested, and so
-the insights section has a seam.
+Page copy lives in Python, not in markup — so it can be tested, and so the
+sections that will later be re-pointed have a seam.
 
-```python
-def get_insights(limit=4):
-    """Today: a placeholder list. Tomorrow: a CMS or content API."""
-```
+| Module | Holds |
+|---|---|
+| `web/content.py` | Platform cards, the credibility items, the ecosystem routes, and `get_insights()` |
+| `web/faq.py` | The umbrella FAQ, as sections of questions |
+| `web/contact.py` | The five contact routes |
+| `web/legal.py` | Metadata for the four legal pages (their prose is in templates) |
 
-Everything goes through this one function and callers get `Article` objects
-either way, so re-pointing it at a real source is one function body — no
-template learns where an article came from.
+`get_insights()` is the seam between the homepage and editorial content.
+Everything goes through it and callers get `Article` objects either way, so
+re-pointing it is one function body — no template learns where an article came
+from.
 
-The current articles are **placeholders and are labelled "Sample" on the page**.
-They assert no findings, figures or outcomes: a placeholder that reads as real
-research is a claim nobody made. They also carry no URL, so they render as
-static cards rather than dead links.
+**No customer numbers, practice counts or performance claims appear anywhere.**
+A test enforces it for the credibility section, which is where such a claim would
+naturally be invented.
 
-No customer numbers, practice counts or performance claims appear anywhere.
+### Two sections became one
+
+The homepage used to carry an abstract "principles" band *and* a strip of the
+facts behind it — Evidence-led / Built from experience / Practical against 25+
+years / NHS data / IGPM. They made the same four points twice. `CREDIBILITY` now
+pairs each principle with the fact that substantiates it, and `PRINCIPLES` is
+gone.
+
+### The FAQ is an *ecosystem* FAQ
+
+What Haresign is, who each platform is for, where the data comes from, whether
+Haresign is part of the NHS. Consulting's own FAQs — how engagements start, day
+rates, what is in a client portal — stay with Haresign Consulting; copying them
+here would rebuild the mixed old homepage this architecture exists to separate. A
+test asserts they have not crept in.
+
+Answers are `<details>`/`<summary>`, not a JavaScript accordion: the browser
+supplies the behaviour, the keyboard handling and the ARIA, and — the part that
+matters — the answer is in the DOM whether open or not, so it works with scripts
+off, is found by in-page search, and is readable by a crawler.
+
+**There is deliberately no `FAQPage` structured data.** Google restricted FAQ
+rich results to government and health bodies, so the markup is now pure
+maintenance cost, and its standing risk is the structured copy drifting from the
+visible copy. If it is ever added, generate it from `FAQ_SECTIONS`.
+
+### Contact routes rather than captures
+
+`/contact/` exists to get the right question to the right part of Haresign. Five
+routes, each a `mailto:` with the subject already filled in — that subject line
+is the entire mechanism, and it is what makes five routes better than one inbox.
+
+**There is no form**, and that is load-bearing: the Privacy Notice states that
+this site has no enquiry form. Adding one would mean spam handling, an SMTP
+credential in this deployment, and a rewrite of that page. It is a decision to
+take deliberately, not a detail to slip in with a routing page.
 
 ---
 
@@ -475,7 +605,8 @@ python manage.py check --deploy
 | `HARESIGN_URL_WORKSPACE` | `https://clients.haresign.net` | Haresign Workspace. |
 | `HARESIGN_URL_ACCOUNT` | `https://auth.haresign.net` | Haresign Account. |
 | `HARESIGN_URL_API` | `https://api.haresign.net` | Haresign API. |
-| `HARESIGN_LIVE_SERVICES` | `intelligence` | Comma-separated slugs that actually resolve. |
+| `HARESIGN_URL_DOCS` | `https://haresign.readthedocs.io/en/latest/` | Documentation — linked, never copied. |
+| `HARESIGN_LIVE_SERVICES` | `intelligence,docs` | Comma-separated slugs that actually resolve. |
 | `LEGAL_COMPANY_NAME` | `Haresign Consulting Services` | |
 | `LEGAL_COMPANY_NUMBER` | *(unset)* | Omitted from the footer when blank. |
 | `LEGAL_REGISTERED_ADDRESS` | *(unset)* | Omitted when blank. |
@@ -487,10 +618,7 @@ python manage.py check --deploy
 > **Legal details are placeholders by design.** The real company number,
 > registered address and ICO registration belong to the business, not to this
 > repository. Unset values are *omitted* from the footer rather than shown as
-> invented text. The Privacy / Cookies / Terms / Accessibility footer links are
-> structured but render as text with a "Soon" badge until those pages exist — a
-> Privacy link that 404s on a healthcare site is worse than one visibly still to
-> come.
+> invented text. (The four legal pages now exist and are real links.)
 
 ---
 
@@ -535,6 +663,37 @@ wildcard for `*.haresign.net`, and Cloudflare DNS for `beta` already resolves.
 2. `SITE_BASE_URL=https://haresign.net`, `SITE_ENVIRONMENT_LABEL=`,
    `SITE_INDEXABLE=true`.
 3. Publish the legal pages and replace the footer placeholders.
+
+---
+
+## Analytics — what is here, and what production does
+
+**This site runs no analytics.** No Google Analytics, no tag manager, no
+third-party measurement of any kind, and no requests to any external host: fonts,
+styles, scripts and images are all served from here. A test asserts it, because
+the Privacy Notice, the Cookie Policy *and* the Accessibility Statement all
+depend on it being true.
+
+**Production haresign.net runs GA4** (`G-F6H5DE6RQM`), loaded only after explicit
+consent through the cookie banner in `base_site.html`. That is a correct PECR
+implementation; it is simply not carried over here.
+
+That was deliberate, not an omission. Migrating GA because the legacy site had it
+would import a consent banner, a third-party request and a cookie into a site
+that currently needs none of them — and the consent rate on such a banner means
+the data is partial anyway. Three options, for a decision before cutover:
+
+| Option | Consent needed | Cost |
+|---|---|---|
+| **Nothing** (today) | No | No visitor numbers at all |
+| **Server-side log analysis** (GoAccess over Traefik logs) | No — no cookie, no device access | A container; no per-visitor journeys |
+| **Privacy-first analytics** (Plausible / Umami, self-hosted) | Generally no cookie; check placement | A container; one external request unless proxied |
+| **GA4, as production** | **Yes** — banner + policy rewrite | Loses the "no cookies, no trackers" position |
+
+The middle two keep the current cookie position intact, which is worth more on a
+healthcare-adjacent site than a funnel report. **If GA4 is chosen, the Cookie
+Policy and Privacy Notice must be rewritten first** — both currently state
+plainly that nothing measures visitors.
 
 ---
 

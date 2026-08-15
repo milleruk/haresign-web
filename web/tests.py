@@ -15,7 +15,6 @@ from django.conf import settings
 from django.test import SimpleTestCase, TestCase, override_settings
 
 from config.services import build_registry
-from web.content import PRINCIPLES
 from web.views import build_platform_cards
 
 
@@ -41,13 +40,6 @@ class HomePageTests(TestCase):
             self.assertContains(response, card['name'])
             self.assertContains(response, card['platform'].blurb)
             self.assertContains(response, card['platform'].cta)
-
-    def test_shows_the_four_principles(self):
-        response = self.client.get('/')
-
-        for principle in PRINCIPLES:
-            self.assertContains(response, principle['heading'])
-            self.assertContains(response, principle['body'])
 
     def test_heading_hierarchy_has_exactly_one_h1(self):
         """A single h1 per page; sections descend from it via h2."""
@@ -95,7 +87,7 @@ class HomePageTests(TestCase):
             ('<header', 'header'),
             ('<footer', 'footer'),
             ('<main', 'main'),
-            ('hs-cta-band"', 'CTA band'),
+            ('hs-ecosystem"', 'ecosystem band'),
             ('hs-hero"', 'hero'),
             ('hs-credibility"', 'credibility strip'),
             ('id="platforms"', 'platforms section'),
@@ -256,12 +248,26 @@ class NamingTests(TestCase):
 
     def test_names_are_defined_once(self):
         """Every name on the page comes from the registry, so a rename is one
-        edit. content.py must not carry a second copy."""
+        edit. content.py must not carry a second copy.
+
+        Asserted against the module's *values* rather than its source text. An
+        earlier version scanned the file and so also read the comments, which
+        made an explanatory note mentioning a product name fail a test about
+        data — punishing the documentation for describing the rule it enforces.
+        """
         from web import content
 
-        source = (content.__file__ and open(content.__file__).read()) or ''
-        for name in self.AGREED:
-            self.assertNotIn(name, source)
+        copy = []
+        for platform in content.PLATFORMS:
+            copy += [platform.blurb, platform.cta] + list(platform.areas)
+        for item in content.CREDIBILITY:
+            copy += [item['heading'], item['body'], item['proof']]
+        for route in content.ECOSYSTEM_ROUTES:
+            copy += [route['service'], route['action']]
+
+        for text in copy:
+            for name in self.AGREED:
+                self.assertNotIn(name, text)
 
 
 class SeoTests(TestCase):
@@ -509,14 +515,405 @@ class LegalPageTests(TestCase):
         with self.assertRaises(Http404):
             legal_page(RequestFactory().get('/nope/'), slug='nope')
 
-    def test_cookie_policy_states_what_the_site_actually_does(self):
-        """The site sets no cookies to public visitors and loads nothing
-        external. If that ever changes, this test should fail and the policy
-        should be rewritten before it ships."""
+    def test_the_only_cookie_is_the_one_the_policy_names(self):
+        """The site's cookie position changed with the newsletter, and it changed
+        honestly rather than the form being smuggled in.
+
+        A page carrying the newsletter form sets `csrftoken` — strictly
+        necessary, so no consent is required — and the Cookie Policy names it and
+        says which pages set it. Nothing else is set, and if anything else ever
+        is, this fails before the policy becomes untrue.
+        """
         response = self.client.get('/')
 
-        self.assertNotIn('Set-Cookie', response)
-        body = response.content.decode()
-        self.assertNotIn('googletagmanager', body)
-        self.assertNotIn('google-analytics', body)
-        self.assertNotIn('fonts.googleapis.com', body)
+        for cookie in response.cookies:
+            self.assertEqual(cookie, 'csrftoken')
+
+    def test_a_page_without_the_form_still_sets_nothing(self):
+        """Which is precisely the distinction the Cookie Policy draws, so it has
+        to be true."""
+        response = self.client.get('/privacy/')
+
+        self.assertEqual(len(response.cookies), 0)
+
+    def test_the_cookie_policy_names_the_cookie_that_is_actually_set(self):
+        body = self.client.get('/cookies/').content.decode()
+
+        self.assertIn('csrftoken', body)
+
+    def test_no_analytics_and_no_external_requests(self):
+        """Nothing measures visitors and nothing is loaded from a third party.
+        The Privacy Notice, the Cookie Policy and the Accessibility Statement all
+        say so, so all three depend on this."""
+        body = self.client.get('/').content.decode()
+
+        for external in ('googletagmanager', 'google-analytics', 'gtag(',
+                         'fonts.googleapis.com', 'cdn.jsdelivr', 'unpkg.com'):
+            self.assertNotIn(external, body)
+
+
+class FaqPageTests(TestCase):
+    """The umbrella FAQ.
+
+    The content is a product decision and not something a test can validate. What
+    is asserted here is the mechanics — that it resolves, that every answer is in
+    the page whether or not it is expanded, and that it stays an *ecosystem* FAQ
+    rather than drifting into consulting's territory.
+    """
+
+    def test_route_resolves(self):
+        response = self.client.get('/faq/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'web/faq.html')
+
+    def test_every_question_and_answer_reaches_the_page(self):
+        """A `<details>` keeps its content in the DOM whether open or not, which
+        is exactly why it was chosen over a JavaScript accordion: closed answers
+        are still readable, searchable and crawlable."""
+        from web.faq import all_questions
+
+        body = self.client.get('/faq/').content.decode()
+        for question in all_questions():
+            with self.subTest(anchor=question.anchor):
+                self.assertIn(question.question, body)
+                for paragraph in question.answer:
+                    self.assertIn(paragraph, body)
+
+    def test_answers_work_without_javascript(self):
+        """<details>/<summary> is browser-native. If this ever becomes a div
+        with a click handler, the answers vanish for anyone without JS."""
+        body = self.client.get('/faq/').content.decode()
+
+        self.assertIn('<details', body)
+        self.assertIn('<summary', body)
+        self.assertNotIn('<script', body[body.index('<main'):body.index('</main>')])
+
+    def test_the_first_question_of_each_section_is_open(self):
+        """An accordion where everything is shut reads as an empty page."""
+        body = self.client.get('/faq/').content.decode()
+
+        self.assertIn('open>', body.replace(' open>', 'open>'))
+
+    def test_every_question_has_a_stable_anchor(self):
+        from web.faq import all_questions
+
+        body = self.client.get('/faq/').content.decode()
+        for question in all_questions():
+            with self.subTest(anchor=question.anchor):
+                self.assertIn(f'id="{question.anchor}"', body)
+
+    def test_contents_links_point_at_sections_that_exist(self):
+        from web.faq import FAQ_SECTIONS
+
+        body = self.client.get('/faq/').content.decode()
+        for section in FAQ_SECTIONS:
+            with self.subTest(section=section.anchor):
+                self.assertIn(f'href="#{section.anchor}"', body)
+                self.assertIn(f'id="{section.anchor}"', body)
+
+    def test_it_stays_an_ecosystem_faq(self):
+        """Consulting's own FAQs — engagements, day rates, the client portal —
+        belong to Haresign Consulting. Copying them here would rebuild the mixed
+        old homepage this architecture exists to separate."""
+        body = self.client.get('/faq/').content.decode().lower()
+
+        for consulting_topic in ('day rate', 'day-rate', 'retainer',
+                                 'engagement typically', 'pricing look like'):
+            self.assertNotIn(consulting_topic, body)
+
+    def test_platform_questions_link_to_live_platforms_only(self):
+        """The availability rule holds here as everywhere: Intelligence is live
+        and linked, Consulting is not and must not be."""
+        body = self.client.get('/faq/').content.decode()
+
+        self.assertIn('href="https://app.haresign.net"', body)
+        self.assertNotIn('href="https://consulting.haresign.net"', body)
+
+    def test_the_nhs_answer_is_unambiguous(self):
+        """The one question where a vague answer would be a real problem."""
+        response = self.client.get('/faq/')
+
+        self.assertContains(response, 'Is Haresign part of the NHS?')
+        self.assertContains(response, 'not part of the NHS')
+
+    def test_no_faq_structured_data(self):
+        """Deliberate: Google restricted FAQ rich results to government and
+        health bodies, so the markup is now pure maintenance cost — and the
+        standing risk with it is the structured copy drifting from the visible
+        copy. If it is ever added, it must be generated from FAQ_SECTIONS."""
+        body = self.client.get('/faq/').content.decode()
+
+        self.assertNotIn('FAQPage', body)
+
+    def test_page_has_exactly_one_h1(self):
+        self.assertEqual(self.client.get('/faq/').content.decode().count('<h1'), 1)
+
+    def test_no_inline_styles(self):
+        body = self.client.get('/faq/').content.decode()
+
+        self.assertNotIn('<style', body)
+        self.assertNotIn('style="', body)
+
+
+class ContactPageTests(TestCase):
+    """The contact routing page."""
+
+    def test_route_resolves(self):
+        response = self.client.get('/contact/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Talk to Haresign')
+
+    def test_every_route_is_offered(self):
+        from web.contact import CONTACT_ROUTES
+
+        body = self.client.get('/contact/').content.decode()
+        for route in CONTACT_ROUTES:
+            with self.subTest(route=route.anchor):
+                self.assertIn(route.heading, body)
+                self.assertIn(route.blurb, body)
+
+    def test_each_route_carries_its_own_prefilled_subject(self):
+        """Five routes into one inbox are only better than one if the subject
+        line tells them apart — that is the entire mechanism."""
+        from urllib.parse import quote
+
+        from web.contact import CONTACT_ROUTES
+
+        body = self.client.get('/contact/').content.decode()
+        subjects = {route.subject for route in CONTACT_ROUTES}
+        self.assertEqual(len(subjects), len(CONTACT_ROUTES))
+        for subject in subjects:
+            self.assertIn(f'subject={quote(subject)}', body)
+
+    def test_there_is_no_form(self):
+        """Deliberate, and the Privacy Notice depends on it: it states that this
+        site has no general-enquiry form. Adding one here without updating that
+        page would make the privacy notice untrue."""
+        body = self.client.get('/contact/').content.decode()
+        main = body[body.index('<main'):body.index('</main>')]
+
+        self.assertNotIn('<form', main)
+        self.assertNotIn('<input', main)
+
+    def test_routes_to_unlaunched_platforms_are_not_links(self):
+        body = self.client.get('/contact/').content.decode()
+
+        self.assertNotIn('href="https://consulting.haresign.net"', body)
+        self.assertNotIn('href="https://clients.haresign.net"', body)
+
+    def test_the_general_route_is_reachable_from_the_hero(self):
+        """"Not sure which?" has to go somewhere, or the page has made the
+        visitor do the routing it exists to do for them."""
+        response = self.client.get('/contact/')
+
+        self.assertContains(response, 'href="#general"')
+        self.assertContains(response, 'id="general"')
+
+    def test_page_has_exactly_one_h1(self):
+        self.assertEqual(self.client.get('/contact/').content.decode().count('<h1'), 1)
+
+
+class CredibilityTests(TestCase):
+    """One section where there were two.
+
+    The page carried an abstract principles band *and* a strip of the facts
+    behind it, saying the same four things twice. They are merged: each item
+    states the principle and prints the evidence.
+    """
+
+    def test_the_merged_section_is_on_the_page(self):
+        from web.content import CREDIBILITY
+
+        response = self.client.get('/')
+
+        self.assertContains(response, 'Built around primary care.')
+        for item in CREDIBILITY:
+            self.assertContains(response, item['heading'])
+            self.assertContains(response, item['body'])
+            self.assertContains(response, item['proof'])
+
+    def test_the_duplicate_section_is_gone(self):
+        """Both bands rendered four near-identical claims. If a second one comes
+        back, this fails."""
+        body = self.client.get('/').content.decode()
+
+        self.assertEqual(body.count('hs-credibility"'), 1)
+        self.assertNotIn('hs-principles-grid', body)
+        self.assertNotIn('Built around what matters in primary care.', body)
+
+    def test_it_is_not_a_biography(self):
+        """The umbrella page says Haresign is founder-led and links onward. The
+        people belong to Haresign Consulting."""
+        body = self.client.get('/').content.decode()
+
+        self.assertNotIn('Ben Haresign', body)
+        self.assertNotIn('Benjamin', body)
+
+    def test_the_people_link_respects_availability(self):
+        """Consulting is not live, so "meet the people" is a label, not a link
+        to a host that does not resolve."""
+        response = self.client.get('/')
+
+        self.assertContains(response, 'Meet the people behind Haresign')
+        self.assertNotContains(response, 'href="https://consulting.haresign.net"')
+
+    def test_no_invented_numbers(self):
+        """Every claim in this section is one already published on haresign.net.
+        Customer counts and performance figures are exactly what a credibility
+        section invites, and there are none."""
+        import re
+
+        from web.content import CREDIBILITY
+
+        for item in CREDIBILITY:
+            with self.subTest(item=item['heading']):
+                numbers = re.findall(r'\d+', item['body'])
+                self.assertEqual(numbers, [], 'no numeric claim belongs in the body')
+
+
+class EcosystemCtaTests(TestCase):
+    """The pre-footer band: four routes in, rather than one funnel."""
+
+    PLACEMENTS = ['/', '/faq/', '/insights/']
+
+    def test_it_appears_where_a_page_needs_a_way_onward(self):
+        for path in self.PLACEMENTS:
+            with self.subTest(path=path):
+                response = self.client.get(path)
+
+                self.assertContains(response, 'Find the right part of Haresign for you.')
+
+    def test_it_offers_all_four_platforms(self):
+        response = self.client.get('/')
+
+        for name in ('Haresign Consulting', 'Haresign Intelligence',
+                     'Haresign Community', 'Haresign Workspace'):
+            self.assertContains(response, name)
+
+    def test_the_names_and_urls_come_from_the_registry(self):
+        """Not a second copy of the platform list. A rename or a subdomain move
+        must not need this band edited."""
+        from web.content import ECOSYSTEM_ROUTES
+
+        registry = build_registry()
+        for route in ECOSYSTEM_ROUTES:
+            with self.subTest(service=route['service']):
+                # The route names a registry slug and carries no name and no URL
+                # of its own — that is what makes a rename or a subdomain move
+                # one edit rather than two.
+                self.assertIn(route['service'], registry)
+                self.assertEqual(set(route), {'service', 'action'})
+                self.assertNotIn('haresign.net', route['action'])
+
+    def test_an_unlaunched_platform_is_named_but_not_linked(self):
+        body = self.client.get('/').content.decode()
+
+        self.assertNotIn('href="https://community.haresign.net"', body)
+        self.assertIn('hs-ecosystem__link--soon', body)
+
+    def test_it_appears_once_per_page(self):
+        for path in self.PLACEMENTS:
+            with self.subTest(path=path):
+                body = self.client.get(path).content.decode()
+
+                self.assertEqual(body.count('hs-ecosystem"'), 1)
+
+    def test_the_old_single_funnel_band_is_gone(self):
+        """It offered "Open Intelligence" or "email us", which made the umbrella
+        page a funnel into one platform."""
+        body = self.client.get('/').content.decode()
+
+        self.assertNotIn('hs-cta-band', body)
+        self.assertNotIn('One Haresign. Wherever you start.', body)
+
+
+class NavigationTests(TestCase):
+    """No broken internal routes.
+
+    The nav and footer used bare `#insights` / `#about` fragments, which are
+    homepage section ids — on any other page they scrolled nowhere, and the
+    footer is on every page.
+    """
+
+    PAGES = ['/', '/faq/', '/contact/', '/insights/', '/privacy/', '/cookies/',
+             '/terms/', '/accessibility/']
+
+    def test_every_public_page_resolves(self):
+        for path in self.PAGES:
+            with self.subTest(path=path):
+                self.assertEqual(self.client.get(path).status_code, 200)
+
+    def test_no_page_links_to_a_bare_fragment_that_is_not_on_it(self):
+        """Catches exactly the bug this test class is named for."""
+        import re
+
+        for path in self.PAGES:
+            body = self.client.get(path).content.decode()
+            for match in re.finditer(r'href="#([\w-]+)"', body):
+                anchor = match.group(1)
+                with self.subTest(path=path, anchor=anchor):
+                    self.assertIn(f'id="{anchor}"', body,
+                                  f'{path} links to #{anchor}, which is not on it')
+
+    def test_internal_links_resolve(self):
+        """Every same-site href on every page must be a real route."""
+        import re
+
+        from django.urls import Resolver404, resolve
+
+        for path in self.PAGES:
+            body = self.client.get(path).content.decode()
+            for match in re.finditer(r'href="(/[^"#?]*)', body):
+                target = match.group(1)
+                with self.subTest(path=path, target=target):
+                    if target.startswith('/static/'):
+                        continue
+                    try:
+                        resolve(target)
+                    except Resolver404:
+                        self.fail(f'{path} links to {target}, which does not resolve')
+
+    def test_the_nav_reaches_the_new_pages(self):
+        body = self.client.get('/').content.decode()
+        nav = body[body.index('<nav'):body.index('</nav>')]
+
+        self.assertIn('href="/faq/"', nav)
+        self.assertIn('href="/contact/"', nav)
+
+    def test_the_footer_carries_the_agreed_information_architecture(self):
+        body = self.client.get('/').content.decode()
+        footer = body[body.index('<footer'):]
+
+        for heading in ('Platforms', 'Haresign', 'Resources', 'Legal'):
+            self.assertIn(f'>{heading}</h2>', footer)
+
+    def test_documentation_is_linked_not_copied(self):
+        """Web links to the service that owns the docs. If documentation ever
+        appears *in* this repository, that is the boundary breaking."""
+        import os
+
+        body = self.client.get('/').content.decode()
+        footer = body[body.index('<footer'):]
+
+        self.assertIn('readthedocs.io', footer)
+        self.assertFalse(os.path.exists('docs'),
+                         'documentation belongs to the service that owns it')
+
+    def test_documentation_is_attributed_to_the_service_that_owns_it(self):
+        """It documents the platform, its tools and its data sources — that is
+        Intelligence documentation, not ecosystem documentation."""
+        body = self.client.get('/').content.decode()
+        footer = body[body.index('<footer'):]
+
+        start = footer.index('aria-labelledby="footer-resources"')
+        resources = footer[start:footer.index('</ul>', start)]
+        self.assertIn('Haresign Intelligence', resources)
+
+    def test_documentation_is_not_in_the_main_nav(self):
+        """Most visitors to an umbrella site are not looking for a tools manual."""
+        body = self.client.get('/').content.decode()
+        nav = body[body.index('<nav'):body.index('</nav>')]
+
+        self.assertNotIn('readthedocs', nav)

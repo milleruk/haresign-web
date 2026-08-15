@@ -30,6 +30,12 @@
 .hs-section { padding-block: var(--hs-section-y); }
 .hs-section--tight { padding-block: var(--hs-section-y-tight); }
 .hs-section--muted { background-color: var(--hs-surface-muted); }
+/* The barely-there warm neutral, for a band that should read as an invitation
+   rather than as another panel — currently the newsletter. Warmth, not a tint. */
+.hs-section--warm {
+  background-color: var(--hs-surface-warm);
+  border-block: 1px solid var(--hs-border-subtle);
+}
 
 /* Dark section. Sets the on-dark text tokens once so children need no
    per-element colour overrides. */
@@ -198,6 +204,15 @@
 }
 .hs-footer__list { list-style: none; margin: 0; padding: 0; }
 .hs-footer__list li { margin-bottom: var(--hs-space-3); }
+
+/* Who owns a linked resource, under its link. The documentation is Haresign
+   Intelligence's, not the umbrella brand's, and saying so is the difference
+   between linking to a service and appearing to absorb it. */
+.hs-footer__hint {
+  display: block;
+  font-size: var(--hs-text-xs);
+  color: var(--hs-text-on-dark-muted);
+}
 
 .hs-footer__legal-details {
   margin-top: var(--hs-space-6);

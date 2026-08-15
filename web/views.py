@@ -3,7 +3,9 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
-from .content import PLATFORMS, PRINCIPLES, get_insights
+from .contact import CONTACT_ROUTES
+from .content import CREDIBILITY, PLATFORMS, get_insights
+from .faq import FAQ_SECTIONS
 from .legal import LAST_REVIEWED, LEGAL_PAGES
 
 
@@ -53,12 +55,54 @@ def home(request):
     insights = get_insights(limit=4)
     return render(request, 'web/home.html', {
         'platform_cards': build_platform_cards(),
-        'principles': PRINCIPLES,
+        'credibility': CREDIBILITY,
         # One featured article plus three cards. Sliced here rather than in the
         # template so the shape of the section is a decision in Python.
         'featured_article': insights[0] if insights else None,
         'recent_articles': insights[1:4],
     })
+
+
+def faq(request):
+    """The umbrella FAQ.
+
+    Each question's optional service link is resolved here, because a Django
+    template cannot index a dict by a variable key — the same reason
+    `build_platform_cards()` exists. Resolving it also means an unlaunched
+    platform renders as a label rather than a link, without the template having
+    to know the rule.
+    """
+    services = settings.HARESIGN_SERVICES
+    sections = [
+        {
+            'anchor': section.anchor,
+            'heading': section.heading,
+            'items': [
+                {
+                    'question': question,
+                    'link_service': services.get((question.link or {}).get('service')),
+                }
+                for question in section.questions
+            ],
+        }
+        for section in FAQ_SECTIONS
+    ]
+    return render(request, 'web/faq.html', {'sections': sections})
+
+
+def contact(request):
+    """The contact routing page.
+
+    A GET-only page: there is no form and nothing is posted. See web/contact.py
+    for why routing rather than capture, and the README for what adding a form
+    would cost.
+    """
+    services = settings.HARESIGN_SERVICES
+    routes = [
+        {'route': route, 'service': services.get(route.service)}
+        for route in CONTACT_ROUTES
+    ]
+    return render(request, 'web/contact.html', {'routes': routes})
 
 
 def legal_page(request, slug):

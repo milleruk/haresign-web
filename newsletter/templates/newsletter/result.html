@@ -1,0 +1,39 @@
+{% extends 'web/base.html' %}{% comment %}The answer to a subscribe POST.
+
+One template for both outcomes, because they differ by a sentence and a heading.
+The page is deliberately small and offers a way back: the reader was almost
+certainly part-way through something else when they subscribed.
+
+Note the outcomes this page cannot distinguish, by design: newly subscribed,
+already subscribed and reactivated all render identically. See views.subscribe.
+{% endcomment %}
+
+{% block title %}{% if ok %}You're subscribed{% else %}Sign-up problem{% endif %} — {{ SITE_NAME }}{% endblock %}
+{% block description %}Haresign newsletter sign-up.{% endblock %}
+
+{% block content %}
+<section class="hs-section">
+  <div class="hs-container hs-container--reading">
+    <div class="hs-notice{% if not ok %} hs-notice--error{% endif %}">
+      {% if ok %}
+        <p class="hs-eyebrow">Newsletter</p>
+        <h1 class="hs-notice__title">Thanks — you're on the list.</h1>
+        <p>
+          You'll get new primary care analysis, research and Haresign updates as
+          they are published. Every email carries an unsubscribe link, and one
+          click is all it takes.
+        </p>
+      {% else %}
+        <p class="hs-eyebrow">Newsletter</p>
+        <h1 class="hs-notice__title">That didn't go through.</h1>
+        <p>{{ error }}</p>
+      {% endif %}
+
+      <div class="hs-notice__actions">
+        <a class="hs-btn hs-btn--primary" href="{% url 'insights:index' %}">Read Insights</a>
+        <a class="hs-btn hs-btn--secondary" href="/">Back to Haresign</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

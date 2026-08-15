@@ -1,0 +1,66 @@
+{% comment %}Newsletter sign-up — the reusable component.
+
+    {% include 'web/partials/_newsletter.html' with source='home' %}
+    {% include 'web/partials/_newsletter.html' with source='article' variant='inline' %}
+
+`source` is recorded against the subscription so we can tell which placement
+actually works. `variant='inline'` is the quieter treatment used after an
+article, where a full band would compete with the piece the reader just finished.
+
+An ordinary form posting to an ordinary URL — no JavaScript in the path, so it
+works on an article page with scripts blocked. See newsletter/views.py for why
+there is no redirect and no inline swap.
+
+`{% csrf_token %}` is what puts a `csrftoken` cookie on any page carrying this
+block. That is a strictly-necessary cookie (no consent required) and the Cookie
+Policy names it and says which pages set it — the site's cookie position had to
+change honestly rather than the form being smuggled in.
+{% endcomment %}
+<div class="hs-newsletter{% if variant == 'inline' %} hs-newsletter--inline{% endif %}">
+  <div class="hs-newsletter__text">
+    <h2 class="hs-newsletter__title" id="newsletter-title-{{ source|default:'default' }}">
+      {{ heading|default:"Stay informed." }}
+    </h2>
+    <p class="hs-newsletter__lead">
+      {{ lead|default:"New primary care analysis, research, tools and Haresign updates — without filling your inbox for the sake of it." }}
+    </p>
+  </div>
+
+  <form class="hs-newsletter__form" action="{% url 'newsletter:subscribe' %}" method="post"
+        aria-labelledby="newsletter-title-{{ source|default:'default' }}">
+    {% csrf_token %}
+    <input type="hidden" name="source" value="{{ source|default:'' }}">
+
+    {% comment %}Labels are real and visually hidden, not placeholders. A
+    placeholder disappears the moment you type, which leaves anyone who loses
+    their place with an unlabelled box.{% endcomment %}
+    <div class="hs-newsletter__field">
+      <label class="hs-visually-hidden" for="nl-name-{{ source|default:'default' }}">Your name (optional)</label>
+      <input class="hs-input" type="text" id="nl-name-{{ source|default:'default' }}"
+             name="name" autocomplete="given-name" placeholder="First name (optional)">
+    </div>
+
+    <div class="hs-newsletter__field hs-newsletter__field--wide">
+      <label class="hs-visually-hidden" for="nl-email-{{ source|default:'default' }}">Your email address</label>
+      <input class="hs-input" type="email" id="nl-email-{{ source|default:'default' }}"
+             name="email" autocomplete="email" required placeholder="Your email address">
+    </div>
+
+    {% comment %}Honeypot: hidden from people (CSS), hidden from assistive tech
+    (aria-hidden), and out of the tab order. Only something filling every field
+    reaches it. Cheaper and more private than a CAPTCHA, which would be the one
+    external request this site makes.{% endcomment %}
+    <div class="hs-newsletter__trap" aria-hidden="true">
+      <label for="nl-website-{{ source|default:'default' }}">Leave this field empty</label>
+      <input type="text" id="nl-website-{{ source|default:'default' }}" name="website"
+             tabindex="-1" autocomplete="off">
+    </div>
+
+    <button class="hs-btn hs-btn--primary" type="submit">Subscribe</button>
+  </form>
+
+  <p class="hs-newsletter__note">
+    No spam, and you can unsubscribe from any email. See our
+    <a href="{% url 'legal_privacy' %}">Privacy Notice</a>.
+  </p>
+</div>

@@ -1,0 +1,48 @@
+{% comment %}One FAQ question.
+
+    {% include 'web/partials/_faq_item.html' with question=q link_service=svc %}
+
+**`<details>`/`<summary>`, not a JavaScript accordion.** The browser gives us the
+expand/collapse behaviour, keyboard operation, the correct ARIA semantics and —
+the part that matters most — the content is in the DOM whether it is open or not.
+That means it works with JavaScript disabled, it is found by in-page search, and
+it is readable by a crawler. A div-based accordion has to reimplement all four
+and usually reimplements three.
+
+`open` on the first item of each section: an accordion where everything is shut
+looks like an empty page. One open answer shows what the control does.
+
+`question.link` optionally adds one trailing link. A registry service resolves
+through `link_service` (the view does the lookup, since a template cannot index a
+dict by a variable) and renders as a plain label when the platform is not live —
+the same availability rule as the rest of the site.
+{% endcomment %}
+<details class="hs-faq__item" id="{{ question.anchor }}"{% if open %} open{% endif %}>
+  <summary class="hs-faq__question">
+    <span class="hs-faq__question-text">{{ question.question }}</span>
+    <span class="hs-faq__marker" aria-hidden="true"></span>
+  </summary>
+
+  <div class="hs-faq__answer">
+    {% for paragraph in question.answer %}<p>{{ paragraph }}</p>{% endfor %}
+
+    {% if question.link %}
+      {% if question.link.url %}
+        <a class="hs-link-arrow hs-link-arrow--sm" href="{{ question.link.url }}">
+          {{ question.link.label }}
+          {% include 'web/partials/_icon.html' with name='arrow-right' %}
+        </a>
+      {% elif link_service.available %}
+        <a class="hs-link-arrow hs-link-arrow--sm" href="{{ link_service.url }}">
+          {{ question.link.label|default:link_service.name }}
+          {% include 'web/partials/_icon.html' with name='arrow-right' %}
+        </a>
+      {% else %}
+        <span class="hs-link-arrow hs-link-arrow--sm hs-link-arrow--soon">
+          {{ question.link.label|default:link_service.name }}
+          <span class="hs-badge">Coming soon</span>
+        </span>
+      {% endif %}
+    {% endif %}
+  </div>
+</details>

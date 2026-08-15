@@ -4,10 +4,16 @@ Adapted from the existing haresign.net privacy policy. The identity, controller,
 lawful bases, rights and ICO wording are carried over unchanged in meaning.
 
 What is deliberately *not* carried over, because it is not true of this site:
-contact-form processing (there is no form here — enquiries arrive by email),
-Google Analytics (none is deployed), Google Fonts (self-hosted), and
+contact-form processing (there is no enquiry form here — enquiries arrive by
+email), Google Analytics (none is deployed), Google Fonts (self-hosted), and
 PracticeConnect embedded content (none). Claiming processing that does not
 happen is as wrong as omitting processing that does.
+
+Added with the newsletter: what the sign-up stores, its lawful basis (consent,
+not legitimate interests — it is a marketing list), how long it is kept, and the
+one cookie the form now sets. That last change is why the Cookie Policy was
+rewritten at the same time. `/contact/` deliberately routes by `mailto:` rather
+than posting a form, which is what keeps the paragraph above true.
 {% endcomment %}
 
 {% block policy %}
@@ -40,9 +46,21 @@ happen is as wrong as omitting processing that does.
 
 <h3>Information you send us</h3>
 <p>
-  There are no forms on this website. Where the site invites you to get in touch,
-  it opens an email to us. If you email us we receive your email address, your
-  name if you give it, and whatever you choose to write.
+  There is no enquiry or contact form on this website. Where the site invites you
+  to get in touch, it opens an email to us. If you email us we receive your email
+  address, your name if you give it, and whatever you choose to write.
+</p>
+
+<h3>Newsletter subscription</h3>
+<p>
+  The one form on this site is the newsletter sign-up. If you use it, we store
+  the <strong>email address</strong> you give us, your <strong>first name</strong>
+  if you choose to add one, the date you subscribed, and which page you
+  subscribed from.
+</p>
+<p>
+  That is all of it. We do not record whether you open an email or what you click
+  in it, and we do not build a profile of you.
 </p>
 
 <h3>Technical information</h3>
@@ -62,9 +80,11 @@ happen is as wrong as omitting processing that does.
 
 <h3>Cookies</h3>
 <p>
-  This website sets <strong>no cookies</strong> when you browse it. See the
-  <a href="{% url 'legal_cookies' %}">Cookie Policy</a> for detail, including the
-  cookies used by the staff area.
+  This website sets <strong>one cookie</strong>, and only on pages carrying the
+  newsletter sign-up: a security token that stops another site submitting the
+  form as you. It is strictly necessary, so it needs no consent, and there is
+  nothing optional to accept or decline. See the
+  <a href="{% url 'legal_cookies' %}">Cookie Policy</a> for the detail.
 </p>
 
 <h2 id="how-we-use-it">How we use it, and our lawful basis</h2>
@@ -75,6 +95,11 @@ happen is as wrong as omitting processing that does.
     responding to an enquiry you have initiated.
   </li>
   <li>
+    <strong>Newsletter</strong> — used to send you the newsletter you asked for,
+    and nothing else. Lawful basis: <em>consent</em>, which you give by
+    subscribing and can withdraw at any time.
+  </li>
+  <li>
     <strong>Server logs</strong> — used to operate the site securely and
     investigate problems. Lawful basis: <em>legitimate interests</em>, in keeping
     the service available and secure.
@@ -83,6 +108,11 @@ happen is as wrong as omitting processing that does.
 <p>
   We do not use your information for marketing without your explicit agreement,
   and we do not add you to any mailing list because you emailed us.
+</p>
+<p>
+  Every newsletter carries an unsubscribe link, and one click is enough — you do
+  not need an account, and you do not need to reply to anybody. You can also
+  email us and we will remove you.
 </p>
 
 <h2 id="sharing">Who we share it with</h2>
@@ -102,6 +132,11 @@ happen is as wrong as omitting processing that does.
   <li>
     <strong>Email correspondence</strong> — kept for as long as it remains
     relevant to the enquiry or the working relationship, then deleted.
+  </li>
+  <li>
+    <strong>Newsletter subscriptions</strong> — kept until you unsubscribe. When
+    you do, we keep a record that the address opted out, so that a later import
+    cannot put you back on the list by accident.
   </li>
   <li>
     <strong>Server logs</strong> — kept only as long as needed to operate and

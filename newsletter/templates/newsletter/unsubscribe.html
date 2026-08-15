@@ -1,0 +1,43 @@
+{% extends 'web/base.html' %}{% comment %}Unsubscribe confirmation.
+
+A GET only ever *offers* to unsubscribe; the POST does it. Mail clients and
+security scanners fetch links in email without a person being involved, so a GET
+that unsubscribed would quietly remove people who never clicked anything.
+
+Nothing here asks why they are leaving, and nothing tries to talk them out of it.
+{% endcomment %}
+
+{% block title %}Unsubscribe — {{ SITE_NAME }}{% endblock %}
+{% block description %}Unsubscribe from the Haresign newsletter.{% endblock %}
+
+{% block content %}
+<section class="hs-section">
+  <div class="hs-container hs-container--reading">
+    <div class="hs-notice">
+      <p class="hs-eyebrow">Newsletter</p>
+
+      {% if already_gone %}
+        <h1 class="hs-notice__title">You're already unsubscribed.</h1>
+        <p>
+          <strong>{{ subscriber.email }}</strong> is not on the Haresign
+          newsletter list. Nothing further is needed.
+        </p>
+      {% else %}
+        <h1 class="hs-notice__title">Unsubscribe from the newsletter?</h1>
+        <p>
+          This will stop all Haresign newsletter emails to
+          <strong>{{ subscriber.email }}</strong>.
+        </p>
+        <form method="post">
+          {% csrf_token %}
+          <button class="hs-btn hs-btn--primary" type="submit">Yes, unsubscribe me</button>
+        </form>
+      {% endif %}
+
+      <div class="hs-notice__actions">
+        <a class="hs-btn hs-btn--secondary" href="/">Back to Haresign</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

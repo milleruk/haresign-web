@@ -116,12 +116,6 @@
   gap: var(--hs-space-6);
 }
 
-/* --- Principles grid ----------------------------------------------------- */
-.hs-principles-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--hs-space-8);
-}
 /* Decorative colour fields for the dark band. */
 .hs-band__field {
   position: absolute;
@@ -156,13 +150,11 @@
 
 @media (max-width: 991.98px) {
   .hs-hero__visual { max-width: 32.5rem; margin-top: var(--hs-space-10); }
-  .hs-principles-grid { grid-template-columns: repeat(2, 1fr); }
   .hs-insights-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 767.98px) {
   .hs-platform-grid { grid-template-columns: 1fr; gap: var(--hs-space-5); }
-  .hs-principles-grid { grid-template-columns: 1fr; gap: var(--hs-space-6); }
 
   /* Full-width CTAs — side-by-side pills get uncomfortably narrow below ~380px. */
   .hs-hero__actions .hs-btn { width: 100%; }
@@ -175,17 +167,14 @@
 
 
 /* --- Section rhythm ------------------------------------------------------
-   warm hero -> light platforms -> navy principles -> white insights ->
-   navy CTA band -> navy footer. Each band is intentional, and no two adjacent
-   sections share a ground, so the page reads as a sequence rather than as one
-   long scroll of white cards on pale grey.
-   ------------------------------------------------------------------------- */
-.hs-section--credibility {
-  background-color: var(--hs-surface);
-  border-bottom: 1px solid var(--hs-border-subtle);
-}
+   warm hero -> light platforms -> navy credibility -> white insights ->
+   warm newsletter -> navy ecosystem band -> navy footer. Each ground is
+   intentional and no two adjacent sections share one, so the page reads as a
+   sequence rather than as one long scroll of white cards on pale grey.
 
-/* The navy principle band bleeds into the footer's navy, so it needs no bottom
-   transition of its own; the CTA band sits inside the white section above it. */
-.hs-section--cta { padding-bottom: 0; }
-.hs-section--cta .hs-container { padding-bottom: var(--hs-section-y); }
+   The credibility band and the ecosystem band are both navy but never touch:
+   Insights and the newsletter sit between them.
+
+   `.hs-section--cta` is not here — the ecosystem band is a component now, used
+   on Insights and the FAQ as well, and page CSS is not loaded on those pages.
+   ------------------------------------------------------------------------- */

@@ -38,8 +38,16 @@ navigates somewhere implies authentication exists, and it does not yet.
           <li>{% include 'web/partials/_service_link.html' with service=services.intelligence label=services.intelligence.nav_label link_class='hs-nav__link' show_badge=False %}</li>
           <li>{% include 'web/partials/_service_link.html' with service=services.community label=services.community.nav_label link_class='hs-nav__link' show_badge=False %}</li>
           <li>{% include 'web/partials/_service_link.html' with service=services.workspace label=services.workspace.nav_label link_class='hs-nav__link' show_badge=False %}</li>
-          <li><a class="hs-nav__link" href="#insights">Insights</a></li>
-          <li><a class="hs-nav__link" href="#about">About</a></li>
+          {% comment %}Real routes, not in-page anchors. These were `#insights`
+          and `#about`, which are homepage section ids — on /privacy/ or /faq/
+          they scrolled nowhere and the nav was quietly broken on every page but
+          one. "About" is gone from the bar rather than pointed at `/#about`:
+          seven items is already the ceiling, and the FAQ answers "what is
+          Haresign" better than a scroll target does. The footer still carries
+          it.{% endcomment %}
+          <li><a class="hs-nav__link" href="{% url 'insights:index' %}">Insights</a></li>
+          <li><a class="hs-nav__link" href="{% url 'faq' %}">FAQ</a></li>
+          <li><a class="hs-nav__link" href="{% url 'contact' %}">Contact</a></li>
           {% comment %}The header Sign in button is hidden below 992px, so the
           panel carries its own copy — the action is never lost on mobile.{% endcomment %}
           <li class="d-lg-none">

@@ -1,0 +1,53 @@
+{% comment %}One contact route card.
+
+    {% include 'web/partials/_contact_route.html' with route=route service=route_service %}
+
+`route` is a `web.contact.ContactRoute`; `service` is the registry entry it names
+(or empty), resolved by the view because a Django template cannot look a dict up
+by a variable key. The action is a `mailto:` with the
+subject already filled in — the destination address is visible in the status bar
+before you click, and there is no server-side send path to abuse.
+
+A route whose platform is not live still shows: the question is real even when
+the platform is not ("how do I get into the community?" is answerable now). What
+changes is the note underneath, which says so rather than implying the service is
+waiting for you.
+{% endcomment %}
+<article class="hs-card hs-card--interactive hs-contact-route hs-accent-{{ route.accent }}" id="{{ route.anchor }}">
+
+  <span class="hs-contact-route__icon">
+    {% include 'web/partials/_icon.html' with name=route.icon %}
+  </span>
+
+  <h3 class="hs-contact-route__title">{{ route.heading }}</h3>
+  <p class="hs-contact-route__blurb">{{ route.blurb }}</p>
+
+  {% for note in route.notes %}
+    <p class="hs-contact-route__note">{{ note }}</p>
+  {% endfor %}
+
+  {% if route.service and not service.available %}
+    <p class="hs-contact-route__note">
+      {{ service.name }} is not open yet — email us and we will keep
+      you posted.
+    </p>
+  {% endif %}
+
+  <div class="hs-contact-route__footer">
+    {% comment %}`?subject=` is what makes five routes better than one inbox.
+    urlencode so a subject containing a space or a slash survives the mail
+    client rather than being truncated at it.{% endcomment %}
+    <a class="hs-btn hs-btn--secondary hs-btn--sm"
+       href="mailto:{{ legal.contact_email }}?subject={{ route.subject|urlencode }}">
+      Email about {{ route.heading|lower }}
+    </a>
+
+    {% if route.service and service.available %}
+      <a class="hs-link-arrow hs-link-arrow--sm" href="{{ service.url }}">
+        Visit {{ service.name }}
+        {% include 'web/partials/_icon.html' with name='arrow-right' %}
+      </a>
+    {% endif %}
+  </div>
+
+</article>

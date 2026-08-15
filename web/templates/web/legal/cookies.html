@@ -1,15 +1,22 @@
 {% extends 'web/legal/base.html' %}{% comment %}Cookie Policy.
 
 Written against what this site actually does, checked by request rather than
-assumed: a public page returns no Set-Cookie header at all, makes no external
-requests, and loads no analytics.
+assumed.
 
-The monolith's policy lists _ga cookies and a consent banner. Neither exists
-here, so neither is described — inventing cookies is as misleading as hiding
-them, and a consent banner for cookies that are not set would be theatre.
+**Updated for the newsletter.** This page used to say the site set no cookies at
+all. That was true and is not any longer: the CSRF token in the newsletter form
+sets a `csrftoken` cookie on the pages carrying it. The cookie is strictly
+necessary and requires no consent — but the policy had to change rather than the
+form being slipped in under wording that no longer held.
 
-The structure anticipates that changing: the "essential" and "optional" sections
-are tables ready for rows, so adding analytics later is an edit, not a rewrite.
+`web/tests.py` asserts that `csrftoken` is the *only* cookie set anywhere on the
+site, and that a page without the form sets none, so this page stays honest by
+failing rather than by being remembered.
+
+There is still no analytics, no third-party content and no consent banner — a
+banner for cookies that are not set would be theatre. The optional-cookies
+section is a table ready for rows, so adding analytics later is an edit rather
+than a rewrite.
 {% endcomment %}
 
 {% block policy %}
@@ -25,15 +32,16 @@ are tables ready for rows, so adding analytics later is an edit, not a rewrite.
 <h2 id="what-this-site-uses">What this site uses</h2>
 <blockquote>
   <p>
-    Browsing this website sets <strong>no cookies at all</strong>. There is no
-    analytics, no advertising, no tracking, and no third-party content — so there
-    is nothing to consent to, and no cookie banner.
+    This website sets <strong>one cookie, and only where you could sign up to
+    the newsletter</strong>. There is no analytics, no advertising, no tracking
+    and no third-party content — so there is nothing to consent to, and no
+    cookie banner.
   </p>
 </blockquote>
 <p>
   That is a description of how the site is built today, not a promise about
-  forever. If that changes, this page changes with it and anything non-essential
-  will ask for your consent first.
+  forever. If it changes, this page changes with it, and anything non-essential
+  will ask for your consent before it runs.
 </p>
 
 <h2 id="essential">Essential cookies</h2>
@@ -43,27 +51,31 @@ are tables ready for rows, so adding analytics later is an edit, not a rewrite.
   they protect.
 </p>
 <p>
-  On this website they are used <strong>only in the staff publishing area</strong>
-  at <code>/admin/</code>, which is not part of the public site. If you are simply
-  reading these pages, none of them is set.
+  Pages carrying the newsletter sign-up — the homepage, Insights and articles —
+  set a security token so that the form cannot be submitted from another site on
+  your behalf. Pages without the form, such as this one, set nothing at all.
 </p>
 
 <div class="hs-table-wrap">
   <table>
-    <caption>Cookies used by the staff publishing area only.</caption>
+    <caption>Every cookie this website sets.</caption>
     <thead>
-      <tr><th scope="col">Name</th><th scope="col">Purpose</th><th scope="col">When it is set</th></tr>
+      <tr><th scope="col">Name</th><th scope="col">Purpose</th><th scope="col">When it is set</th><th scope="col">How long it lasts</th></tr>
     </thead>
     <tbody>
       <tr>
         <td><code>csrftoken</code></td>
-        <td>Protects form submissions against cross-site request forgery.</td>
-        <td>On a page containing a form that posts data.</td>
+        <td>Protects the newsletter form against cross-site request forgery — it
+            stops another website submitting the form as you.</td>
+        <td>On any page showing the newsletter sign-up.</td>
+        <td>One year.</td>
       </tr>
       <tr>
         <td><code>sessionid</code></td>
         <td>Keeps a signed-in member of staff signed in.</td>
-        <td>On signing in to the publishing area.</td>
+        <td>Only on signing in to the staff publishing area at
+            <code>/admin/</code>, which is not part of the public site.</td>
+        <td>Until sign-out.</td>
       </tr>
     </tbody>
   </table>
@@ -93,13 +105,16 @@ are tables ready for rows, so adding analytics later is an edit, not a rewrite.
 
 <h2 id="controlling">Controlling cookies</h2>
 <p>
-  Because the public site sets no cookies, there is nothing here to opt out of.
+  Because this site sets no optional cookies, there is nothing here to opt out
+  of. Nothing you do or do not accept changes what we learn about you, because we
+  are not measuring it.
 </p>
 <p>
   Every major browser lets you view, block and delete cookies through its
-  settings, and you can apply that to this site as to any other. Blocking
-  essential cookies would prevent the staff publishing area from working, but
-  will not affect your reading of these pages.
+  settings, and you can apply that to this site as to any other. Blocking cookies
+  will not affect your reading of any page here; it would stop the newsletter
+  form and the staff publishing area from working, since both depend on the
+  security token above.
 </p>
 
 <h2 id="changes">Changes to this policy</h2>

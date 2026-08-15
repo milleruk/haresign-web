@@ -299,8 +299,46 @@
 }
 .hs-article-card__summary { margin-bottom: 0; color: var(--hs-text); }
 
-/* --- Principle ----------------------------------------------------------- */
-.hs-principle__icon {
+/* --- Link with an arrow --------------------------------------------------
+   The recurring tertiary action: a text link that leads somewhere, used in the
+   credibility section, the FAQ answers, the contact cards and after an article.
+   Not a button — these are "and there is more over here", not the primary
+   action of the block they sit in.
+
+   The `--soon` variant is the same rule the whole site follows: a destination
+   that does not exist yet is a label with a badge, never an anchor. */
+.hs-link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  color: var(--hs-primary);
+  font-weight: var(--hs-weight-bold);
+}
+.hs-link-arrow svg { width: 0.875rem; height: 0.875rem; transition: transform var(--hs-transition); }
+.hs-link-arrow:hover svg { transform: translateX(4px); }
+.hs-link-arrow--sm { font-size: var(--hs-text-sm); }
+.hs-link-arrow--soon { color: var(--hs-text-muted); cursor: default; }
+/* On navy, teal-deep is too dark to read; bright teal is 5.73:1 there. */
+.hs-section--inverse .hs-link-arrow { color: var(--hs-teal); }
+.hs-section--inverse .hs-link-arrow--soon { color: var(--hs-text-on-dark-muted); }
+
+/* --- Credibility ---------------------------------------------------------
+   "Built around primary care." One section carrying four items, each pairing a
+   principle with the fact that substantiates it.
+
+   This replaced two sections that said the same four things — an abstract
+   principles band and a separate strip of facts. The pairing is the whole idea,
+   so `__body` and `__proof` are visibly different kinds of statement: the claim
+   in running text, the evidence as a small marked line beneath a rule.
+
+   Sits on the navy band, so it reads the on-dark tokens.
+   ------------------------------------------------------------------------- */
+.hs-credibility {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--hs-space-8);
+}
+.hs-credibility__icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -311,45 +349,40 @@
   background-color: rgba(255, 255, 255, 0.10);
   color: var(--hs-text-on-dark-strong);
 }
-.hs-principle__icon svg { width: 1.375rem; height: 1.375rem; }
-.hs-principle__title { font-size: var(--hs-text-xl); margin-bottom: var(--hs-space-2); }
-.hs-principle__body { margin-bottom: 0; color: var(--hs-text-on-dark); }
+.hs-credibility__icon svg { width: 1.375rem; height: 1.375rem; }
+.hs-credibility__title {
+  font-size: var(--hs-text-xl);
+  margin-bottom: var(--hs-space-3);
+  color: var(--hs-text-on-dark-strong);
+}
+.hs-credibility__body { margin-bottom: var(--hs-space-4); color: var(--hs-text-on-dark); }
 
+/* The evidence line. Teal, small and set above a rule so the eye reads it as a
+   different kind of statement from the sentence above — a citation, not more
+   copy. Never italic: italic small text on a dark ground is hard work. */
+.hs-credibility__proof {
+  margin: 0;
+  padding-top: var(--hs-space-3);
+  border-top: 1px solid var(--hs-border-on-dark);
+  color: var(--hs-teal);
+  font-size: var(--hs-text-sm);
+  font-weight: var(--hs-weight-semibold);
+}
+.hs-credibility__foot { margin-top: var(--hs-space-10); }
 
-/* --- Credibility strip ---------------------------------------------------
-   Haresign is not an anonymous software company, and an umbrella page with no
-   trace of where it came from reads like one. Four short factual statements,
-   each already substantiated on haresign.net — no invented numbers, no claims
-   about customers, and no turning the umbrella page into a personal profile.
+/* --- Ecosystem CTA -------------------------------------------------------
+   The pre-footer band: four routes into Haresign rather than one sales pitch.
+   Navy, so it closes the page and hands over to the navy footer instead of
+   stopping dead against it.
    ------------------------------------------------------------------------- */
-.hs-credibility {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--hs-space-6);
-}
-.hs-credibility__item {
-  padding-inline-start: var(--hs-space-5);
-  border-inline-start: 3px solid var(--hs-accent, var(--hs-teal));
-}
-.hs-credibility__item:nth-child(1) { --hs-accent: var(--hs-coral); }
-.hs-credibility__item:nth-child(2) { --hs-accent: var(--hs-teal); }
-.hs-credibility__item:nth-child(3) { --hs-accent: var(--hs-aqua); }
-.hs-credibility__item:nth-child(4) { --hs-accent: var(--hs-navy); }
-.hs-credibility__lead {
-  display: block;
-  font-family: var(--hs-font-display);
-  font-size: var(--hs-text-lg);
-  font-weight: var(--hs-weight-bold);
-  color: var(--hs-text-strong);
-  margin-bottom: var(--hs-space-1);
-}
-.hs-credibility__note { margin: 0; font-size: var(--hs-text-sm); color: var(--hs-text-muted); }
 
-/* --- CTA band -------------------------------------------------------------
-   The transition into the footer. Without it the Insights section ended and the
-   navy footer simply began, which read as the page running out rather than
-   closing. */
-.hs-cta-band {
+/* The band bleeds into the footer, so the section owns no bottom padding and
+   the container carries it instead. Lives with the component because the band
+   now appears on Insights and the FAQ, where page CSS is not loaded. */
+.hs-section--cta { padding-bottom: 0; }
+.hs-section--cta .hs-container { padding-bottom: var(--hs-section-y); }
+
+.hs-ecosystem {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -357,22 +390,8 @@
   background-color: var(--hs-navy);
   color: var(--hs-text-on-dark);
   padding: clamp(2.5rem, 5vw, 4rem);
-  text-align: center;
 }
-.hs-cta-band h2 { color: var(--hs-text-on-dark-strong); margin-bottom: var(--hs-space-4); }
-.hs-cta-band__lead {
-  max-width: 42rem;
-  margin: 0 auto var(--hs-space-8);
-  color: var(--hs-text-on-dark);
-  font-size: var(--hs-text-lg);
-}
-.hs-cta-band__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--hs-space-4);
-  justify-content: center;
-}
-.hs-cta-band__field {
+.hs-ecosystem__field {
   position: absolute;
   z-index: -1;
   width: 30rem;
@@ -381,8 +400,251 @@
   filter: blur(90px);
   pointer-events: none;
 }
-.hs-cta-band__field--teal  { top: -14rem; left: -8rem;  background-color: rgba(15, 163, 163, 0.30); }
-.hs-cta-band__field--coral { bottom: -16rem; right: -8rem; background-color: rgba(255, 91, 97, 0.18); }
+.hs-ecosystem__field--teal  { top: -14rem; left: -8rem;    background-color: rgba(15, 163, 163, 0.30); }
+.hs-ecosystem__field--coral { bottom: -16rem; right: -8rem; background-color: rgba(255, 91, 97, 0.18); }
+
+.hs-ecosystem__head { max-width: 44rem; margin-bottom: var(--hs-space-10); }
+.hs-ecosystem__title { color: var(--hs-text-on-dark-strong); margin-bottom: var(--hs-space-4); }
+.hs-ecosystem__lead { margin-bottom: 0; color: var(--hs-text-on-dark); font-size: var(--hs-text-lg); }
+
+.hs-ecosystem__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--hs-space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hs-ecosystem__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hs-space-2);
+  height: 100%;
+  padding: var(--hs-space-6);
+  border: 1px solid var(--hs-border-on-dark);
+  border-radius: var(--hs-radius-md);
+  /* The accent as a wash rather than a border: four coloured outlines on navy
+     read as four separate products, which is the opposite of the point. */
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--hs-text-on-dark);
+  transition: background-color var(--hs-transition), border-color var(--hs-transition),
+              transform var(--hs-transition);
+}
+a.hs-ecosystem__link:hover {
+  transform: translateY(-3px);
+  border-color: var(--hs-accent);
+  background-color: rgba(255, 255, 255, 0.07);
+  color: var(--hs-text-on-dark);
+}
+.hs-ecosystem__name {
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-lg);
+  font-weight: var(--hs-weight-bold);
+  color: var(--hs-text-on-dark-strong);
+}
+.hs-ecosystem__action { flex: 1 1 auto; font-size: var(--hs-text-sm); }
+.hs-ecosystem__arrow { width: 0.875rem; height: 0.875rem; color: var(--hs-teal); }
+a.hs-ecosystem__link:hover .hs-ecosystem__arrow { transform: translateX(4px); }
+.hs-ecosystem__link--soon { cursor: default; }
+.hs-ecosystem__link--soon .hs-ecosystem__name { color: var(--hs-text-on-dark); }
+.hs-ecosystem__link--soon .hs-badge { align-self: flex-start; }
+
+.hs-ecosystem__foot {
+  margin: var(--hs-space-8) 0 0;
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-on-dark-muted);
+}
+.hs-ecosystem__foot a { color: var(--hs-teal); text-decoration: underline; text-underline-offset: 0.15em; }
+
+/* --- Form input ----------------------------------------------------------
+   One input style, because there is one form. Deliberately generous: 44px+ tall
+   and 17px type, since anything smaller triggers zoom-on-focus in iOS Safari. */
+.hs-input {
+  width: 100%;
+  padding: var(--hs-space-3) var(--hs-space-4);
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-pill);
+  background-color: var(--hs-surface);
+  color: var(--hs-text-strong);
+  font-family: inherit;
+  font-size: var(--hs-text-base);
+  line-height: 1.4;
+}
+.hs-input::placeholder { color: var(--hs-text-muted); }
+.hs-input:focus { border-color: var(--hs-primary); }
+
+/* --- Newsletter ----------------------------------------------------------
+   Used on the homepage, the Insights index and after an article. */
+.hs-newsletter {
+  max-width: 46rem;
+  margin-inline: auto;
+  text-align: center;
+}
+.hs-newsletter__title { font-size: var(--hs-heading-section); margin-bottom: var(--hs-space-4); }
+.hs-newsletter__lead {
+  margin-bottom: var(--hs-space-8);
+  font-size: var(--hs-text-lg);
+  color: var(--hs-text);
+}
+.hs-newsletter__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hs-space-3);
+  justify-content: center;
+  align-items: center;
+}
+.hs-newsletter__field { flex: 1 1 11rem; min-width: 10rem; }
+.hs-newsletter__field--wide { flex: 2 1 16rem; }
+.hs-newsletter__note {
+  margin: var(--hs-space-5) 0 0;
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+}
+.hs-newsletter__note a { color: var(--hs-text-muted); text-decoration: underline; }
+
+/* Honeypot. Positioned off-canvas rather than display:none — some bots skip
+   hidden fields, and this one is meant to be filled in. Never focusable: the
+   input carries tabindex="-1" and the wrapper is aria-hidden. */
+.hs-newsletter__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Inline variant — after an article, where a full band would compete with the
+   piece the reader just finished. Bounded box, left-aligned, quieter. */
+.hs-newsletter--inline {
+  max-width: none;
+  margin-block: var(--hs-space-12);
+  padding: var(--hs-space-8);
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-surface-warm);
+  text-align: left;
+}
+.hs-newsletter--inline .hs-newsletter__title { font-size: var(--hs-text-xl); }
+.hs-newsletter--inline .hs-newsletter__lead {
+  margin-bottom: var(--hs-space-6);
+  font-size: var(--hs-text-base);
+}
+.hs-newsletter--inline .hs-newsletter__form { justify-content: flex-start; }
+
+/* --- Notice --------------------------------------------------------------
+   The single-message pages: subscribed, unsubscribed, and the error case. */
+.hs-notice {
+  padding: var(--hs-space-10);
+  border: 1px solid var(--hs-border);
+  border-inline-start: 4px solid var(--hs-primary);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-surface);
+  box-shadow: var(--hs-shadow-md);
+}
+.hs-notice--error { border-inline-start-color: var(--hs-coral); }
+.hs-notice__title { font-size: var(--hs-heading-card); margin-bottom: var(--hs-space-4); }
+.hs-notice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hs-space-3);
+  margin-top: var(--hs-space-8);
+}
+
+/* --- Contact route card -------------------------------------------------- */
+.hs-contact-route { padding: var(--hs-space-8) var(--hs-space-6) var(--hs-space-6); height: 100%; }
+.hs-contact-route:hover { border-color: var(--hs-accent); }
+.hs-contact-route__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: var(--hs-space-5);
+  border-radius: var(--hs-radius-sm);
+  background-color: var(--hs-accent-tint);
+  color: var(--hs-accent-ink);
+}
+.hs-contact-route__icon svg { width: 1.5rem; height: 1.5rem; }
+.hs-contact-route__title { font-size: var(--hs-text-xl); margin-bottom: var(--hs-space-3); }
+.hs-contact-route__blurb { color: var(--hs-text); margin-bottom: var(--hs-space-4); }
+.hs-contact-route__note {
+  margin-bottom: var(--hs-space-4);
+  font-size: var(--hs-text-sm);
+  color: var(--hs-text-muted);
+}
+/* Pushed to the bottom so the actions line up across cards of unequal length. */
+.hs-contact-route__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hs-space-4);
+  margin-top: auto;
+  padding-top: var(--hs-space-4);
+}
+
+/* --- FAQ item ------------------------------------------------------------
+   A <details>/<summary> disclosure. The browser supplies the behaviour, the
+   keyboard handling and the ARIA; this only supplies the appearance.
+
+   `list-style: none` plus the ::-webkit-details-marker rule removes the native
+   triangle; ours is a plus/minus built from two bars, so it rotates rather than
+   swapping glyphs.
+   ------------------------------------------------------------------------- */
+.hs-faq__item {
+  border: 1px solid var(--hs-border);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-surface);
+  margin-bottom: var(--hs-space-3);
+  overflow: hidden;
+}
+.hs-faq__item[open] { border-color: var(--hs-border-strong); box-shadow: var(--hs-shadow-sm); }
+
+.hs-faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hs-space-4);
+  /* Comfortably past the 44px touch target at every text size. */
+  padding: var(--hs-space-5) var(--hs-space-6);
+  cursor: pointer;
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-lg);
+  font-weight: var(--hs-weight-bold);
+  color: var(--hs-text-strong);
+  list-style: none;
+}
+.hs-faq__question::-webkit-details-marker { display: none; }
+.hs-faq__question:hover { color: var(--hs-primary); }
+
+/* Plus turning into minus. Two bars, the vertical one collapsing on open, so
+   the state is legible without colour and without a font. */
+.hs-faq__marker {
+  position: relative;
+  flex: 0 0 auto;
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.hs-faq__marker::before,
+.hs-faq__marker::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background-color: var(--hs-primary);
+  transition: transform var(--hs-transition);
+}
+.hs-faq__marker::after { transform: rotate(90deg); }
+.hs-faq__item[open] .hs-faq__marker::after { transform: rotate(0deg); }
+
+.hs-faq__answer {
+  padding: 0 var(--hs-space-6) var(--hs-space-6);
+  color: var(--hs-text);
+}
+.hs-faq__answer p { margin-bottom: var(--hs-space-4); }
+.hs-faq__answer > :last-child { margin-bottom: 0; }
 
 /* --- Editorial article treatment -----------------------------------------
    Insights is research and commentary, not product release notes, so the
@@ -395,10 +657,17 @@
 .hs-article-card--link:hover { border-inline-start-color: var(--hs-teal); }
 
 @media (max-width: 991.98px) {
-  .hs-credibility { grid-template-columns: repeat(2, 1fr); gap: var(--hs-space-5); }
+  .hs-credibility { grid-template-columns: repeat(2, 1fr); gap: var(--hs-space-6); }
+  .hs-ecosystem__grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 575.98px) {
   .hs-credibility { grid-template-columns: 1fr; }
+  .hs-ecosystem__grid { grid-template-columns: 1fr; }
+  /* Stacked, full-width fields: side-by-side inputs below ~380px leave the
+     email box about eight characters wide. */
+  .hs-newsletter__field,
+  .hs-newsletter__form .hs-btn { flex: 1 1 100%; width: 100%; }
+  .hs-notice { padding: var(--hs-space-6); }
 }
 
 /* ==========================================================================

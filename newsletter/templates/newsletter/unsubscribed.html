@@ -1,0 +1,27 @@
+{% extends 'web/base.html' %}{% comment %}Done.
+
+Says plainly that it worked and which address it applied to, so nobody has to
+wonder whether to click the link in the next email too.
+{% endcomment %}
+
+{% block title %}Unsubscribed — {{ SITE_NAME }}{% endblock %}
+{% block description %}You have been unsubscribed from the Haresign newsletter.{% endblock %}
+
+{% block content %}
+<section class="hs-section">
+  <div class="hs-container hs-container--reading">
+    <div class="hs-notice">
+      <p class="hs-eyebrow">Newsletter</p>
+      <h1 class="hs-notice__title">You're unsubscribed.</h1>
+      <p>
+        We've stopped newsletter emails to <strong>{{ subscriber.email }}</strong>.
+        If you change your mind, you can subscribe again from any Insights page.
+      </p>
+      <div class="hs-notice__actions">
+        <a class="hs-btn hs-btn--secondary" href="{% url 'insights:index' %}">Read Insights</a>
+        <a class="hs-btn hs-btn--secondary" href="/">Back to Haresign</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

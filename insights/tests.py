@@ -250,3 +250,43 @@ class HomepageInsightsTests(TestCase):
         response = self.client.get('/')
 
         self.assertContains(response, f'href="{article.get_absolute_url()}"')
+
+
+class HeadingStructureTests(TestCase):
+    """Every page needs exactly one `<h1>`.
+
+    The Insights index had none: it used the section-header partial, which
+    renders an `<h2>`, so the outline began at level 2 under nothing and a screen
+    reader user got no page title. Nothing errors when this is wrong, which is
+    why it is a test.
+    """
+
+    def setUp(self):
+        Article.objects.create(
+            title='A published piece',
+            slug='a-published-piece',
+            summary='Summary.',
+            body='<p>Body.</p>',
+            status=Article.STATUS_PUBLISHED,
+            published_at=timezone.now(),
+        )
+
+    def test_index_has_exactly_one_h1(self):
+        body = self.client.get(reverse('insights:index')).content.decode()
+
+        self.assertEqual(body.count('<h1'), 1)
+
+    def test_article_has_exactly_one_h1(self):
+        body = self.client.get(
+            reverse('insights:detail', kwargs={'slug': 'a-published-piece'})
+        ).content.decode()
+
+        self.assertEqual(body.count('<h1'), 1)
+
+    def test_the_article_h1_is_its_title(self):
+        """Not "Insights" with the title as an h2 beneath it — the page is about
+        the article."""
+        response = self.client.get(
+            reverse('insights:detail', kwargs={'slug': 'a-published-piece'}))
+
+        self.assertContains(response, 'A published piece')

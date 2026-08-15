@@ -1,0 +1,102 @@
+/* ==========================================================================
+   pages/faq.css — layout for the FAQ page only.
+
+   The question disclosure itself is a component (.hs-faq__item in
+   components.css), because the partial that renders it is reusable. What is
+   here is the page: its hero, its contents rail and the two-column arrangement.
+   ========================================================================== */
+
+.hs-faq-hero {
+  padding-block: clamp(3rem, 6vw, 4.5rem) clamp(2.5rem, 5vw, 3.5rem);
+  background-color: var(--hs-surface-warm);
+  border-bottom: 1px solid var(--hs-border-subtle);
+}
+.hs-faq-hero__title {
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  margin-bottom: var(--hs-space-5);
+}
+.hs-faq-hero__lead {
+  max-width: 44rem;
+  margin-bottom: 0;
+  font-size: var(--hs-text-lg);
+}
+
+/* Contents rail beside the questions. `start` rather than `stretch` so the
+   sticky rail has a height to be sticky against. */
+.hs-faq-layout {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.hs-faq-nav {
+  position: sticky;
+  /* Clears the sticky site header, plus a little air. */
+  top: calc(var(--hs-header-height) + var(--hs-space-6));
+}
+.hs-faq-nav__heading {
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-bold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+  color: var(--hs-text-muted);
+  margin-bottom: var(--hs-space-4);
+}
+.hs-faq-nav__list { list-style: none; margin: 0; padding: 0; }
+.hs-faq-nav__list li { margin-bottom: var(--hs-space-1); }
+.hs-faq-nav__list a {
+  display: block;
+  padding: var(--hs-space-2) var(--hs-space-3);
+  border-inline-start: 2px solid var(--hs-border);
+  color: var(--hs-text);
+  font-size: var(--hs-text-sm);
+  font-weight: var(--hs-weight-medium);
+}
+.hs-faq-nav__list a:hover {
+  border-inline-start-color: var(--hs-primary);
+  color: var(--hs-primary);
+}
+
+.hs-faq__section { margin-bottom: var(--hs-space-12); }
+.hs-faq__heading {
+  font-size: var(--hs-heading-card);
+  margin-bottom: var(--hs-space-5);
+  /* An anchor target under a sticky header lands with its heading behind the
+     header; this pushes the scroll position down to compensate. */
+  scroll-margin-top: calc(var(--hs-header-height) + var(--hs-space-6));
+}
+
+/* "Still have a question?" — carried over in substance from the existing
+   haresign.net FAQ, which ends the same way, because the question it answers is
+   the same one. */
+.hs-faq__aside {
+  padding: var(--hs-space-8);
+  border-radius: var(--hs-radius-md);
+  background-color: var(--hs-surface-muted);
+  border: 1px solid var(--hs-border-subtle);
+}
+.hs-faq__aside-title { font-size: var(--hs-text-xl); margin-bottom: var(--hs-space-3); }
+.hs-faq__aside p { margin-bottom: var(--hs-space-6); }
+
+/* An anchored question must clear the sticky header too. */
+.hs-faq__item { scroll-margin-top: calc(var(--hs-header-height) + var(--hs-space-4)); }
+
+@media (max-width: 991.98px) {
+  /* The rail becomes a plain list above the questions. Sticky positioning on a
+     full-width block at the top of the page would cover the content it links
+     to, which is worse than no rail at all. */
+  .hs-faq-layout { grid-template-columns: 1fr; }
+  .hs-faq-nav {
+    position: static;
+    padding-bottom: var(--hs-space-6);
+    border-bottom: 1px solid var(--hs-border);
+  }
+  .hs-faq-nav__list { display: flex; flex-wrap: wrap; gap: var(--hs-space-2); }
+  .hs-faq-nav__list li { margin-bottom: 0; }
+  .hs-faq-nav__list a {
+    border: 1px solid var(--hs-border);
+    border-radius: var(--hs-radius-pill);
+    padding: var(--hs-space-2) var(--hs-space-4);
+  }
+}

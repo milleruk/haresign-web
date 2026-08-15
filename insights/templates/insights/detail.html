@@ -61,8 +61,21 @@
       </div>
     {% endif %}
 
+    {% comment %}One conversion component after an article, and the quiet variant
+    of it. Editorial content is the point of this page: a reader who has just
+    finished a piece is the right person to ask, but stacking a newsletter band, a
+    related-articles rail and an ecosystem CTA underneath would bury the thing
+    they came for under three asks. The ecosystem band is on the index, one click
+    away, which is where somebody looking for "the rest of Haresign" already
+    goes.{% endcomment %}
+    {% include 'web/partials/_newsletter.html' with source='article' variant='inline' %}
+
     <div class="hs-article__foot">
       <a class="hs-btn hs-btn--secondary" href="{% url 'insights:index' %}">All insights</a>
+      <a class="hs-link-arrow hs-link-arrow--sm" href="{% url 'faq' %}">
+        What is Haresign?
+        {% include 'web/partials/_icon.html' with name='arrow-right' %}
+      </a>
     </div>
   </div>
 

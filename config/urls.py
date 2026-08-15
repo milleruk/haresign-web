@@ -8,6 +8,7 @@ urlpatterns = [
     path('tinymce/', include('tinymce.urls')),
 
     path('insights/', include('insights.urls', namespace='insights')),
+    path('newsletter/', include('newsletter.urls', namespace='newsletter')),
 
     # Last: web owns '' and the catch-all-ish public routes.
     path('', include('web.urls')),

@@ -1,0 +1,61 @@
+{% comment %}Ecosystem call to action — the pre-footer band.
+
+    {% include 'web/partials/_ecosystem_cta.html' %}
+
+Four ways into Haresign rather than one sales pitch. The old band offered "open
+Intelligence" or "email us", which quietly made the umbrella page a funnel into
+one platform; this one asks the only question the master brand can usefully ask —
+which part of Haresign do you need?
+
+`ecosystem_routes` is joined to the service registry in web/context_processors.py,
+so this works on any page without a view knowing about it, and a platform that is
+not live shows as a label with its destination named in text. Navy, so it closes
+the page and hands over to the footer rather than stopping dead.
+{% endcomment %}
+<section class="hs-section hs-section--cta" aria-labelledby="ecosystem-cta-title">
+  <div class="hs-container">
+    <div class="hs-ecosystem">
+      <span class="hs-ecosystem__field hs-ecosystem__field--teal" aria-hidden="true"></span>
+      <span class="hs-ecosystem__field hs-ecosystem__field--coral" aria-hidden="true"></span>
+
+      <div class="hs-ecosystem__head">
+        <h2 class="hs-ecosystem__title" id="ecosystem-cta-title">
+          Find the right part of Haresign for you.
+        </h2>
+        <p class="hs-ecosystem__lead">
+          Whether you need data, practical tools, specialist support, a
+          professional community or access to your Haresign work, there is a
+          place to start.
+        </p>
+      </div>
+
+      <ul class="hs-ecosystem__grid">
+        {% for route in ecosystem_routes %}
+          <li class="hs-ecosystem__route hs-accent-{{ route.service.accent }}">
+            {% if route.service.available %}
+              {% comment %}The whole tile is the link here — unlike the platform
+              card, it holds nothing but a name and one line, so there is no
+              nested interactive content to confuse the accessible name.{% endcomment %}
+              <a class="hs-ecosystem__link" href="{{ route.service.url }}">
+                <span class="hs-ecosystem__name">{{ route.service.name }}</span>
+                <span class="hs-ecosystem__action">{{ route.action }}</span>
+                {% include 'web/partials/_icon.html' with name='arrow-right' extra_class='hs-ecosystem__arrow' %}
+              </a>
+            {% else %}
+              <span class="hs-ecosystem__link hs-ecosystem__link--soon">
+                <span class="hs-ecosystem__name">{{ route.service.name }}</span>
+                <span class="hs-ecosystem__action">{{ route.action }}</span>
+                <span class="hs-badge hs-badge--on-dark">Soon</span>
+              </span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+
+      <p class="hs-ecosystem__foot">
+        Still not sure? <a href="{% url 'contact' %}">Talk to Haresign</a> and we
+        will point you the right way.
+      </p>
+    </div>
+  </div>
+</section>

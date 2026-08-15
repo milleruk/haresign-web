@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'tinymce',
 
     'insights',
+    'newsletter',
     'web',
 ]
 
@@ -82,9 +83,11 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # No form on the site posts anything today, and this sets no cookie until a
-    # template asks for a token — so it is free now and already correct on the
-    # day somebody adds the first form, rather than a thing to remember then.
+    # The newsletter form is the first public POST on this site. Note the
+    # consequence, which is documented rather than hidden: `{% csrf_token %}`
+    # sets a `csrftoken` cookie on every page carrying that form. It is a
+    # strictly-necessary cookie and needs no consent, and the Cookie Policy names
+    # it and says which pages set it.
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

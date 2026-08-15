@@ -47,16 +47,36 @@ the business and are supplied by configuration (see README).
 
       <div>
         <h2 class="hs-footer__heading" id="footer-haresign">Haresign</h2>
+        {% comment %}Absolute paths, not bare fragments. `#about` and `#insights`
+        were homepage section ids, so on every other page they scrolled nowhere —
+        and a footer appears on all of them, which is what made it worth fixing.
+
+        About stays a homepage anchor on purpose: that section is the umbrella
+        brand's own account of itself, and a separate About page here would drift
+        straight into the founder and team material that belongs to Haresign
+        Consulting.{% endcomment %}
         <ul class="hs-footer__list" aria-labelledby="footer-haresign">
-          <li><a href="#about">About</a></li>
-          <li><a href="#insights">Insights</a></li>
-          <li><a href="mailto:{{ legal.contact_email }}">Contact</a></li>
+          <li><a href="/#about">About</a></li>
+          <li><a href="{% url 'insights:index' %}">Insights</a></li>
+          <li><a href="{% url 'faq' %}">FAQ</a></li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
         </ul>
       </div>
 
       <div>
-        <h2 class="hs-footer__heading" id="footer-account">Account</h2>
-        <ul class="hs-footer__list" aria-labelledby="footer-account">
+        {% comment %}Resources: things that live somewhere else and are linked,
+        never copied into this repository. The documentation belongs to Haresign
+        Intelligence — read it and it documents the platform, its tools and its
+        data sources — so it is labelled as that rather than passed off as
+        ecosystem documentation, and it sits here rather than in the main nav
+        because most visitors to the umbrella site are not looking for a tools
+        manual.{% endcomment %}
+        <h2 class="hs-footer__heading" id="footer-resources">Resources</h2>
+        <ul class="hs-footer__list" aria-labelledby="footer-resources">
+          <li>
+            {% include 'web/partials/_service_link.html' with service=services.docs link_class='hs-footer__link' %}
+            <span class="hs-footer__hint">Haresign Intelligence</span>
+          </li>
           <li>{% include 'web/partials/_service_link.html' with service=services.account link_class='hs-footer__link' %}</li>
         </ul>
 

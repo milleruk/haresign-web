@@ -1,0 +1,43 @@
+{% comment %}Credibility section — "Built around primary care."
+
+    {% include 'web/partials/_credibility.html' with items=credibility %}
+
+One section where there used to be two. The old page carried an abstract
+"principles" band and a separate strip of supporting facts, which said the same
+four things twice; each item here states the principle *and* the fact behind it.
+
+`proof` is the substantiation, printed as a small marked line rather than folded
+into the sentence — a claim and its evidence read as two different kinds of
+statement, and merging them makes both weaker.
+
+Deliberately not a biography. Haresign is founder-led and that is worth saying,
+but the people belong to Haresign Consulting; the umbrella page links there and
+stops. When Consulting is not live the link becomes a plain label — same rule as
+everywhere else on this site.
+{% endcomment %}
+<div class="hs-credibility">
+  {% for item in items %}
+    <div class="hs-credibility__item">
+      <span class="hs-credibility__icon">
+        {% include 'web/partials/_icon.html' with name=item.icon %}
+      </span>
+      <h3 class="hs-credibility__title">{{ item.heading }}</h3>
+      <p class="hs-credibility__body">{{ item.body }}</p>
+      <p class="hs-credibility__proof">{{ item.proof }}</p>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="hs-credibility__foot">
+  {% if services.consulting.available %}
+    <a class="hs-link-arrow" href="{{ services.consulting.url }}">
+      Meet the people behind Haresign
+      {% include 'web/partials/_icon.html' with name='arrow-right' %}
+    </a>
+  {% else %}
+    <span class="hs-link-arrow hs-link-arrow--soon">
+      Meet the people behind Haresign
+      <span class="hs-badge hs-badge--on-dark">Coming soon</span>
+    </span>
+  {% endif %}
+</div>

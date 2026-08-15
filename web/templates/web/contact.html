@@ -1,0 +1,93 @@
+{% extends 'web/base.html' %}
+{% load static %}{% comment %}Contact — a routing page, not an enquiry form.
+
+Its job is to get the right question to the right part of Haresign. A single
+"how can we help?" box would drop a consulting enquiry, a data question and a
+client access request into one inbox with nothing to tell them apart, which is
+precisely the mixing this architecture separates.
+
+There is no form here on purpose. See web/contact.py and the README: adding one
+would mean spam handling, an SMTP credential in this deployment, and a change to
+the Privacy Notice, which currently says truthfully that this site has no
+general-enquiry form. That is a decision to take deliberately, not a detail to
+slip in with a routing page.
+{% endcomment %}
+
+{% block title %}Contact Haresign{% endblock %}
+{% block description %}Reach the right part of Haresign — consultancy, intelligence and tools, community, client workspace, or anything else.{% endblock %}
+{% block og_title %}Talk to Haresign{% endblock %}
+{% block og_description %}Not sure where your question belongs? Start here.{% endblock %}
+
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/contact.css' %}">{% endblock %}
+
+{% block content %}
+
+<header class="hs-contact-hero">
+  <div class="hs-container">
+    <p class="hs-eyebrow">Contact</p>
+    <h1 class="hs-contact-hero__title">Talk to Haresign.</h1>
+    <p class="hs-contact-hero__lead">
+      Not sure where your question belongs? Start here.
+    </p>
+    <p class="hs-contact-hero__body">
+      Haresign covers consultancy, a data and tools platform, a professional
+      community and private client work. Pick the closest match below and your
+      message arrives with the right label on it — or use
+      <a href="#general">anything else</a> and we will point you the right way.
+    </p>
+  </div>
+</header>
+
+<section class="hs-section hs-section--tight hs-section--muted" aria-labelledby="routes-title">
+  <div class="hs-container">
+    <h2 class="hs-visually-hidden" id="routes-title">Ways to reach us</h2>
+
+    <div class="hs-contact-grid">
+      {% for item in routes %}
+        {% include 'web/partials/_contact_route.html' with route=item.route service=item.service %}
+      {% endfor %}
+    </div>
+
+    <div class="hs-contact-direct">
+      <p>
+        Everything reaches the same place in the end:
+        <a href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>.
+        The subjects above just help it get sorted.
+      </p>
+      {% comment %}Said plainly rather than left to be discovered: this is a
+      small business, and a promise of a two-hour SLA would be a claim we have
+      not made anywhere else and could not keep.{% endcomment %}
+      <p class="hs-contact-direct__note">
+        Haresign is a small team, so replies come from a person rather than a
+        ticketing system. If your question is urgent, say so in the subject.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="hs-section" aria-labelledby="contact-more-title">
+  <div class="hs-container hs-container--reading">
+    <h2 id="contact-more-title">Before you write</h2>
+    <div class="hs-prose">
+      <p>
+        A few things are answered faster by a page than by an email:
+      </p>
+      <ul>
+        <li>
+          <a href="{% url 'faq' %}">The FAQ</a> covers what Haresign is, who each
+          platform is for, and where the data comes from.
+        </li>
+        <li>
+          <a href="{% url 'insights:index' %}">Insights</a> carries our published
+          analysis and commentary on primary care.
+        </li>
+        <li>
+          <a href="{% url 'legal_privacy' %}">The Privacy Notice</a> explains what
+          happens to anything you send us.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

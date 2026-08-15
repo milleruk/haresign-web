@@ -71,28 +71,61 @@ PLATFORMS = [
 ]
 
 
-PRINCIPLES = [
-    {
-        'icon': 'evidence',
-        'heading': 'Evidence-led',
-        'body': 'Insight people can actually use.',
-    },
+# Credibility — one section, not two.
+#
+# This was previously a "principles" band (Evidence-led / Built from experience /
+# Practical / Connected) *and* a separate credibility strip carrying the facts
+# behind them. The two said the same four things, one abstractly and one
+# concretely, which is repetition dressed up as structure. Merged: each item now
+# states the principle and the fact that substantiates it, so the section makes a
+# claim and backs it in the same breath.
+#
+# Every `proof` is already published on haresign.net. No customer counts, no
+# performance claims, and nothing that turns the umbrella page into a personal
+# profile — the people behind Haresign belong to Haresign Consulting.
+CREDIBILITY = [
     {
         'icon': 'experience',
         'heading': 'Built from experience',
-        'body': 'Created around the realities of running primary care.',
+        'body': 'Created around the realities of managing and improving primary '
+                'care, by someone who has done the job.',
+        'proof': '25+ years in practice and business management',
+    },
+    {
+        'icon': 'evidence',
+        'heading': 'Evidence-led',
+        'body': 'Published NHS data and practical analysis, so you can see what '
+                'is actually happening rather than what it feels like.',
+        'proof': 'Official NHS datasets, not estimates',
     },
     {
         'icon': 'practical',
-        'heading': 'Practical',
-        'body': 'Tools and support intended to help people make decisions and take action.',
+        'heading': 'Practical by design',
+        'body': 'Tools, insight and support built to help people decide '
+                'something and then act on it.',
+        'proof': 'Working with practices and PCNs across England',
     },
     {
         'icon': 'connected',
-        'heading': 'Connected',
-        'body': 'Consulting, intelligence, workspace and community working as '
-                'one Haresign ecosystem.',
+        'heading': 'Independent thinking',
+        'body': 'Analysis and commentary meant to inform decisions — not to '
+                'rank practices against each other.',
+        'proof': 'Accredited member of the IGPM',
     },
+]
+
+
+# The pre-footer ecosystem call to action: four ways in, one per platform.
+#
+# `service` is the registry slug, so the name, the destination and whether it is
+# live all come from one place — a route to a platform that has not launched
+# renders as a label rather than a broken link, exactly as the cards and the nav
+# already do.
+ECOSYSTEM_ROUTES = [
+    {'service': 'consulting',   'action': 'Get practical support.'},
+    {'service': 'intelligence', 'action': 'Explore data and tools.'},
+    {'service': 'community',    'action': 'Join the conversation.'},
+    {'service': 'workspace',    'action': 'Access your work with Haresign.'},
 ]
 
 
