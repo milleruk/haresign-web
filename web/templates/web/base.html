@@ -45,11 +45,18 @@
   <link rel="stylesheet" href="{% static 'css/layout.css' %}">
   <link rel="stylesheet" href="{% static 'css/components.css' %}">
   {% block page_css %}{% endblock %}
+
+  {% comment %} Anything else one page needs in the head — currently the homepage preloading
+     its banner photograph. After the stylesheets, so a preload can never delay them. {% endcomment %}
+  {% block page_head %}{% endblock %}
 </head>
 <body>
   <a class="hs-skip-link" href="#main">Skip to content</a>
 
-  {% include 'web/partials/header.html' %}
+  {% comment %} A block rather than a bare include: the homepage overrides it to ask for the
+     transparent overlay header that sits on the banner photograph. Every other page
+     wants the solid navy bar, which is the default. {% endcomment %}
+  {% block site_header %}{% include 'web/partials/header.html' %}{% endblock %}
 
   <main id="main">
     {% block content %}{% endblock %}

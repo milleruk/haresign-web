@@ -109,6 +109,77 @@
 
 .hs-btn--sm { padding: var(--hs-space-2) var(--hs-space-5); font-size: var(--hs-text-sm); }
 
+/* The arrow button — haresign.net's primary call to action, and the one control
+   on the site people recognise before they read it. A pill with a white disc at
+   the trailing edge; on hover the disc reappears at the leading edge and the
+   label slides across to it.
+
+   Aqua rather than the usual teal. This is the established colour of that button
+   on the production site, and #0d5bb8 carries white text at 6.4:1 — the reason
+   teal is normally the interactive colour (bright teal cannot carry a label at
+   all) does not apply here.
+
+   The two discs are decorative and marked aria-hidden in the partial: the label
+   is the accessible name, and a screen reader gaining "arrow, arrow" from a
+   button would be noise. Under prefers-reduced-motion the token durations
+   collapse and the hover state snaps rather than slides. */
+.hs-btn--arrow {
+  position: relative;
+  overflow: hidden;
+  /* Room for the disc at the trailing edge, so the label never sits under it. */
+  padding: var(--hs-space-3) 4.25rem var(--hs-space-3) var(--hs-space-8);
+  background-color: var(--hs-aqua);
+  border-color: var(--hs-aqua);
+  color: var(--hs-text-on-dark-strong);
+}
+.hs-btn--arrow:hover { background-color: var(--hs-aqua-deep); border-color: var(--hs-aqua-deep); }
+.hs-btn__arrow {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background-color: var(--hs-surface);
+  color: var(--hs-aqua);
+  font-size: 1.0625rem;
+  transition: transform var(--hs-transition);
+}
+.hs-btn__arrow--lead  { left: 0.3125rem;  transform: translateY(-50%) scale(0); }
+.hs-btn__arrow--trail { right: 0.3125rem; transform: translateY(-50%) scale(1); }
+.hs-btn__label { transition: transform var(--hs-transition); }
+.hs-btn--arrow:hover .hs-btn__arrow--lead  { transform: translateY(-50%) scale(1); }
+.hs-btn--arrow:hover .hs-btn__arrow--trail { transform: translateY(-50%) scale(0); }
+.hs-btn--arrow:hover .hs-btn__label { transform: translateX(1.75rem); }
+
+/* The small size is the header's. The disc has to shrink with the pill or it
+   stands taller than the control it sits inside — which is what it did, and it
+   read as a white circle stuck to the end of the button rather than as part of
+   it. Padding follows, or the label runs underneath the disc. */
+.hs-btn--arrow.hs-btn--sm {
+  padding: var(--hs-space-2) 3.25rem var(--hs-space-2) var(--hs-space-5);
+}
+.hs-btn--arrow.hs-btn--sm .hs-btn__arrow {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+}
+.hs-btn--arrow.hs-btn--sm .hs-btn__arrow--lead  { left: 0.25rem; }
+.hs-btn--arrow.hs-btn--sm .hs-btn__arrow--trail { right: 0.25rem; }
+.hs-btn--arrow.hs-btn--sm:hover .hs-btn__label { transform: translateX(1.25rem); }
+
+/* On a dark ground the fill inverts: white pill, aqua discs. Used where the
+   button sits on navy and an aqua fill would sink into it. */
+.hs-btn--arrow-light {
+  background-color: var(--hs-surface);
+  border-color: var(--hs-surface);
+  color: var(--hs-aqua);
+}
+.hs-btn--arrow-light:hover { background-color: var(--hs-surface); border-color: var(--hs-surface); }
+.hs-btn--arrow-light .hs-btn__arrow { background-color: var(--hs-aqua); color: var(--hs-text-on-dark-strong); }
+
 /* Unavailable action. Rendered as a <button disabled>, never as a dead <a>:
    a link that goes nowhere is a broken promise, a disabled control is a
    statement. aria-describedby points at the "Coming soon" badge so screen

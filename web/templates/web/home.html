@@ -6,81 +6,124 @@
 {% block og_title %}Haresign has grown.{% endblock %}
 {% block og_description %}Consultancy, intelligence, practical tools, client services and a growing professional community for primary care.{% endblock %}
 
+{% comment %}The banner sits under the header rather than below it, so this page —
+and only this page — asks for the transparent overlay variant. The hero's own top
+padding is what clears the bar.{% endcomment %}
+{% block site_header %}{% include 'web/partials/header.html' with overlay=True %}{% endblock %}
+
 {% block page_css %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">{% endblock %}
+
+{% comment %}The first slide's photograph is the largest thing above the fold and
+the last thing the browser discovers, because it is named in a srcset inside a
+<picture> the parser reaches after the stylesheets. Preloading it in the format
+and width the browser would have chosen anyway costs nothing and removes that
+round trip from the critical path. Only the first: slides two and three are
+lazily loaded and must not compete with it.{% endcomment %}
+{% block page_head %}
+  {% with slide=hero_slides.0.slide %}
+    {% with base='images/hero/'|add:slide.image %}
+      <link rel="preload" as="image" type="image/webp" imagesizes="100vw"
+            imagesrcset="{% static base|add:'-900.webp' %} 900w, {% static base|add:'-1600.webp' %} 1600w">
+    {% endwith %}
+  {% endwith %}
+{% endblock %}
 
 {% block content %}
 
 {# ============================== Hero ============================== #}
-<section class="hs-hero" aria-labelledby="hero-title">
-  {# Decorative only: no information here, so all of it is hidden from AT. #}
-  <span class="hs-hero__grid" aria-hidden="true"></span>
-  <span class="hs-hero__field hs-hero__field--teal" aria-hidden="true"></span>
-  <span class="hs-hero__field hs-hero__field--coral" aria-hidden="true"></span>
-  <span class="hs-hero__field hs-hero__field--aqua" aria-hidden="true"></span>
+{% comment %}The banner, as haresign.net has always done it: a photograph of the
+work, white type over it, one action per frame.
 
-  <div class="hs-container">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-7">
-        <h1 class="hs-hero__title" id="hero-title">
-          Haresign has <span class="hs-hero__emphasis">grown</span>.
-        </h1>
-        <p class="hs-hero__lead">
-          What started as a simple aim — helping primary care make better use of
-          its data — has become something much bigger.
-        </p>
-        <p class="hs-hero__body">
-          Today, Haresign brings together consultancy, intelligence, practical
-          tools, client services and a growing professional community — all
-          focused on helping primary care understand, manage and improve.
-        </p>
-        <div class="hs-hero__actions">
-          <a class="hs-btn hs-btn--primary" href="#platforms">
-            Explore our platforms
-            {% include 'web/partials/_icon.html' with name='arrow-down' %}
-          </a>
-          <a class="hs-btn hs-btn--secondary" href="#about">About Haresign</a>
+Three slides in a grid rather than absolutely positioned — every slide occupies
+the same cell, so the section is as tall as its tallest frame and nothing has to
+measure anything in JavaScript.
+
+Accessibility, since an auto-rotating carousel is the classic way to fail it:
+  * The photographs are decorative (alt=""). They illustrate the words; they do
+    not carry information the words leave out.
+  * One <h1> on the page. The other two frames head themselves with a <p> that
+    is styled identically — three <h1>s would be three page titles.
+  * Inactive slides are aria-hidden, so a screen reader is given one frame at a
+    time rather than all three at once.
+  * Rotation stops on hover, on focus inside, and on the Pause control (WCAG
+    2.2.2), and never starts at all under prefers-reduced-motion.
+  * With JavaScript off, every slide is visible and stacked, and every link in
+    them works. Nothing here is behind the script.
+{% endcomment %}
+<section class="hs-hero" aria-roledescription="carousel"
+         aria-label="Haresign — what we do" data-hs-carousel>
+  <div class="hs-hero__slides">
+    {% for item in hero_slides %}{% with slide=item.slide %}
+      <article class="hs-hero__slide{% if forloop.first %} is-active{% endif %}"
+               role="group" aria-roledescription="slide"
+               aria-label="{{ forloop.counter }} of {{ hero_slides|length }}"
+               {% if not forloop.first %}aria-hidden="true"{% endif %}
+               data-hs-slide>
+        {% with base='images/hero/'|add:slide.image %}
+          <picture class="hs-hero__frame">
+            {% comment %}WebP first, JPEG behind it. The audience includes
+            locked-down NHS desktops, and the fallback costs one element — the
+            same rule the insights images follow.{% endcomment %}
+            <source type="image/webp" sizes="100vw"
+                    srcset="{% static base|add:'-900.webp' %} 900w, {% static base|add:'-1600.webp' %} 1600w">
+            <img class="hs-hero__image" alt="" width="1600" height="900" sizes="100vw"
+                 src="{% static base|add:'-1600.jpg' %}"
+                 srcset="{% static base|add:'-900.jpg' %} 900w, {% static base|add:'-1600.jpg' %} 1600w"
+                 {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+          </picture>
+        {% endwith %}
+        <span class="hs-hero__scrim" aria-hidden="true"></span>
+
+        <div class="hs-container hs-hero__inner">
+          <div class="hs-hero__content">
+            {% if forloop.first %}
+              <h1 class="hs-hero__title" id="hero-title">
+                {{ slide.strong }} <span class="hs-hero__light">{{ slide.light }}</span> <span class="hs-hero__accent">{{ slide.accent }}</span>
+              </h1>
+            {% else %}
+              <p class="hs-hero__title">
+                {{ slide.strong }} <span class="hs-hero__light">{{ slide.light }}</span> <span class="hs-hero__accent">{{ slide.accent }}</span>
+              </p>
+            {% endif %}
+            <p class="hs-hero__body">{{ slide.body }}</p>
+            <div class="hs-hero__actions">
+              {% include 'web/partials/_arrow_button.html' with href=item.href label=slide.cta %}
+            </div>
+          </div>
         </div>
-      </div>
+      </article>
+    {% endwith %}{% endfor %}
+  </div>
 
-      <div class="col-lg-5">
-        <div class="hs-hero__visual" aria-hidden="true">
-          <svg viewBox="0 0 460 420" role="presentation" focusable="false">
-            {% comment %}An ecosystem, not a growth chart. The previous four-bar
-            graphic read as a software product; this echoes the Haresign logo
-            mark's rounded-square geometry — one Haresign at the centre, four
-            destinations around it, connected. Navy and teal lead; coral appears
-            once, as it does in the headline.{% endcomment %}
-            <path d="M243 22c74-12 150 32 181 100 31 68 17 156-31 207-48 51-131 66-195 48-64-18-111-69-128-134C53 178 65 105 114 63c49-42 55-29 129-41Z"
-                  fill="#ffffff" opacity=".72"/>
+  {% comment %}Previous / next, at the trailing edge as on the production site.
+  Hidden below 1200px, where they would sit on top of the copy; the dots below
+  stay at every width, so a slide is always reachable without them.{% endcomment %}
+  <div class="hs-hero__arrows" aria-hidden="false">
+    <button class="hs-hero__arrow" type="button" data-hs-prev>
+      {% include 'web/partials/_icon.html' with name='chevron-left' %}
+      <span class="hs-visually-hidden">Previous slide</span>
+    </button>
+    <button class="hs-hero__arrow" type="button" data-hs-next>
+      {% include 'web/partials/_icon.html' with name='chevron-right' %}
+      <span class="hs-visually-hidden">Next slide</span>
+    </button>
+  </div>
 
-            <g stroke="#111827" stroke-opacity=".16" stroke-width="1.5" stroke-linecap="round">
-              <path d="M120 116 168 160M340 116 292 160M120 304 168 260M340 304 292 260"/>
-            </g>
-
-            <g>
-              <rect x="88"  y="84"  width="64" height="64" rx="19" fill="#ff5b61"/>
-              <rect x="308" y="84"  width="64" height="64" rx="19" fill="#0fa3a3"/>
-              <rect x="88"  y="272" width="64" height="64" rx="19" fill="#0d5bb8"/>
-              <rect x="308" y="272" width="64" height="64" rx="19" fill="#1e293b"/>
-              <g fill="#ffffff" opacity=".92">
-                <rect x="106" y="112" width="28" height="8" rx="4"/>
-                <rect x="326" y="112" width="28" height="8" rx="4"/>
-                <rect x="106" y="300" width="28" height="8" rx="4"/>
-                <rect x="326" y="300" width="28" height="8" rx="4"/>
-              </g>
-            </g>
-
-            <rect x="160" y="140" width="140" height="140" rx="34" fill="#111827"/>
-            <g fill="#ffffff">
-              <rect x="186" y="170" width="18" height="80" rx="5"/>
-              <rect x="256" y="170" width="18" height="80" rx="5"/>
-              <rect x="186" y="201" width="88" height="18" rx="5"/>
-            </g>
-            <rect x="212" y="170" width="26" height="26" rx="7" fill="#ff5b61"/>
-          </svg>
-        </div>
-      </div>
+  <div class="hs-container hs-hero__controls">
+    {% comment %}A group of buttons, not role="tablist": tabs without tabpanels
+    are ARIA describing a widget this is not. aria-current marks the frame the
+    reader is on, which is the thing a dot actually says.{% endcomment %}
+    <div class="hs-hero__dots" role="group" aria-label="Choose a slide">
+      {% for item in hero_slides %}
+        <button class="hs-hero__dot{% if forloop.first %} is-active{% endif %}" type="button"
+                {% if forloop.first %}aria-current="true"{% endif %}
+                data-hs-dot="{{ forloop.counter0 }}">
+          <span class="hs-visually-hidden">{{ item.slide.strong }} {{ item.slide.light }} {{ item.slide.accent }}</span>
+        </button>
+      {% endfor %}
     </div>
+    {% comment %}Pause is appended here by the script, because a pause control
+    with nothing rotating behind it is a button that does nothing.{% endcomment %}
   </div>
 </section>
 

@@ -405,10 +405,49 @@ vendor/bootstrap  →  tokens  →  base  →  layout  →  components  →  pag
 | `base.css` | Element defaults, focus treatment, skip link, reduced-motion |
 | `layout.css` | Container, sections, header, nav, footer — structure only |
 | `components.css` | Reusable UI: button, badge, eyebrow, card, platform card, article card, principle |
-| `pages/home.css` | Only what exists on the homepage (mostly the hero) |
+| `pages/home.css` | Only what exists on the homepage (mostly the banner) |
 
 If something in `pages/` gets used on a second page, move it to
 `components.css`.
+
+### The banner and the header
+
+The homepage led, briefly, with an illustrated hero: a pale ground, a blurred
+colour field and a vector diagram. It was competent and it was not Haresign —
+it looked like every B2B SaaS landing page written since 2019, while
+[haresign.net](https://haresign.net/) has always opened with a photograph of the
+actual work, white type over it, and one action. The banner and the header are
+now built to that, in this repository's own design system rather than by
+importing the production site's purchased theme (which would have brought
+jQuery, Swiper, WOW.js and a 12,000-line stylesheet to a project that currently
+ships **one** 200-line script).
+
+**Three frames, in `content.HERO_SLIDES`.** A headline stored in three parts —
+heavy white subject, normal-weight connective phrase, slate close — because the
+typography is carrying meaning and a single string with tags in it would put
+presentation in the content module. Each slide's destination is resolved in the
+view (`build_hero_slides()`), so the template asks no questions and a renamed
+route fails a test rather than rendering an empty `href`.
+
+**The carousel is an enhancement, in that order.** The markup renders as three
+stacked banners with no controls; `site.js` adds `hs-hero--live` and only then
+is it a carousel. Rotation stops on hover, on focus inside it, and on the Pause
+control (WCAG 2.2.2), and never starts under `prefers-reduced-motion`. Inactive
+frames are `visibility: hidden` and `aria-hidden` — invisible is not enough, or
+three hidden buttons stay in the tab order. One `<h1>`: the other two frames
+head themselves with an identically styled `<p>`.
+
+**The header is dark now**, because it has to work over the banner photograph
+and above a white page. `{% include 'web/partials/header.html' with overlay=True %}`
+— homepage only — lifts it out of the flow and the banner runs underneath; the
+navy ground returns on scroll. It collapses to the panel at **1200px**, not
+992px: six links, a Sign in and a call to action measured 1136px inside a
+1136px container, which is not a layout so much as a coincidence.
+
+**Photography** lives in `static/images/hero/`, at two widths in WebP and JPEG
+(≈50 KB and ≈120 KB for 1600px), served through `<picture>` with the first frame
+preloaded and the other two lazy. The same WebP-with-a-JPEG-behind-it rule as
+the insights images, for the same reason: locked-down NHS desktops.
 
 ### Typography
 
@@ -437,7 +476,7 @@ Coral has **two** inks because the thresholds genuinely differ:
 | Token | Use | Ratio |
 |---|---|---|
 | `--hs-coral-ink` `#cf353c` | small text (card CTA) | 4.97:1 — clears AA 4.5 |
-| `--hs-coral-ink-large` `#e8484f` | large text only (hero emphasis) | 3.62:1 — clears the 3.0 large-text threshold |
+| `--hs-coral-ink-large` `#e8484f` | large text only (>=24px) | 3.62:1 — clears the 3.0 large-text threshold |
 
 Reaching for `--hs-coral` as a text colour is the mistake this prevents.
 
@@ -495,8 +534,8 @@ of `pages/home.css` for exactly this reason.
 
 ### Section rhythm
 
-warm hero → white credibility → light platforms → navy principles → white
-insights → navy CTA band → navy footer. No two adjacent sections share a ground,
+photographic banner → light platforms → navy credibility → white insights →
+warm newsletter → navy ecosystem band → navy footer. No two adjacent sections share a ground,
 so the page reads as a sequence rather than one long scroll of white cards on
 pale grey.
 
@@ -689,7 +728,7 @@ configure to get started. With `DEBUG=False` and no key the app **refuses to
 start** rather than running on a placeholder.
 
 ```bash
-python manage.py test          # 28 tests, no database required
+python manage.py test          # 228 tests
 python manage.py check --deploy
 ```
 

@@ -44,10 +44,12 @@
 
      Two inks, because the thresholds genuinely differ:
        --hs-coral-ink       small text, e.g. a card CTA. 4.97:1 — clears AA 4.5.
-       --hs-coral-ink-large large text only (>=24px, or >=18.66px bold): the
-                            hero emphasis. 3.62:1 — clears the 3.0 large-text
-                            threshold and keeps the word visibly *coral* rather
-                            than sliding towards red.
+       --hs-coral-ink-large large text only (>=24px, or >=18.66px bold). 3.62:1
+                            — clears the 3.0 large-text threshold and keeps the
+                            word visibly *coral* rather than sliding towards
+                            red. Nothing uses it since the banner headline
+                            became photographic; it stays because the threshold
+                            it encodes is the thing worth keeping.
      The previous single #e8484f was 3.84:1 and quietly failed as small text. */
   --hs-coral-ink:       #cf353c;
   --hs-coral-ink-large: #e8484f;
@@ -69,6 +71,10 @@
   --hs-text-on-dark:            rgba(255, 255, 255, 0.78);
   --hs-text-on-dark-strong:     #ffffff;
   --hs-text-on-dark-muted:      rgba(255, 255, 255, 0.58);
+  /* The slate that closes a banner headline. Not white and not a brand colour:
+     it separates the last phrase from the first without spending coral or teal
+     on a word that is set 80px high. 7.4:1 on the banner's darkened ground. */
+  --hs-text-on-dark-accent:     #94a3b8;
 
   /* --- Borders ---------------------------------------------------------- */
   --hs-border:          #d1d5db;   /* the production site's --border */

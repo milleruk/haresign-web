@@ -1,4 +1,17 @@
-{% load static %}{% comment %}Site header — brand, primary navigation, Sign in.
+{% load static %}{% comment %}Site header — brand, primary navigation, "Get in touch", Sign in.
+
+Dark by default, because haresign.net's header is dark and because it has to work
+in two places at once: over the homepage banner photograph, where it is
+transparent and the ink must survive whatever the image does behind it, and above
+an ordinary white page, where it is a solid navy bar.
+
+    {% include 'web/partials/header.html' %}               {# solid navy bar #}
+    {% include 'web/partials/header.html' with overlay=True %}  {# over the banner #}
+
+`overlay=True` lifts the header out of the flow and lets the hero run underneath
+it. It is set by home.html and nowhere else: the hero's own top padding is what
+clears it, so a page without that padding would put the bar over its first line
+of text. On scroll the JS adds `.is-stuck` and the navy ground comes back.
 
 Platform destinations come from the service registry (config/services.py), never
 from a literal URL here, so a subdomain move is a configuration change.
@@ -7,16 +20,17 @@ Sign in is deliberately *not* a working link while `auth` is not live: it render
 as a disabled control with a "Coming soon" badge, because a Sign in button that
 navigates somewhere implies authentication exists, and it does not yet.
 {% endcomment %}
-<header class="hs-header">
+<header class="hs-header{% if overlay %} hs-header--overlay{% endif %}" id="hs-header">
   <div class="hs-container position-relative">
     <div class="hs-header__inner">
 
       <a class="hs-header__brand" href="/">
         {% comment %}The asset suffix names the background, not the ink:
-        logo-primary-dark is the white-ink file. This header is white, so it
-        takes logo-primary (navy ink). Reversed, the logo is invisible rather
-        than obviously broken.{% endcomment %}
-        <img class="hs-header__logo" src="{% static 'images/logo-primary.png' %}"
+        logo-primary-dark is the white-ink file, which is what this header
+        wants — it is navy when solid and sits on a darkened photograph when
+        transparent, so the ink is white in both states. Reversed, the logo is
+        invisible rather than obviously broken.{% endcomment %}
+        <img class="hs-header__logo" src="{% static 'images/logo-primary-dark.png' %}"
              alt="{{ SITE_NAME }} — home">
         {% if SITE_ENVIRONMENT_LABEL %}
           <span class="hs-badge hs-badge--environment">{{ SITE_ENVIRONMENT_LABEL }}</span>
@@ -44,21 +58,27 @@ navigates somewhere implies authentication exists, and it does not yet.
           one. "About" is gone from the bar rather than pointed at `/#about`:
           seven items is already the ceiling, and the FAQ answers "what is
           Haresign" better than a scroll target does. The footer still carries
-          it.{% endcomment %}
+          it.
+
+          Contact is not in this list on desktop either — it is the pill to the
+          right of the bar, as it is on haresign.net. Below 1200px the pill is
+          hidden and the row below restores it, so the route is never lost.{% endcomment %}
           <li><a class="hs-nav__link" href="{% url 'insights:index' %}">Insights</a></li>
           <li><a class="hs-nav__link" href="{% url 'faq' %}">FAQ</a></li>
-          <li><a class="hs-nav__link" href="{% url 'contact' %}">Contact</a></li>
-          {% comment %}The header Sign in button is hidden below 992px, so the
-          panel carries its own copy — the action is never lost on mobile.{% endcomment %}
-          <li class="d-lg-none">
+          <li class="d-xl-none"><a class="hs-nav__link" href="{% url 'contact' %}">Contact</a></li>
+          {% comment %}The header actions are hidden below 1200px, so the panel
+          carries its own copy — neither action is lost on mobile.{% endcomment %}
+          <li class="d-xl-none">
             {% include 'web/partials/_signin.html' with in_nav=True %}
           </li>
         </ul>
       </nav>
 
       <div class="hs-header__actions">
-        <div class="d-none d-lg-block">
+        <div class="hs-header__actions-desktop d-none d-xl-flex">
           {% include 'web/partials/_signin.html' %}
+          {% url 'contact' as contact_url %}
+          {% include 'web/partials/_arrow_button.html' with href=contact_url label='Get in touch' extra_class='hs-btn--sm' %}
         </div>
         <button class="hs-nav__toggle" type="button" id="hs-nav-toggle"
                 aria-controls="hs-nav" aria-expanded="false">

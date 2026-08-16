@@ -71,6 +71,74 @@ PLATFORMS = [
 ]
 
 
+@dataclass(frozen=True)
+class HeroSlide:
+    """One frame of the homepage banner.
+
+    The headline is stored in three parts rather than as one string because the
+    typography carries meaning: `strong` is the heavy white subject, `light` is
+    the connective phrase set at normal weight, and `accent` closes the line in
+    slate. Putting the markup in the template and only the words here would mean
+    the copy could not be tested without parsing HTML, and storing a single
+    string with tags in it would put presentation in the content module.
+
+    A slide points at exactly one destination. `url_name` is a Django URL name
+    where the target is a page of this site; `anchor` is for in-page targets
+    only. Nothing here names a host: a platform destination goes through the
+    service registry, as everywhere else.
+    """
+    image: str      # stem under static/images/hero/, without width or extension
+    strong: str
+    light: str
+    accent: str
+    body: str
+    cta: str
+    url_name: str = ''
+    anchor: str = ''
+
+
+# The homepage banner: three slides over photography, rotating.
+#
+# This replaces the illustrated hero the migration shipped with. That version was
+# technically fine and completely off-brand — a pale ground, a blurred colour
+# field and a vector diagram, which is what every B2B SaaS homepage looks like.
+# haresign.net has always led with a photograph of the actual work, white type
+# over it, and one action. The visual language is the established one; only the
+# copy is the umbrella brand's rather than the consultancy's.
+#
+# Three slides, one per audience question: what is Haresign now, what does it
+# know, and who is behind it. The first keeps the line the whole page hangs on.
+HERO_SLIDES = [
+    HeroSlide(
+        image='hero-ecosystem',
+        strong='Haresign', light='has', accent='grown.',
+        body='What started as helping primary care make better use of its data is '
+             'now consultancy, intelligence, practical tools, client services and '
+             'a growing professional community.',
+        cta='Explore our platforms',
+        anchor='#platforms',
+    ),
+    HeroSlide(
+        image='hero-intelligence',
+        strong='Insight', light='drawn from', accent='NHS data.',
+        body='Published NHS datasets, benchmarked and explained — so decisions on '
+             'funding, workforce and access are made with the evidence in front '
+             'of you rather than the impression.',
+        cta='Read the insights',
+        url_name='insights:index',
+    ),
+    HeroSlide(
+        image='hero-consultancy',
+        strong='Support', light='from inside', accent='general practice.',
+        body='Haresign was not built by a software company that found healthcare. '
+             'It was built by people who have run practices and PCNs, and it shows '
+             'in what it chooses to measure.',
+        cta='Talk to us',
+        url_name='contact',
+    ),
+]
+
+
 # Credibility — one section, not two.
 #
 # This was previously a "principles" band (Evidence-led / Built from experience /

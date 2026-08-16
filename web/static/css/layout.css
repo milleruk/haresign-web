@@ -69,15 +69,67 @@
   gap: var(--hs-space-4);
 }
 
-/* --- Site header --------------------------------------------------------- */
+/* --- Site header ---------------------------------------------------------
+   Dark, as haresign.net's is. The previous white bar was a fine piece of UI
+   chrome and the wrong brand: it read as an app shell, and it could not sit over
+   the banner photograph at all.
+
+   Two states, one component:
+
+     .hs-header              solid navy, sticky. Every page but the homepage.
+     .hs-header--overlay     transparent, lifted out of the flow so the banner
+                             runs under it. Homepage only.
+     .hs-header--overlay.is-stuck   the navy ground returns once the banner has
+                             scrolled past — added by site.js.
+
+   Overlay is `fixed` rather than `sticky` because a sticky element still takes
+   its height out of the flow, which would push the banner down by exactly the
+   height of the bar that is meant to be floating on top of it. */
 .hs-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: rgba(255, 255, 255, 0.92);
-  -webkit-backdrop-filter: saturate(160%) blur(12px);
-  backdrop-filter: saturate(160%) blur(12px);
-  border-bottom: 1px solid var(--hs-border);
+  background-color: var(--hs-navy-deep);
+  color: var(--hs-text-on-dark);
+  border-bottom: 1px solid var(--hs-border-on-dark);
+}
+.hs-header--overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+  border-bottom-color: transparent;
+  transition: background-color var(--hs-transition), border-color var(--hs-transition);
+}
+.hs-header--overlay.is-stuck {
+  background-color: rgba(11, 17, 30, 0.94);
+  -webkit-backdrop-filter: saturate(150%) blur(12px);
+  backdrop-filter: saturate(150%) blur(12px);
+  border-bottom-color: var(--hs-border-on-dark);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+/* Teal on navy (5.73:1). The default badge is deep teal on a pale teal tint,
+   which on this ground is one dark colour on another. */
+.hs-header .hs-badge--environment {
+  background-color: rgba(15, 163, 163, 0.18);
+  color: var(--hs-teal);
+}
+
+/* Sign in, in both the bar and the mobile panel. It is a <button disabled>
+   while `auth` is not live, and the disabled style is written for a white
+   ground — a grey border and grey ink, which on navy is one dark thing on
+   another. Re-stated here rather than changed at source: the component is
+   correct everywhere else. */
+.hs-header .hs-btn--secondary,
+.hs-header .hs-btn[disabled] {
+  border-color: var(--hs-border-on-dark);
+  color: var(--hs-text-on-dark-muted);
+}
+.hs-header .hs-btn--secondary:not([disabled]):hover {
+  border-color: var(--hs-text-on-dark-strong);
+  color: var(--hs-text-on-dark-strong);
 }
 .hs-header__inner {
   display: flex;
@@ -87,18 +139,26 @@
   min-height: var(--hs-header-height);
 }
 .hs-header__brand { display: flex; align-items: center; gap: var(--hs-space-3); }
-/* The header is white, so this takes the navy-ink logo. The asset suffix names
-   the *background* it belongs on, not the ink: logo-primary-dark is the
-   white-ink file for dark grounds. Getting these the wrong way round renders
-   the logo invisible rather than broken, so check against the ground. */
+/* The header is dark in both its states, so this takes the white-ink logo. The
+   asset suffix names the *background* the file belongs on, not the ink:
+   logo-primary-dark is the white-ink file for dark grounds. Getting these the
+   wrong way round renders the logo invisible rather than broken, so check
+   against the ground. */
 .hs-header__logo { height: 2.625rem; width: auto; display: block; }
 .hs-header__actions { display: flex; align-items: center; gap: var(--hs-space-3); }
+.hs-header__actions-desktop { align-items: center; gap: var(--hs-space-3); }
 
-/* --- Primary navigation -------------------------------------------------- */
+/* --- Primary navigation --------------------------------------------------
+   Six items, a Sign in and a call to action have to share the bar with a
+   220px wordmark. The gap and the type size are both a step down from the body
+   scale for that reason — at 17px and a 24px gap the row measured 1136px inside
+   a 1136px container, which is not a layout so much as a coincidence. It now
+   collapses to the panel at 1200px rather than 992px, because between those two
+   widths it fitted only by touching. */
 .hs-nav__list {
   display: flex;
   align-items: center;
-  gap: var(--hs-space-6);
+  gap: var(--hs-space-5);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -107,10 +167,12 @@
   display: inline-block;
   position: relative;
   padding-block: var(--hs-space-2);
-  color: var(--hs-text-strong);
-  font-size: var(--hs-text-base);
+  color: var(--hs-text-on-dark-strong);
+  font-size: var(--hs-text-sm);
   font-weight: var(--hs-weight-medium);
 }
+/* Bright teal, not aqua. The underline sits on navy, where #0d5bb8 is one dark
+   blue on another and all but disappears; #0fa3a3 is 5.73:1 here. */
 .hs-nav__link::after {
   content: "";
   position: absolute;
@@ -118,11 +180,11 @@
   bottom: 0;
   width: 0;
   height: 2px;
-  background-color: var(--hs-aqua);
+  background-color: var(--hs-teal);
   border-radius: 2px;
   transition: width var(--hs-transition);
 }
-.hs-nav__link:hover { color: var(--hs-aqua); }
+.hs-nav__link:hover { color: var(--hs-teal); }
 .hs-nav__link:hover::after,
 .hs-nav__link[aria-current="page"]::after { width: 100%; }
 
@@ -134,7 +196,7 @@
 .hs-footer__link--unavailable {
   display: inline-flex;
   align-items: center;
-  color: var(--hs-text-muted);
+  color: var(--hs-text-on-dark-muted);
   cursor: default;
 }
 .hs-footer__link--unavailable { gap: var(--hs-space-2); }
@@ -149,9 +211,9 @@
   width: 2.75rem;
   height: 2.75rem;
   background: transparent;
-  border: 1px solid var(--hs-border);
+  border: 1px solid var(--hs-border-on-dark);
   border-radius: var(--hs-radius-sm);
-  color: var(--hs-text-strong);
+  color: var(--hs-text-on-dark-strong);
   cursor: pointer;
 }
 .hs-nav__toggle-bar,
@@ -255,7 +317,16 @@
 
 /* --- Responsive ---------------------------------------------------------- */
 
-@media (max-width: 991.98px) {
+/* The brand refuses to be compressed only where there is room for that to be
+   true. In the full bar it is the first thing flexbox takes width from when the
+   nav is wide, and the wordmark starts squeezing into the badge; at 320px, with
+   the nav gone, holding its natural 245px pushes the header 9px past the
+   viewport and every page on the site scrolls sideways. */
+@media (min-width: 1200px) {
+  .hs-header__brand { flex-shrink: 0; }
+}
+
+@media (max-width: 1199.98px) {
   .hs-nav__toggle { display: inline-flex; }
 
   /* The nav becomes a stacked disclosure panel below the bar. A panel rather
@@ -267,9 +338,12 @@
     top: 100%;
     left: 0;
     right: 0;
-    background-color: var(--hs-surface);
-    border-bottom: 1px solid var(--hs-border);
-    box-shadow: var(--hs-shadow-md);
+    /* Opaque navy, not translucent: on the homepage this panel opens over a
+       photograph, and a blurred ground would put the links on top of whatever
+       the image happens to be doing underneath them. */
+    background-color: var(--hs-navy-deep);
+    border-bottom: 1px solid var(--hs-border-on-dark);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
     padding-block: var(--hs-space-3) var(--hs-space-5);
   }
   .hs-nav.is-open { display: block; }
@@ -279,13 +353,15 @@
     gap: 0;
     padding-inline: var(--hs-container-pad);
   }
-  .hs-nav__list > li { border-bottom: 1px solid var(--hs-border); }
+  .hs-nav__list > li { border-bottom: 1px solid var(--hs-border-on-dark); }
   .hs-nav__list > li:last-child { border-bottom: 0; }
-  .hs-nav__link { display: block; padding-block: var(--hs-space-4); }
+  /* Back to the body size in the panel: the reason the bar's links are small is
+     that seven of them share one row, which is not true here. */
+  .hs-nav__link { display: block; padding-block: var(--hs-space-4); font-size: var(--hs-text-base); }
   .hs-nav__link::after { display: none; }
 
-  /* The header Sign in button is hidden on small screens; the nav panel
-     carries its own copy, so the action is never actually lost. */
+  /* The header actions are hidden on small screens; the nav panel carries its
+     own copies, so neither action is actually lost. */
   .hs-header__actions .hs-btn { display: none; }
 
   .hs-footer__grid { grid-template-columns: repeat(2, 1fr); gap: var(--hs-space-8); }
@@ -293,6 +369,12 @@
 }
 
 @media (max-width: 575.98px) {
+  /* At 320px the wordmark, the environment badge and the menu button want
+     246px of a 216px row, and the badge ends up underneath the button. The
+     logo gives up the difference rather than the badge being dropped — "Beta"
+     is the one thing on this site a visitor most needs to know. */
+  .hs-header__logo { height: 2.125rem; }
+
   .hs-footer__grid { grid-template-columns: 1fr; }
   .hs-footer__bottom { flex-direction: column; align-items: flex-start; }
   .hs-section-header--split { align-items: flex-start; }

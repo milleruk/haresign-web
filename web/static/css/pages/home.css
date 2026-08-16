@@ -5,109 +5,211 @@
    on a second page should move to components.css.
    ========================================================================== */
 
+/* --- Banner --------------------------------------------------------------
+   Photography, white type, one action — the form haresign.net has always used,
+   and the reason the migrated homepage stopped looking like the brand. The
+   version this replaces was a pale ground with a blurred colour field and a
+   vector diagram on it: competent, and indistinguishable from every B2B SaaS
+   landing page written since 2019.
+
+   The section is dark by construction, so it sets the on-dark tokens once and
+   the type inside needs no per-element colour. */
 .hs-hero {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding-block: clamp(3rem, 7vw, 6.25rem) clamp(3.75rem, 8vw, 6.875rem);
-  /* Warm wash rather than flat white. The four brand colours are no longer
-     spread evenly across the hero: teal and navy lead, coral appears once (on
-     "grown"), and aqua sits behind the composition. */
-  background-color: var(--hs-surface-warm);
-  border-bottom: 1px solid var(--hs-border-subtle);
+  background-color: var(--hs-navy-deep);
+  color: var(--hs-text-on-dark);
 }
 
-/* Organic colour fields rather than a linear gradient — the brief is explicitly
-   "not a generic blue SaaS template". Large, heavily blurred and low-opacity,
-   so they read as warmth behind the type and never threaten its contrast.
-   Clipped by the section's own overflow:hidden. */
-.hs-hero__field {
+.hs-hero__slide {
+  position: relative;
+  isolation: isolate;
+  /* Top padding clears the fixed overlay header; the section owns that
+     clearance because the header is out of the flow and cannot push it down. */
+  padding-block: clamp(8.5rem, 16vw, 13.5rem) clamp(5rem, 10vw, 8.5rem);
+}
+
+/* Enhancement, in that order. What is written above is what a browser with no
+   JavaScript gets: three banners stacked down the page, all readable, every
+   link working, and no controls — because a previous/next button with no script
+   behind it is a control that lies.
+
+   `.hs-hero--live` is added by site.js and turns the same markup into a
+   carousel: every slide into one grid cell, so the section is as tall as its
+   tallest frame with nothing to measure; inactive frames out of paint, out of
+   the pointer's way and out of the tab order. visibility:hidden is what does
+   that last part — opacity alone would leave three invisible buttons focusable. */
+.hs-hero--live .hs-hero__slides { display: grid; }
+.hs-hero--live .hs-hero__slide {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+}
+.hs-hero--live .hs-hero__slide.is-active { opacity: 1; visibility: visible; }
+
+/* The crossfade is switched on a frame *after* the carousel is, by `is-ready`.
+   Without that split the first thing a visitor sees is all three frames fading
+   out of each other over 600ms, because adding `--live` transitions the two
+   inactive slides from their no-JS visible state rather than starting them
+   hidden. The banner has to arrive already correct and only animate from
+   there. */
+.hs-hero--live.is-ready .hs-hero__slide {
+  transition: opacity 600ms var(--hs-ease), visibility 600ms var(--hs-ease);
+}
+
+/* The <picture> is what is positioned, not the <img> inside it. A <picture> is
+   an inline box that takes its size from its child, so an absolutely positioned
+   image leaves its parent zero-width — which is a real problem, not a cosmetic
+   one: it is how "is this image wider than its container?" gets an answer of
+   "yes, infinitely", in the responsive QA suite and in anything else that walks
+   the DOM. */
+.hs-hero__frame {
   position: absolute;
-  z-index: -1;
-  border-radius: 50%;
-  filter: blur(70px);
-  pointer-events: none;
+  inset: 0;
+  z-index: -2;
+  display: block;
 }
-.hs-hero__field--teal {
-  width: 40rem;
-  height: 40rem;
-  top: -14rem;
-  right: -9rem;
-  background-color: rgba(15, 163, 163, 0.26);
-}
-.hs-hero__field--coral {
-  width: 26rem;
-  height: 26rem;
-  bottom: -12rem;
-  left: -10rem;
-  background-color: rgba(255, 91, 97, 0.14);
-}
-.hs-hero__field--aqua {
-  width: 34rem;
-  height: 34rem;
-  top: 9rem;
-  right: 26%;
-  background-color: rgba(13, 91, 184, 0.14);
+.hs-hero__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* Faint grid, masked to fade out at the edges so it never becomes a visible
-   rectangle. Decorative — hidden from assistive tech in the markup. */
-.hs-hero__grid {
+/* The scrim, not a filter on the image: it is heaviest at the leading edge,
+   where the type is, and lightest at the trailing edge, where the photograph
+   should still read as a photograph. The floor of 0.34 across the whole frame
+   is what guarantees white type clears 4.5:1 over the palest of the three
+   images rather than over the one that happened to be checked. */
+.hs-hero__scrim {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background-image:
-    linear-gradient(rgba(17, 24, 39, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 24, 39, 0.045) 1px, transparent 1px);
-  background-size: 4.5rem 4.5rem;
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 20%, transparent 75%);
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 35%, #000 20%, transparent 75%);
+  background:
+    linear-gradient(90deg, rgba(9, 14, 25, 0.88) 0%, rgba(9, 14, 25, 0.62) 45%, rgba(9, 14, 25, 0.30) 100%),
+    linear-gradient(180deg, rgba(9, 14, 25, 0.55) 0%, rgba(9, 14, 25, 0.20) 40%, rgba(9, 14, 25, 0.55) 100%);
 }
 
-.hs-hero__title { margin-bottom: var(--hs-space-6); }
+.hs-hero__content { max-width: 46rem; }
 
-/* "grown" — the emphasis the whole page hangs on. Coral carries it, and the
-   underline rule means the emphasis survives greyscale printing and colour
-   vision differences, where hue alone would not. */
-.hs-hero__emphasis {
-  position: relative;
-  color: var(--hs-coral-ink-large);
-  white-space: nowrap;
-}
-.hs-hero__emphasis::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  bottom: -0.06em;
-  height: 0.075em;
-  background-color: var(--hs-coral);
-  border-radius: var(--hs-radius-pill);
-}
-
-.hs-hero__lead {
-  max-width: 38.75rem;
-  margin-bottom: var(--hs-space-5);
-  color: var(--hs-navy-soft);
+/* The headline, in three weights of one line: the subject heavy and white, the
+   connective phrase at normal weight, the closing phrase in slate. Rendered as
+   an <h1> on the first frame and a <p> on the others — same type, one page
+   title. */
+.hs-hero__title {
+  margin-bottom: var(--hs-space-6);
+  color: var(--hs-text-on-dark-strong);
   font-family: var(--hs-font-display);
-  font-size: var(--hs-text-xl);
-  font-weight: var(--hs-weight-medium);
-  line-height: 1.55;
+  font-size: var(--hs-heading-hero);
+  font-weight: var(--hs-weight-extrabold);
+  line-height: var(--hs-leading-tight);
+  letter-spacing: var(--hs-tracking-hero);
 }
+.hs-hero__light  { font-weight: var(--hs-weight-normal); }
+.hs-hero__accent { color: var(--hs-text-on-dark-accent); }
+
 .hs-hero__body {
-  max-width: 40rem;
+  max-width: 36rem;
   margin-bottom: var(--hs-space-8);
+  color: var(--hs-text-on-dark);
   font-size: var(--hs-text-lg);
 }
 .hs-hero__actions { display: flex; flex-wrap: wrap; gap: var(--hs-space-4); }
 
-.hs-hero__visual { position: relative; }
-.hs-hero__visual svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  /* Depth through a soft cast shadow rather than more colour. */
-  filter: drop-shadow(0 18px 40px rgba(17, 24, 39, 0.10));
+/* --- Banner controls ------------------------------------------------------
+   Previous/next at the trailing edge, as on the production site. Below 1200px
+   they would sit on top of the copy, so they go and the dots carry on. */
+.hs-hero__arrows,
+.hs-hero__controls { display: none; }
+
+.hs-hero--live .hs-hero__arrows {
+  position: absolute;
+  top: 50%;
+  right: clamp(1rem, 3vw, 3rem);
+  z-index: 2;
+  display: grid;
+  gap: var(--hs-space-3);
+  transform: translateY(-50%);
 }
+.hs-hero__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 5.5rem;
+  background-color: rgba(255, 255, 255, 0.16);
+  border: 0;
+  border-radius: var(--hs-radius-sm);
+  color: var(--hs-text-on-dark-strong);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color var(--hs-transition);
+}
+.hs-hero__arrow:hover { background-color: var(--hs-aqua); }
+
+/* Dots and Pause, inside the container so they line up with the copy above
+   them rather than floating against the viewport edge. */
+.hs-hero--live .hs-hero__controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(1.5rem, 4vw, 2.75rem);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--hs-space-5);
+}
+.hs-hero__dots { display: flex; align-items: center; gap: var(--hs-space-2); }
+
+/* 44x44 of target around a 10px dot: the dot is the affordance, the padding is
+   the control. WCAG 2.2 SC 2.5.8 wants 24px minimum and a row of bare 10px dots
+   is the most common way to miss it. */
+.hs-hero__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.hs-hero__dot::before {
+  content: "";
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.45);
+  transition: background-color var(--hs-transition), width var(--hs-transition);
+}
+.hs-hero__dot:hover::before { background-color: var(--hs-text-on-dark-strong); }
+/* The active dot lengthens as well as brightening: on the frame it belongs to,
+   shape says which one it is without relying on brightness alone. */
+.hs-hero__dot.is-active::before {
+  width: 1.75rem;
+  border-radius: var(--hs-radius-pill);
+  background-color: var(--hs-teal);
+}
+
+.hs-hero__pause {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hs-space-2);
+  min-height: 2.25rem;
+  padding: var(--hs-space-2) var(--hs-space-4);
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--hs-border-on-dark);
+  border-radius: var(--hs-radius-pill);
+  color: var(--hs-text-on-dark-strong);
+  font-family: inherit;
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-semibold);
+  cursor: pointer;
+  transition: background-color var(--hs-transition);
+}
+.hs-hero__pause:hover { background-color: rgba(255, 255, 255, 0.22); }
 
 /* --- Platform grid ------------------------------------------------------- */
 .hs-platform-grid {
@@ -141,15 +243,15 @@
 
 /* --- Responsive ----------------------------------------------------------
    Deliberately not "shrink the desktop page": the platform grid steps 4 -> 2 -> 1,
-   the hero visual moves below the copy rather than being squeezed beside it, and
-   the blurred fields shrink so they do not swamp a small screen. */
+   the banner's prev/next controls are dropped rather than shrunk once they would
+   overlap the copy, and the scrim turns vertical when the frame is portrait. */
 
 @media (max-width: 1199.98px) {
   .hs-platform-grid { grid-template-columns: repeat(2, 1fr); }
+  .hs-hero--live .hs-hero__arrows { display: none; }
 }
 
 @media (max-width: 991.98px) {
-  .hs-hero__visual { max-width: 32.5rem; margin-top: var(--hs-space-10); }
   .hs-insights-grid { grid-template-columns: 1fr; }
 }
 
@@ -159,15 +261,19 @@
   /* Full-width CTAs — side-by-side pills get uncomfortably narrow below ~380px. */
   .hs-hero__actions .hs-btn { width: 100%; }
 
-  .hs-hero__field { filter: blur(50px); }
-  .hs-hero__field--teal  { width: 21.25rem; height: 21.25rem; top: -8.75rem; right: -7.5rem; }
-  .hs-hero__field--coral { width: 18.75rem; height: 18.75rem; bottom: -8.75rem; left: -7.5rem; }
-  .hs-hero__field--aqua  { display: none; }
+  /* A left-to-right scrim assumes a landscape frame with room beside the type.
+     On a phone the copy fills the width, so the gradient has to run top to
+     bottom or the last words of every line sit on the bright side of it. */
+  .hs-hero__scrim {
+    background: linear-gradient(180deg, rgba(9, 14, 25, 0.72) 0%, rgba(9, 14, 25, 0.80) 55%, rgba(9, 14, 25, 0.88) 100%);
+  }
+  /* Room for the controls, which sit over the bottom of the frame. */
+  .hs-hero__slide { padding-bottom: clamp(7rem, 22vw, 9rem); }
 }
 
 
 /* --- Section rhythm ------------------------------------------------------
-   warm hero -> light platforms -> navy credibility -> white insights ->
+   photographic banner -> light platforms -> navy credibility -> white insights ->
    warm newsletter -> navy ecosystem band -> navy footer. Each ground is
    intentional and no two adjacent sections share one, so the page reads as a
    sequence rather than as one long scroll of white cards on pale grey.

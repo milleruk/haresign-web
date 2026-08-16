@@ -15,7 +15,8 @@ from django.conf import settings
 from django.test import SimpleTestCase, TestCase, override_settings
 
 from config.services import build_registry
-from web.views import build_platform_cards
+from web.content import HERO_SLIDES
+from web.views import build_hero_slides, build_platform_cards
 
 
 class HomePageTests(TestCase):
@@ -28,10 +29,35 @@ class HomePageTests(TestCase):
     def test_leads_with_the_growth_message(self):
         response = self.client.get('/')
 
-        self.assertContains(response, 'Haresign has')
-        # "grown" is emphasised in its own element, not just present in text.
-        self.assertContains(response, 'hs-hero__emphasis')
+        self.assertContains(response, 'Haresign')
+        # "grown" closes the line in its own element, not just present in text.
+        self.assertContains(response, '<span class="hs-hero__accent">grown.</span>')
         self.assertContains(response, 'Four platforms. One purpose.')
+
+    def test_banner_carries_every_slide_and_its_destination(self):
+        """Each frame reaches the page with its copy and a resolved link.
+
+        `href` is built in the view, so a slide pointing at a route that has
+        been renamed fails here rather than rendering an empty href.
+        """
+        response = self.client.get('/')
+
+        for item in build_hero_slides():
+            self.assertContains(response, item['slide'].body)
+            self.assertContains(response, item['slide'].cta)
+            self.assertContains(response, f'href="{item["href"]}"')
+
+    def test_banner_photographs_are_decorative_and_offered_as_webp(self):
+        """The images illustrate the words rather than adding to them, so they
+        carry an empty alt — and each is offered as WebP with a JPEG behind it,
+        as the insights images are."""
+        body = self.client.get('/').content.decode()
+
+        for item in build_hero_slides():
+            self.assertIn(f'{item["slide"].image}-1600', body)
+            self.assertIn(f'{item["slide"].image}-900', body)
+        self.assertIn('type="image/webp"', body)
+        self.assertEqual(body.count('class="hs-hero__image" alt=""'), len(HERO_SLIDES))
 
     def test_shows_every_platform_with_its_copy(self):
         response = self.client.get('/')
@@ -119,9 +145,10 @@ class HomePageTests(TestCase):
 
     def test_logo_ink_matches_the_ground_it_sits_on(self):
         """The filename suffix names the *background*, not the ink: -dark is the
-        white-ink file. The header is white and the footer deep navy, so they
-        take opposite variants. Get it wrong and the logo is invisible rather
-        than obviously broken, which no other test would catch."""
+        white-ink file. Both the header and the footer are dark now — the header
+        is navy when solid and sits on a darkened photograph when transparent —
+        so both take the white-ink file. Get it wrong and the logo is invisible
+        rather than obviously broken, which no other test would catch."""
         body = self.client.get('/').content.decode()
         header, _, footer = body.partition('<footer')
 
@@ -129,8 +156,8 @@ class HomePageTests(TestCase):
         # manifest storage inserts a content hash before the extension
         # ("logo-primary.edeb55afdd97.png"). "logo-primary." cannot match
         # "logo-primary-dark.…", which is what makes the pair distinguishable.
-        self.assertIn('logo-primary.', header)
-        self.assertNotIn('logo-primary-dark.', header)
+        self.assertIn('logo-primary-dark.', header)
+        self.assertNotIn('logo-primary.', header)
         self.assertIn('logo-primary-dark.', footer)
 
 

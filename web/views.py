@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
 
 from .contact import CONTACT_ROUTES
-from .content import CREDIBILITY, PLATFORMS, get_insights
+from .content import CREDIBILITY, HERO_SLIDES, PLATFORMS, get_insights
 from .faq import FAQ_SECTIONS
 from .legal import LAST_REVIEWED, LEGAL_PAGES
 
@@ -45,6 +46,24 @@ def build_platform_cards():
     return cards
 
 
+def build_hero_slides():
+    """Pair each banner slide with the URL its button points at.
+
+    Resolved here rather than in the template for the reason `{% url %}` cannot
+    help with: a slide's destination is either a named route on this site or an
+    in-page anchor, and a template that has to branch on which one it got ends up
+    writing the choice twice — once in the tag and once in the fallback. One
+    `href` per slide means the markup asks no questions.
+    """
+    return [
+        {
+            'slide': slide,
+            'href': reverse(slide.url_name) if slide.url_name else slide.anchor,
+        }
+        for slide in HERO_SLIDES
+    ]
+
+
 def home(request):
     """The umbrella homepage.
 
@@ -54,6 +73,7 @@ def home(request):
     """
     insights = get_insights(limit=4)
     return render(request, 'web/home.html', {
+        'hero_slides': build_hero_slides(),
         'platform_cards': build_platform_cards(),
         'credibility': CREDIBILITY,
         # One featured article plus three cards. Sliced here rather than in the
