@@ -16,5 +16,12 @@ platform cards, with editorial rather than product styling on top.
     </span>
     <span class="hs-article-summary__title">{{ article.title }}</span>
     <span class="hs-article-summary__excerpt">{{ article.summary|truncatewords:26 }}</span>
+    {% comment %}The card is the link, so this is a <span> that looks like one —
+    the affordance haresign.net's blog cards carry, without a second target for
+    the same destination.{% endcomment %}
+    <span class="hs-link-arrow hs-link-arrow--sm hs-article-summary__more">
+      Read the article
+      {% include 'web/partials/_icon.html' with name='arrow-up-right' %}
+    </span>
   </span>
 </a>

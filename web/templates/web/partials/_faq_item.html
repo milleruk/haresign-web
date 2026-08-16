@@ -30,12 +30,12 @@ the same availability rule as the rest of the site.
       {% if question.link.url %}
         <a class="hs-link-arrow hs-link-arrow--sm" href="{{ question.link.url }}">
           {{ question.link.label }}
-          {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          {% include 'web/partials/_icon.html' with name='arrow-up-right' %}
         </a>
       {% elif link_service.available %}
         <a class="hs-link-arrow hs-link-arrow--sm" href="{{ link_service.url }}">
           {{ question.link.label|default:link_service.name }}
-          {% include 'web/partials/_icon.html' with name='arrow-right' %}
+          {% include 'web/partials/_icon.html' with name='arrow-up-right' %}
         </a>
       {% else %}
         <span class="hs-link-arrow hs-link-arrow--sm hs-link-arrow--soon">

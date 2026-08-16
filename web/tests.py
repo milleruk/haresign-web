@@ -849,6 +849,21 @@ class EcosystemCtaTests(TestCase):
 
                 self.assertEqual(body.count('hs-ecosystem"'), 1)
 
+    def test_the_closing_strip_offers_a_real_direct_route(self):
+        """"Contact Haresign directly" is a mailto, not a link to the form.
+
+        The strip takes haresign.net's closing composition — direct contact, the
+        question, one action — and the first of those three has to mean it. The
+        address comes from settings.LEGAL, so it cannot drift from the footer's.
+        """
+        body = self.client.get('/').content.decode()
+
+        self.assertIn(f'href="mailto:{settings.LEGAL["contact_email"]}"', body)
+        self.assertIn('Not sure which part you need?', body)
+        # The action is the arrow pill, on the contact page rather than a mailto:
+        # a question that needs answering is not always an email.
+        self.assertIn('hs-btn--arrow', body)
+
     def test_the_old_single_funnel_band_is_gone(self):
         """It offered "Open Intelligence" or "email us", which made the umbrella
         page a funnel into one platform."""

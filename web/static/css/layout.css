@@ -276,7 +276,30 @@
   margin-bottom: var(--hs-space-5);
 }
 .hs-footer__list { list-style: none; margin: 0; padding: 0; }
-.hs-footer__list li { margin-bottom: var(--hs-space-3); }
+
+/* The » marker, which haresign.net puts against every footer link. Drawn from
+   two borders on each pseudo-element rather than typed as a "»" character:
+   generated *text* is exposed to assistive technology, and "right-pointing
+   double angle quotation mark" before each of twenty links is not information.
+   Two borders are a shape, and a shape says nothing. */
+.hs-footer__list li {
+  position: relative;
+  margin-bottom: var(--hs-space-3);
+  padding-inline-start: var(--hs-space-5);
+}
+.hs-footer__list li::before,
+.hs-footer__list li::after {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border: solid var(--hs-teal);
+  border-width: 2px 2px 0 0;
+  transform: rotate(45deg);
+}
+.hs-footer__list li::before { inset-inline-start: 0; }
+.hs-footer__list li::after  { inset-inline-start: 0.3125rem; }
 
 /* Who owns a linked resource, under its link. The documentation is Haresign
    Intelligence's, not the umbrella brand's, and saying so is the difference

@@ -17,6 +17,15 @@ homepage form.
     <div class="hs-article-card__media">
       {% if article.featured_image %}
         {% include 'insights/partials/_featured_image.html' with article=article lazy=True %}
+        {% comment %}The date chip over the image — haresign.net's blog card
+        carries one. aria-hidden, because the full date is already below it in a
+        <time>: a screen reader gaining "09 Aug" and then "9 August 2026" is the
+        same fact twice. Only over an image, since it is an overlay and has
+        nothing to sit on otherwise.{% endcomment %}
+        <span class="hs-date-chip" aria-hidden="true">
+          <span class="hs-date-chip__day">{{ article.published_at|date:'d' }}</span>
+          <span class="hs-date-chip__month">{{ article.published_at|date:'M' }}</span>
+        </span>
       {% endif %}
     </div>
     <div class="hs-article-card__body">
@@ -27,12 +36,23 @@ homepage form.
       </p>
       <h3 class="hs-article-card__title">{{ article.title }}</h3>
       <p class="hs-article-card__summary">{{ article.summary|truncatewords:34 }}</p>
+      {% comment %}A <span>, not an <a>: the whole card is already the link, and
+      a nested anchor would be invalid and would give the card two targets for
+      one destination.{% endcomment %}
+      <span class="hs-link-arrow hs-link-arrow--sm hs-article-card__more">
+        Read the article
+        {% include 'web/partials/_icon.html' with name='arrow-up-right' %}
+      </span>
     </div>
   {% else %}
     <p class="hs-article-card__meta">
       <time datetime="{{ article.published_at|date:'Y-m-d' }}">{{ article.published_at|date:'j F Y' }}</time>
     </p>
     <h3 class="hs-article-card__title">{{ article.title }}</h3>
+    <span class="hs-link-arrow hs-link-arrow--sm hs-article-card__more">
+      Read the article
+      {% include 'web/partials/_icon.html' with name='arrow-up-right' %}
+    </span>
   {% endif %}
 
 </a>

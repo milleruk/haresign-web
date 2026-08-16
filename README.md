@@ -461,6 +461,36 @@ already intended, and *removes* a third-party request rather than adding one —
 there is no Google Fonts call, so nothing to disclose in a cookie banner. Body
 copy is weight 500 at 1.75 line-height, matching production's 16px/28px setting.
 
+### What is taken from haresign.net, and what is not
+
+The production site runs a purchased theme (Bixoo) on jQuery, Swiper, WOW.js and
+a 12,000-line stylesheet. This repository ships one 200-line script, so the rule
+is: **take the vocabulary, not the machinery.** What was adopted, all of it
+rebuilt on tokens:
+
+| Element | Where |
+|---|---|
+| Photographic banner, dark header, arrow pill | `pages/home.css`, `layout.css`, `.hs-btn--arrow` |
+| Two-diamond eyebrow mark + coloured label | `.hs-eyebrow`, from the two pseudo-elements — no markup change across eleven templates |
+| `↗` as the link idiom | `.hs-link-arrow`, every card CTA and "Read the article" |
+| Aqua closing band with a contact strip | `.hs-ecosystem` |
+| Card rule under the title, tick lists, arrow disc | `.hs-platform-card` |
+| Date chip on article images | `.hs-date-chip` |
+| `»` footer markers, paper-plane subscribe | `.hs-footer__list`, `_newsletter.html` |
+
+Deliberately **not** taken: the preloader, the WOW.js scroll animations, the
+GSAP-pinned services panel, the marquee strip, the offcanvas drawer and the
+counters. Each needs a library, and none of them says anything.
+
+Two adaptations rather than copies, both for the same reason — the production
+markup is less careful than this repository can afford to be:
+
+- The subscribe button keeps its **"Subscribe" label** and gains the paper plane.
+  The live one is a bare circular icon, which in a two-field form is a guess.
+- The `»` marker is drawn from **borders, not a `"»"` character**. Generated text
+  is exposed to assistive technology, and "right-pointing double angle quotation
+  mark" before each of twenty footer links is not information.
+
 ### Colour hierarchy
 
 Navy anchors, teal is the primary interactive colour, coral is warmth used
@@ -535,7 +565,7 @@ of `pages/home.css` for exactly this reason.
 ### Section rhythm
 
 photographic banner → light platforms → navy credibility → white insights →
-warm newsletter → navy ecosystem band → navy footer. No two adjacent sections share a ground,
+warm newsletter → aqua ecosystem band → navy footer. No two adjacent sections share a ground,
 so the page reads as a sequence rather than one long scroll of white cards on
 pale grey.
 
@@ -728,7 +758,7 @@ configure to get started. With `DEBUG=False` and no key the app **refuses to
 start** rather than running on a placeholder.
 
 ```bash
-python manage.py test          # 228 tests
+python manage.py test          # 229 tests
 python manage.py check --deploy
 ```
 

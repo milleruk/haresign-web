@@ -7,6 +7,11 @@ read from the same `Article`, so neither can show a different summary.
   {% if article.featured_image %}
     <div class="hs-lead-article__media">
       {% include 'insights/partials/_featured_image.html' with article=article lazy=True %}
+      {% comment %}aria-hidden: the full date is in the <time> below.{% endcomment %}
+      <span class="hs-date-chip" aria-hidden="true">
+        <span class="hs-date-chip__day">{{ article.published_at|date:'d' }}</span>
+        <span class="hs-date-chip__month">{{ article.published_at|date:'M' }}</span>
+      </span>
     </div>
   {% endif %}
   <div class="hs-lead-article__body">
@@ -20,7 +25,7 @@ read from the same `Article`, so neither can show a different summary.
     <p class="hs-lead-article__summary">{{ article.summary }}</p>
     <span class="hs-lead-article__more">
       Read the article
-      {% include 'web/partials/_icon.html' with name='arrow-right' %}
+      {% include 'web/partials/_icon.html' with name='arrow-up-right' %}
     </span>
   </div>
 </a>

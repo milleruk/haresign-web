@@ -123,7 +123,7 @@ screen reader rather than only by the chip's colour.{% endcomment %}
             <a class="hs-pagination__link" rel="next"
                href="?{% if active_tag %}tag={{ active_tag.slug }}&amp;{% endif %}page={{ page.next_page_number }}">
               Older
-              {% include 'web/partials/_icon.html' with name='arrow-right' %}
+              {% include 'web/partials/_icon.html' with name='arrow-up-right' %}
             </a>
           {% else %}
             <span class="hs-pagination__link hs-pagination__link--disabled">Older</span>

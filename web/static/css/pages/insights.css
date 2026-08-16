@@ -40,7 +40,9 @@
   box-shadow: var(--hs-shadow-lg);
   color: inherit;
 }
-.hs-lead-article__media { background-color: var(--hs-surface-sunken); min-height: 18rem; }
+/* position: relative — the date chip over the image is absolute, and this is
+   its containing block. */
+.hs-lead-article__media { position: relative; background-color: var(--hs-surface-sunken); min-height: 18rem; }
 .hs-lead-article__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .hs-lead-article__body {
   display: flex;

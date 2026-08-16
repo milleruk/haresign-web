@@ -56,7 +56,15 @@ change honestly rather than the form being smuggled in.
              tabindex="-1" autocomplete="off">
     </div>
 
-    <button class="hs-btn hs-btn--primary" type="submit">Subscribe</button>
+    {% comment %}The paper plane is haresign.net's subscribe control. There it is
+    a bare circular icon button; here it keeps its "Subscribe" label, because
+    this form has two fields rather than one and an unlabelled circle at the end
+    of a row is a guess. The icon is decorative — aria-hidden via the partial —
+    so the accessible name is still the word.{% endcomment %}
+    <button class="hs-btn hs-btn--primary" type="submit">
+      Subscribe
+      {% include 'web/partials/_icon.html' with name='paper-plane' %}
+    </button>
   </form>
 
   <p class="hs-newsletter__note">

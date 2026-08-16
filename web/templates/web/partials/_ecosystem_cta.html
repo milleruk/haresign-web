@@ -39,7 +39,7 @@ the page and hands over to the footer rather than stopping dead.
               <a class="hs-ecosystem__link" href="{{ route.service.url }}">
                 <span class="hs-ecosystem__name">{{ route.service.name }}</span>
                 <span class="hs-ecosystem__action">{{ route.action }}</span>
-                {% include 'web/partials/_icon.html' with name='arrow-right' extra_class='hs-ecosystem__arrow' %}
+                {% include 'web/partials/_icon.html' with name='arrow-up-right' extra_class='hs-ecosystem__arrow' %}
               </a>
             {% else %}
               <span class="hs-ecosystem__link hs-ecosystem__link--soon">
@@ -52,10 +52,22 @@ the page and hands over to the footer rather than stopping dead.
         {% endfor %}
       </ul>
 
-      <p class="hs-ecosystem__foot">
-        Still not sure? <a href="{% url 'contact' %}">Talk to Haresign</a> and we
-        will point you the right way.
-      </p>
+      {% comment %}The closing strip, in haresign.net's composition: the direct
+      contact detail on one side, the question and its one action on the other.
+      It replaces a plain "Still not sure? Talk to Haresign" sentence, which said
+      the same thing in the shape of a footnote.
+
+      The email is a real mailto, because "contact me directly" that opens a form
+      is not contacting anyone directly.{% endcomment %}
+      <div class="hs-ecosystem__foot">
+        <div class="hs-ecosystem__direct">
+          <span class="hs-ecosystem__direct-label">Contact Haresign directly</span>
+          <a class="hs-ecosystem__direct-email" href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>
+        </div>
+        <p class="hs-ecosystem__question">Not sure which part you need?</p>
+        {% url 'contact' as ecosystem_contact_url %}
+        {% include 'web/partials/_arrow_button.html' with href=ecosystem_contact_url label='Talk to Haresign' light=True %}
+      </div>
     </div>
   </div>
 </section>

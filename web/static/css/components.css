@@ -217,25 +217,48 @@
 }
 
 /* --- Eyebrow ------------------------------------------------------------- */
+/* --- Eyebrow -------------------------------------------------------------
+   The two-diamond mark plus a coloured label — haresign.net's section opener,
+   and the single most repeated piece of its visual language: it heads every
+   section of the production site.
+
+   This was a 26px rule and an uppercase, letterspaced label. Both were fine and
+   neither was Haresign, so the mark and the sentence-case coloured label are
+   taken as they are on the live site.
+
+   Built from the two pseudo-elements rather than an added <span>, because
+   `.hs-eyebrow` appears bare in eleven templates and none of them should have
+   to carry decoration in their markup. `::after` is a flex item like any other,
+   so `order` puts both diamonds in front of the text. Colours come from tokens,
+   which a background-image data URI could not do. */
 .hs-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: var(--hs-space-2);
   margin-bottom: var(--hs-space-4);
   color: var(--hs-aqua);
-  font-size: var(--hs-text-xs);
+  font-size: var(--hs-text-sm);
   font-weight: var(--hs-weight-bold);
-  letter-spacing: var(--hs-tracking-wide);
-  text-transform: uppercase;
 }
-.hs-eyebrow::before {
+.hs-eyebrow::before,
+.hs-eyebrow::after {
   content: "";
-  width: 1.625rem;
-  height: 2px;
-  background-color: currentColor;
-  border-radius: 2px;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 1px;
+  transform: rotate(45deg);
 }
-.hs-section--inverse .hs-eyebrow { color: var(--hs-teal); }
+/* Negative gap between the two diamonds so they overlap slightly, as the mark
+   does — they read as one glyph rather than two dots. */
+.hs-eyebrow::before { order: -2; background-color: var(--hs-teal); margin-right: -0.625rem; }
+.hs-eyebrow::after  { order: -1; background-color: var(--hs-aqua); }
+
+/* On navy, aqua is one dark blue on another: the label goes bright teal and the
+   trailing diamond white, so the mark keeps its two tones. */
+.hs-section--inverse .hs-eyebrow,
+.hs-ecosystem .hs-eyebrow { color: var(--hs-teal); }
+.hs-section--inverse .hs-eyebrow::after,
+.hs-ecosystem .hs-eyebrow::after { background-color: var(--hs-text-on-dark-strong); }
 
 /* --- Card (shared shell) -------------------------------------------------
    .hs-card is the surface; .hs-platform-card and .hs-article-card add their
@@ -290,6 +313,20 @@
 }
 .hs-platform-card__icon svg { width: 1.625rem; height: 1.625rem; }
 .hs-platform-card__title { margin-bottom: var(--hs-space-3); }
+
+/* The rule under the title — haresign.net puts one under every feature card
+   heading, two-tone and short. It is decoration, so it is a pseudo-element
+   rather than markup, and it takes the card's accent: four colourways, one
+   rule, as with everything else on this card. */
+.hs-platform-card__title::after {
+  content: "";
+  display: block;
+  width: 3.5rem;
+  height: 3px;
+  margin-top: var(--hs-space-3);
+  border-radius: 2px;
+  background-color: var(--hs-accent);
+}
 .hs-platform-card__blurb {
   color: var(--hs-navy-soft);
   font-size: var(--hs-text-base);
@@ -311,16 +348,20 @@
   padding-inline-start: var(--hs-space-5);
   margin-bottom: var(--hs-space-2);
 }
+/* Check marks, not dots. haresign.net ticks every list of what something
+   includes, and a tick says "you get this" where a bullet only says "item".
+   Drawn from two borders on a rotated box, so it takes the card's accent like
+   everything else here and costs no icon markup in a list of eleven. */
 .hs-platform-card__areas li::before {
   content: "";
   position: absolute;
-  inset-inline-start: 0;
-  top: 0.62em;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: var(--hs-accent);
-  opacity: 0.55;
+  inset-inline-start: 1px;
+  top: 0.32em;
+  width: 0.3125rem;
+  height: 0.5625rem;
+  border: solid var(--hs-accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 .hs-platform-card__footer {
   display: flex;
@@ -337,8 +378,23 @@
   font-weight: var(--hs-weight-bold);
 }
 .hs-platform-card__cta--soon { color: var(--hs-text-muted); font-weight: var(--hs-weight-semibold); }
-.hs-platform-card__cta svg { width: 0.875rem; height: 0.875rem; transition: transform var(--hs-transition); }
-.hs-platform-card:hover .hs-platform-card__cta svg { transform: translateX(4px); }
+
+/* The arrow sits in a tinted disc, as it does on the production site's feature
+   cards, and fills with the accent on hover. The disc is on the icon itself
+   rather than a wrapper span: an svg takes a background and a radius like any
+   other inline-block, and the alternative was decoration in the markup. */
+.hs-platform-card__cta svg {
+  width: 1.875rem;
+  height: 1.875rem;
+  padding: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--hs-accent-tint);
+  transition: background-color var(--hs-transition), color var(--hs-transition);
+}
+.hs-platform-card:hover .hs-platform-card__cta svg {
+  background-color: var(--hs-accent);
+  color: var(--hs-text-on-dark-strong);
+}
 .hs-platform-card__domain {
   width: 100%;
   margin: var(--hs-space-4) 0 0;
@@ -368,9 +424,48 @@
   color: var(--hs-text-muted);
 }
 
+/* The "Read the article" affordance. Always a <span> — the card itself is the
+   link — so it needs its own hover hook rather than :hover on an anchor. */
+.hs-article-card__more,
+.hs-article-summary__more { margin-top: var(--hs-space-4); }
+.hs-card--interactive:hover .hs-link-arrow svg { transform: translate(3px, -3px); }
+
+/* --- Date chip -----------------------------------------------------------
+   The day-over-month block on an article image, as the production blog cards
+   carry. Decorative and aria-hidden: the same date is a <time> underneath. */
+.hs-date-chip {
+  position: absolute;
+  left: var(--hs-space-5);
+  bottom: var(--hs-space-5);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.75rem;
+  padding: var(--hs-space-3) var(--hs-space-4);
+  border-radius: var(--hs-radius-sm);
+  background-color: var(--hs-surface);
+  box-shadow: var(--hs-shadow-md);
+  line-height: 1.1;
+}
+.hs-date-chip__day {
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-xl);
+  font-weight: var(--hs-weight-bold);
+  color: var(--hs-navy);
+}
+.hs-date-chip__month {
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hs-text-muted);
+}
+
 /* Featured variant — the lead article. */
 .hs-article-card--featured { padding: 0; }
 .hs-article-card--featured .hs-article-card__media {
+  position: relative;   /* the date chip's containing block */
   aspect-ratio: 16 / 8;
   background: linear-gradient(135deg, var(--hs-navy) 0%, var(--hs-aqua) 100%);
 }
@@ -406,8 +501,11 @@
   color: var(--hs-primary);
   font-weight: var(--hs-weight-bold);
 }
+/* The arrow travels up and to the right, because that is the icon now: an
+   arrow-up-right is haresign.net's link idiom, on every card and every "Learn
+   more" it has. A horizontal nudge under a diagonal arrow reads as a glitch. */
 .hs-link-arrow svg { width: 0.875rem; height: 0.875rem; transition: transform var(--hs-transition); }
-.hs-link-arrow:hover svg { transform: translateX(4px); }
+.hs-link-arrow:hover svg { transform: translate(3px, -3px); }
 .hs-link-arrow--sm { font-size: var(--hs-text-sm); }
 .hs-link-arrow--soon { color: var(--hs-text-muted); cursor: default; }
 /* On navy, teal-deep is too dark to read; bright teal is 5.73:1 there. */
@@ -464,8 +562,13 @@
 
 /* --- Ecosystem CTA -------------------------------------------------------
    The pre-footer band: four routes into Haresign rather than one sales pitch.
-   Navy, so it closes the page and hands over to the navy footer instead of
-   stopping dead against it.
+
+   Aqua, not navy. haresign.net closes every page with a full-bleed aqua band,
+   and it is doing real work beyond brand recognition: navy credibility, then a
+   navy band, then a navy footer was three dark grounds in a row, and the band
+   was invisible as a distinct thing. #0d5bb8 carries white text at 6.4:1, so
+   nothing in it had to be re-checked for contrast — only re-tuned against a
+   lighter ground.
    ------------------------------------------------------------------------- */
 
 /* The band bleeds into the footer, so the section owns no bottom padding and
@@ -479,7 +582,7 @@
   isolation: isolate;
   overflow: hidden;
   border-radius: var(--hs-radius-lg);
-  background-color: var(--hs-navy);
+  background-color: var(--hs-aqua);
   color: var(--hs-text-on-dark);
   padding: clamp(2.5rem, 5vw, 4rem);
 }
@@ -492,8 +595,10 @@
   filter: blur(90px);
   pointer-events: none;
 }
-.hs-ecosystem__field--teal  { top: -14rem; left: -8rem;    background-color: rgba(15, 163, 163, 0.30); }
-.hs-ecosystem__field--coral { bottom: -16rem; right: -8rem; background-color: rgba(255, 91, 97, 0.18); }
+/* Deepened against the aqua ground: the old values were mixed for navy, where a
+   30%-opacity teal reads as a glow and on aqua read as a smear. */
+.hs-ecosystem__field--teal  { top: -14rem; left: -8rem;    background-color: rgba(15, 163, 163, 0.22); }
+.hs-ecosystem__field--coral { bottom: -16rem; right: -8rem; background-color: rgba(11, 17, 30, 0.20); }
 
 .hs-ecosystem__head { max-width: 44rem; margin-bottom: var(--hs-space-10); }
 .hs-ecosystem__title { color: var(--hs-text-on-dark-strong); margin-bottom: var(--hs-space-4); }
@@ -513,19 +618,22 @@
   gap: var(--hs-space-2);
   height: 100%;
   padding: var(--hs-space-6);
-  border: 1px solid var(--hs-border-on-dark);
+  /* Stronger than the navy version's 12%/4%: on a mid-blue ground a hairline at
+     12% white is not a line, it is a rumour. */
+  border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: var(--hs-radius-md);
-  /* The accent as a wash rather than a border: four coloured outlines on navy
-     read as four separate products, which is the opposite of the point. */
-  background-color: rgba(255, 255, 255, 0.04);
+  /* A wash rather than the accent as a border: four coloured outlines read as
+     four separate products, which is the opposite of the point — and on aqua
+     the aqua one would have no outline at all. */
+  background-color: rgba(255, 255, 255, 0.10);
   color: var(--hs-text-on-dark);
   transition: background-color var(--hs-transition), border-color var(--hs-transition),
               transform var(--hs-transition);
 }
 a.hs-ecosystem__link:hover {
   transform: translateY(-3px);
-  border-color: var(--hs-accent);
-  background-color: rgba(255, 255, 255, 0.07);
+  border-color: var(--hs-text-on-dark-strong);
+  background-color: rgba(255, 255, 255, 0.18);
   color: var(--hs-text-on-dark);
 }
 .hs-ecosystem__name {
@@ -535,24 +643,55 @@ a.hs-ecosystem__link:hover {
   color: var(--hs-text-on-dark-strong);
 }
 .hs-ecosystem__action { flex: 1 1 auto; font-size: var(--hs-text-sm); }
-.hs-ecosystem__arrow { width: 0.875rem; height: 0.875rem; color: var(--hs-teal); }
-a.hs-ecosystem__link:hover .hs-ecosystem__arrow { transform: translateX(4px); }
+/* White, not teal: bright teal and aqua sit at almost the same lightness, so
+   the arrow vanished into the ground the moment the band changed colour. */
+.hs-ecosystem__arrow { width: 0.875rem; height: 0.875rem; color: var(--hs-text-on-dark-strong); }
+a.hs-ecosystem__link:hover .hs-ecosystem__arrow { transform: translate(3px, -3px); }
 .hs-ecosystem__link--soon { cursor: default; }
 .hs-ecosystem__link--soon .hs-ecosystem__name { color: var(--hs-text-on-dark); }
 .hs-ecosystem__link--soon .hs-badge { align-self: flex-start; }
 
+/* The closing strip: direct contact | question | one action. A rule separates
+   the contact block from the question, as it does on the production band. */
 .hs-ecosystem__foot {
-  margin: var(--hs-space-8) 0 0;
-  font-size: var(--hs-text-sm);
-  color: var(--hs-text-on-dark-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hs-space-6);
+  margin-top: var(--hs-space-10);
+  padding-top: var(--hs-space-8);
+  border-top: 1px solid rgba(255, 255, 255, 0.26);
 }
-.hs-ecosystem__foot a {
+.hs-ecosystem__direct {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hs-space-1);
+  padding-inline-end: var(--hs-space-6);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.26);
+}
+.hs-ecosystem__direct-label {
+  font-size: var(--hs-text-xs);
+  font-weight: var(--hs-weight-semibold);
+  letter-spacing: var(--hs-tracking-wide);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+.hs-ecosystem__direct-email {
   display: inline-flex;
   align-items: center;
   min-height: 1.5rem;
-  color: var(--hs-teal);
+  color: var(--hs-text-on-dark-strong);
+  font-weight: var(--hs-weight-semibold);
   text-decoration: underline;
   text-underline-offset: 0.15em;
+}
+.hs-ecosystem__question {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--hs-text-on-dark-strong);
+  font-family: var(--hs-font-display);
+  font-size: var(--hs-text-xl);
+  font-weight: var(--hs-weight-bold);
 }
 
 /* --- Form input ----------------------------------------------------------
@@ -765,6 +904,17 @@ a.hs-ecosystem__link:hover .hs-ecosystem__arrow { transform: translateX(4px); }
   .hs-credibility { grid-template-columns: repeat(2, 1fr); gap: var(--hs-space-6); }
   .hs-ecosystem__grid { grid-template-columns: repeat(2, 1fr); }
 }
+@media (max-width: 767.98px) {
+  /* The closing strip stacks. The vertical rule between the contact block and
+     the question is a divider between two columns; once they are rows it is a
+     line hanging off the end of a word. */
+  .hs-ecosystem__direct {
+    padding-inline-end: 0;
+    border-inline-end: 0;
+  }
+  .hs-ecosystem__foot .hs-btn { width: 100%; }
+}
+
 @media (max-width: 575.98px) {
   .hs-credibility { grid-template-columns: 1fr; }
   .hs-ecosystem__grid { grid-template-columns: 1fr; }
