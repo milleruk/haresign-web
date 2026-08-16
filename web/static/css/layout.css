@@ -189,9 +189,10 @@
 .hs-nav__link[aria-current="page"]::after { width: 100%; }
 
 /* A platform that is not live yet: a label, not a link. Muted and without the
-   hover underline, so it does not invite a click it cannot honour. The nav
-   shows no badge (see _service_link.html), so it needs no gap; the footer keeps
-   its pill and does. */
+   hover underline, so it does not invite a click it cannot honour. Neither the
+   nav nor the footer shows a badge any more (see _service_link.html) — muted
+   and unlinked is the signal, and the reason is carried as visually-hidden text
+   for anyone who cannot see either. */
 .hs-nav__link--unavailable,
 .hs-footer__link--unavailable {
   display: inline-flex;

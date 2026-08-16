@@ -476,8 +476,15 @@ class LegalPageTests(TestCase):
                 self.assertIn(f'href="{path}"', body)
 
     def test_footer_has_no_placeholder_legal_links_left(self):
-        """Scoped to the Legal list: "Soon" is still correct in the Platforms and
-        Account columns, where the services genuinely are not live."""
+        """The four policy pages exist, so all four are real links.
+
+        This was scoped to the Legal list because "Soon" pills were still
+        correct in the Platforms and Account columns. They are gone from the
+        footer now — muted and unlinked is signal enough there, as it already
+        was in the nav — so the scoping is belt and braces rather than load
+        bearing. It stays: this test is about the legal links, and it should not
+        start passing or failing for a reason elsewhere in the footer.
+        """
         body = self.client.get('/').content.decode()
         start = body.index('aria-labelledby="footer-legal"')
         legal_list = body[start:body.index('</ul>', start)]

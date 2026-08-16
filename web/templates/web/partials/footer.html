@@ -36,12 +36,26 @@ the business and are supplied by configuration (see README).
 
       <div>
         <h2 class="hs-footer__heading" id="footer-platforms">Platforms</h2>
+        {% comment %}Short `nav_label`, as the header uses — not the full product
+        name. The column is headed "Platforms" and the logo above it says
+        Haresign, so "Haresign Consulting / Haresign Intelligence / Haresign
+        Community / Haresign Workspace" was the master brand printed four more
+        times in a narrow column, where two of the four then wrapped onto a
+        second line and left their badge stranded. It also read as a different
+        naming scheme from the nav's, which is the mismatch worth removing: one
+        list of four platforms, named the same way in both places.
+
+        `show_badge=False`, again as the nav does: an unavailable service is
+        muted and unlinked, which is enough of a signal here, and three "Soon"
+        pills down one column drew the eye to what is missing rather than to
+        what is there. The reason survives as visually-hidden text, so a screen
+        reader user is still told why the item is not a link.{% endcomment %}
         <ul class="hs-footer__list" aria-labelledby="footer-platforms">
           {% comment %}Same rule as the nav and the cards: not live, not a link.{% endcomment %}
-          <li>{% include 'web/partials/_service_link.html' with service=services.consulting link_class='hs-footer__link' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.intelligence link_class='hs-footer__link' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.community link_class='hs-footer__link' %}</li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.workspace link_class='hs-footer__link' %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.consulting label=services.consulting.nav_label link_class='hs-footer__link' show_badge=False %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.intelligence label=services.intelligence.nav_label link_class='hs-footer__link' show_badge=False %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.community label=services.community.nav_label link_class='hs-footer__link' show_badge=False %}</li>
+          <li>{% include 'web/partials/_service_link.html' with service=services.workspace label=services.workspace.nav_label link_class='hs-footer__link' show_badge=False %}</li>
         </ul>
       </div>
 
@@ -78,7 +92,10 @@ the business and are supplied by configuration (see README).
             {% include 'web/partials/_service_link.html' with service=services.docs link_class='hs-footer__link' %}
             <span class="hs-footer__hint">Haresign Intelligence</span>
           </li>
-          <li>{% include 'web/partials/_service_link.html' with service=services.account link_class='hs-footer__link' %}</li>
+          {% comment %}Full name here, not the `nav_label`: that one is "Sign in",
+          which is the *action* and belongs on a button, not in a list of things
+          you can go and read.{% endcomment %}
+          <li>{% include 'web/partials/_service_link.html' with service=services.account link_class='hs-footer__link' show_badge=False %}</li>
         </ul>
 
         <h2 class="hs-footer__heading" id="footer-legal">Legal</h2>
